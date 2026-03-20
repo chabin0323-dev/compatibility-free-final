@@ -38,12 +38,16 @@ const ResultPage: React.FC = () => {
   const navigate = useNavigate();
 
   const [data] = useState<any>(() => {
-    if (location.state) {
-      localStorage.setItem('last_fortune_data', JSON.stringify(location.state));
-      return location.state;
+    try {
+      if (location.state) {
+        localStorage.setItem('last_fortune_data', JSON.stringify(location.state));
+        return location.state;
+      }
+      const saved = localStorage.getItem('last_fortune_data');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
     }
-    const saved = localStorage.getItem('last_fortune_data');
-    return saved ? JSON.parse(saved) : null;
   });
 
   const [showManual, setShowManual] = useState(false);
@@ -66,7 +70,7 @@ const ResultPage: React.FC = () => {
   const progressPercent = ((stepIndex + 1) / STEP_ORDER.length) * 100;
 
   const handleBackToTop = () => {
-    navigate('/', {
+    navigate('/compatibility-free', {
       state: {
         keepPartnerName: data?.partnerName,
         keepRelationship: data?.relationship,
@@ -86,6 +90,14 @@ const ResultPage: React.FC = () => {
   };
 
   const handleNextStep = () => {
+    if (currentStep === 'score') {
+      setCurrentStep('emotion');
+      setTimeout(() => {
+        scrollToTopAnchor();
+      }, 60);
+      return;
+    }
+
     const currentIndex = STEP_ORDER.indexOf(currentStep);
     if (currentIndex < STEP_ORDER.length - 1) {
       const nextStep = STEP_ORDER[currentIndex + 1];
@@ -206,6 +218,10 @@ const ResultPage: React.FC = () => {
     };
   }, []);
 
+  useEffect(() => {
+    setActiveTab('name');
+  }, []);
+
   if (!data || !fortune) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center text-purple-200 font-bold">
@@ -291,7 +307,7 @@ const ResultPage: React.FC = () => {
           <div className="absolute inset-0 flex items-center justify-center p-4">
             <div className="w-full max-w-sm text-center">
               <div className="mx-auto mb-4 w-16 h-16 rounded-full border border-white/15 bg-white/5 flex items-center justify-center text-2xl shadow-[0_0_30px_rgba(168,85,247,0.22)]">
-                🔓
+                🔒
               </div>
 
               <p className="text-[10px] tracking-[0.35em] text-purple-300 mb-3 uppercase">
@@ -706,6 +722,13 @@ const ResultPage: React.FC = () => {
                     className="w-full py-4 rounded-full bg-white/8 border border-white/15 font-black text-gray-200 active:scale-95 transition-all backdrop-blur-md"
                   >
                     すべての鑑定結果を解放する
+                  </button>
+
+                  <button
+                    onClick={handleBackToTop}
+                    className="w-full py-4 rounded-full border border-white/15 bg-white/5 font-black text-gray-200 active:scale-95 transition-all"
+                  >
+                    入力画面に戻る
                   </button>
                 </div>
               </div>
