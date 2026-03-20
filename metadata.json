@@ -1,0 +1,5 @@
+{
+  "name": "Compatibility Fortune-Telling",
+  "description": "An application that tells the compatibility fortune between two people using their names. The AI acts as a fortune teller to provide an entertaining reading.",
+  "requestFramePermissions": []
+}
