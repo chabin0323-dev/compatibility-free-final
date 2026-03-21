@@ -31,6 +31,7 @@ const STEP_LABELS: Record<Exclude<RevealStep, 'intro'>, string> = {
   final: '結論',
 };
 
+// ここを note の決済ページURL に変更してください
 const PAID_URL = 'https://aisou-fortune-host.vercel.app/';
 
 const ResultPage: React.FC = () => {
@@ -102,8 +103,8 @@ const ResultPage: React.FC = () => {
     window.location.href = PAID_URL;
   };
 
+  // 無料版は score の次に locked へ行くだけ
   const handleNextStep = () => {
-    // 無料版は score の次だけ locked 画面へ進む
     if (currentStep === 'score') {
       setCurrentStep('emotion');
       setTimeout(() => {
@@ -112,18 +113,25 @@ const ResultPage: React.FC = () => {
       return;
     }
 
-    // 無料版ではそれ以降は有料版へ誘導
     openPaidPage();
   };
 
+  // 無料版では score 以外はすべてロック画面へ固定
   const jumpToStep = (step: RevealStep) => {
     if (step === 'intro') return;
 
-    // 無料版では score 以外はすべて locked 表示だけに統一
     if (step === 'score') {
       setCurrentStep('score');
-    } else {
-      setCurrentStep(step);
+    } else if (step === 'emotion') {
+      setCurrentStep('emotion');
+    } else if (step === 'destiny') {
+      setCurrentStep('destiny');
+    } else if (step === 'detail') {
+      setCurrentStep('detail');
+    } else if (step === 'biorhythm') {
+      setCurrentStep('biorhythm');
+    } else if (step === 'final') {
+      setCurrentStep('final');
     }
 
     setTimeout(() => {
@@ -280,7 +288,7 @@ const ResultPage: React.FC = () => {
 
         <div className="relative rounded-[28px] border border-white/10 bg-white/[0.04] p-6 min-h-[280px] overflow-hidden">
           <div className="pointer-events-none select-none">
-            <div className="space-y-5 blur-[5px] opacity-45">
+            <div className="space-y-5 blur-[6px] opacity-40">
               <div className="bg-white/5 rounded-3xl p-5 border border-white/5">
                 <h4 className={`text-lg font-black mb-3 ${accent}`}>{previewTitle}</h4>
                 <p className="text-sm text-gray-100 leading-relaxed">{previewText}</p>
@@ -340,9 +348,9 @@ const ResultPage: React.FC = () => {
 
               <div className="rounded-3xl border border-pink-400/20 bg-gradient-to-r from-pink-500/12 via-purple-500/10 to-indigo-500/12 p-4 mb-5">
                 <p className="text-xs text-white leading-relaxed font-semibold">
-                  あなた専用に生成されたこの続きを解放して、
+                  続きを解放して、
                   <br />
-                  「まだ知らない本当の答え」を確認してください。
+                  本当の答えを確認してください。
                 </p>
               </div>
 
@@ -441,7 +449,7 @@ const ResultPage: React.FC = () => {
               </h2>
 
               <p className="text-sm text-gray-300 leading-relaxed mb-8">
-                まずは相性スコアと今の流れを無料で確認できます。
+                まずは相性スコアだけを無料で確認できます。
                 この先の本音・未来・結論は有料版で解放されます。
               </p>
 
@@ -632,7 +640,7 @@ const ResultPage: React.FC = () => {
                   </h2>
                   <p className="text-sm text-gray-300 leading-relaxed">
                     あなたの入力情報から導かれたこの数値は、
-                    {safePartnerName}さんとの今の関係性・感情の温度・未来の流れを総合したものです。
+                    {safePartnerName}さんとの今の関係性・感情の温度を総合したものです。
                   </p>
                 </div>
               </div>
@@ -660,7 +668,7 @@ const ResultPage: React.FC = () => {
                     onClick={openPaidPage}
                     className="w-full py-4 rounded-full bg-white/8 border border-white/15 font-black text-gray-200 active:scale-95 transition-all backdrop-blur-md"
                   >
-                    すべての鑑定結果を解放する
+                    すべての鑑定結果を見る
                   </button>
 
                   <button
@@ -678,9 +686,9 @@ const ResultPage: React.FC = () => {
             <LockedSection
               stepKey="emotion"
               title="相手の本音"
-              subtitle="ここから先では、相手が今あなたに抱いている“本当の気持ち”が明らかになります。"
+              subtitle="ここから先では、相手が今あなたに抱いている本当の気持ちが明らかになります。"
               previewTitle="本音の入口"
-              previewText={`${safePartnerName}さんは、あなたに対して想像以上に特別な感情を抱き始めています。しかし、その核心はこの先で解放されます。`}
+              previewText="相手が今あなたに抱いている本当の気持ちは、この先で明らかになります。"
               accent="text-pink-300"
             />
           )}
@@ -691,7 +699,7 @@ const ResultPage: React.FC = () => {
               title="運命分析"
               subtitle="このご縁が偶然なのか、それとも深い意味を持つのか。その核心は有料版で確認できます。"
               previewTitle="運命の入口"
-              previewText="二人の出会いには、ただの相性では終わらない深い流れがあります。ですが、その意味の全体像はこの先で明かされます。"
+              previewText="二人の関係には特別な流れがあります。その核心はこの先で解放されます。"
               accent="text-[#f9a620]"
             />
           )}
@@ -702,7 +710,7 @@ const ResultPage: React.FC = () => {
               title="詳細分析"
               subtitle="姓名・星座・血液・五行から多角的に読み解く、深い相性分析はここから先です。"
               previewTitle="詳細分析の入口"
-              previewText="表面的な相性ではなく、二人の本質・引き合う理由・噛み合わない時の本当の原因まで、この先で読み解かれます。"
+              previewText="深い相性分析の全貌は、この先で確認できます。"
               accent="text-cyan-300"
             />
           )}
@@ -713,7 +721,7 @@ const ResultPage: React.FC = () => {
               title="週間バイオリズム"
               subtitle="関係が動く日、近づくべき日、慎重になるべき日。その流れはこの先で確認できます。"
               previewTitle="流れの入口"
-              previewText="二人の関係はこの7日で大きく波を打ちます。特に“決定的なタイミング”は、この先に隠されています。"
+              previewText="関係が動く決定的なタイミングはこの先にあります。"
               accent="text-emerald-300"
             />
           )}
@@ -724,7 +732,7 @@ const ResultPage: React.FC = () => {
               title="結論"
               subtitle="このご縁を進めるべきか、待つべきか。その答えは最後の結論にあります。"
               previewTitle="結論の入口"
-              previewText="今の関係を動かす鍵はすでに見え始めています。ただし、本当に取るべき行動はこの先でしか分かりません。"
+              previewText="この関係の結論は、この先で明らかになります。"
               accent="text-purple-300"
             />
           )}
@@ -768,7 +776,7 @@ const ResultPage: React.FC = () => {
                 <section>
                   <h3 className="text-purple-400 font-black mb-1">1. 無料版について</h3>
                   <p>
-                    無料版では、相性スコア・告白成功率・親密度・最初の読み解きまで確認できます。
+                    無料版では、相性スコア・告白成功率・親密度まで確認できます。
                     この先の本音・未来・結論は有料版で解放されます。
                   </p>
                 </section>
@@ -782,10 +790,10 @@ const ResultPage: React.FC = () => {
                 </section>
 
                 <section>
-                  <h3 className="text-pink-400 font-black mb-1">3. スコア演出について</h3>
+                  <h3 className="text-pink-400 font-black mb-1">3. 無料で見られる範囲</h3>
                   <p>
-                    相性スコアは、円が大きく回転しながら表示される特別演出です。
-                    告白成功率と親密度も同じ入力情報から連動して算出されています。
+                    無料版では、最初のスコア表示のみ公開されます。
+                    それ以降の鑑定内容はロックされており、有料版でのみ確認できます。
                   </p>
                 </section>
 
@@ -793,7 +801,6 @@ const ResultPage: React.FC = () => {
                   <h3 className="text-blue-400 font-black mb-1">4. 有料版で分かること</h3>
                   <p>
                     有料版では、相手の本音、関係が動く流れ、詳細分析、最後の結論まで解放されます。
-                    無料版では見えない核心部分にアクセスできます。
                   </p>
                 </section>
 
@@ -802,8 +809,6 @@ const ResultPage: React.FC = () => {
                   <p>
                     ご入力いただいた情報はクラウド上には保存されず、
                     お使いのスマートフォンやブラウザ内部にのみ保持されます。
-                    外部に個人情報を残さない設計のため、
-                    プライバシー面でも安心してお使いいただけます。
                   </p>
                 </section>
               </div>
