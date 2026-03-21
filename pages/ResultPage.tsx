@@ -103,6 +103,7 @@ const ResultPage: React.FC = () => {
   };
 
   const handleNextStep = () => {
+    // 無料版は score の次だけ locked 画面へ進む
     if (currentStep === 'score') {
       setCurrentStep('emotion');
       setTimeout(() => {
@@ -111,19 +112,20 @@ const ResultPage: React.FC = () => {
       return;
     }
 
-    const currentIndex = STEP_ORDER.indexOf(currentStep);
-    if (currentIndex < STEP_ORDER.length - 1) {
-      const nextStep = STEP_ORDER[currentIndex + 1];
-      setCurrentStep(nextStep);
-      setTimeout(() => {
-        scrollToTopAnchor();
-      }, 60);
-    }
+    // 無料版ではそれ以降は有料版へ誘導
+    openPaidPage();
   };
 
   const jumpToStep = (step: RevealStep) => {
     if (step === 'intro') return;
-    setCurrentStep(step);
+
+    // 無料版では score 以外はすべて locked 表示だけに統一
+    if (step === 'score') {
+      setCurrentStep('score');
+    } else {
+      setCurrentStep(step);
+    }
+
     setTimeout(() => {
       scrollToTopAnchor();
     }, 60);
@@ -411,6 +413,16 @@ const ResultPage: React.FC = () => {
 
       <div className="fixed inset-0 z-0 pointer-events-none">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,#2b1144_0%,#12091f_35%,#05020a_75%)]" />
+        <motion.div
+          animate={{ opacity: [0.28, 0.5, 0.28], scale: [1, 1.08, 1] }}
+          transition={{ duration: 6, repeat: Infinity }}
+          className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[440px] h-[440px] rounded-full bg-purple-700/15 blur-3xl"
+        />
+        <motion.div
+          animate={{ opacity: [0.1, 0.2, 0.1], scale: [1, 1.04, 1] }}
+          transition={{ duration: 5, repeat: Infinity, delay: 1 }}
+          className="absolute bottom-[10%] right-[-10%] w-[300px] h-[300px] rounded-full bg-pink-500/10 blur-3xl"
+        />
       </div>
 
       <AnimatePresence>
@@ -477,6 +489,7 @@ const ResultPage: React.FC = () => {
           <div className="grid grid-cols-6 gap-2">
             {(['score', 'emotion', 'destiny', 'detail', 'biorhythm', 'final'] as const).map((step) => {
               const isActive = currentStep === step;
+              const isLocked = step !== 'score';
 
               return (
                 <button
@@ -488,7 +501,7 @@ const ResultPage: React.FC = () => {
                       : 'bg-white/10 border-white/10 text-gray-200 active:scale-95'
                   }`}
                 >
-                  {STEP_LABELS[step]}
+                  {STEP_LABELS[step]} {isLocked ? '🔒' : ''}
                 </button>
               );
             })}
