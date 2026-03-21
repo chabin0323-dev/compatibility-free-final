@@ -31,8 +31,8 @@ const STEP_LABELS: Record<Exclude<RevealStep, 'intro'>, string> = {
   final: '結論',
 };
 
-// 必要なら note のURLに変更
-const PAID_URL = 'https://compatibility-free-final.vercel.app/';
+// note の販売ページ
+const PAID_URL = 'https://note.com/like_swan6953/n/nf547dbe67453';
 
 const ResultPage: React.FC = () => {
   const location = useLocation();
@@ -116,10 +116,9 @@ const ResultPage: React.FC = () => {
   };
 
   const openPaidPage = () => {
-    window.location.href = PAID_URL;
+    window.open(PAID_URL, '_blank', 'noopener,noreferrer');
   };
 
-  // 無料版では score の次はロック画面へ行くだけ
   const handleNextStep = () => {
     if (currentStep === 'score') {
       setCurrentStep('emotion');
@@ -129,7 +128,6 @@ const ResultPage: React.FC = () => {
     }
   };
 
-  // 無料版では score 以外は全部ロック画面だけ
   const jumpToStep = (step: RevealStep) => {
     if (step === 'intro') return;
 
@@ -332,6 +330,7 @@ const ResultPage: React.FC = () => {
               </p>
 
               <button
+                type="button"
                 onClick={openPaidPage}
                 className="w-full py-4 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 font-black text-white"
               >
@@ -350,6 +349,7 @@ const ResultPage: React.FC = () => {
         <div className="w-full max-w-md rounded-[32px] border border-white/10 bg-[#13091f]/80 p-8 text-center shadow-2xl">
           <h1 className="text-2xl font-black mb-3">鑑定データがありません</h1>
           <button
+            type="button"
             onClick={() => navigate('/compatibility-free')}
             className="w-full py-4 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 font-black text-white"
           >
@@ -366,6 +366,7 @@ const ResultPage: React.FC = () => {
         <div className="w-full max-w-md rounded-[32px] border border-white/10 bg-[#13091f]/80 p-8 text-center shadow-2xl">
           <h1 className="text-2xl font-black mb-3">鑑定結果を生成できませんでした</h1>
           <button
+            type="button"
             onClick={() => navigate('/compatibility-free')}
             className="w-full py-4 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 font-black text-white"
           >
@@ -400,6 +401,7 @@ const ResultPage: React.FC = () => {
               </p>
 
               <motion.button
+                type="button"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.2 }}
@@ -423,6 +425,7 @@ const ResultPage: React.FC = () => {
             </div>
 
             <button
+              type="button"
               onClick={() => setShowManual(true)}
               className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-purple-300"
             >
@@ -447,6 +450,7 @@ const ResultPage: React.FC = () => {
 
               return (
                 <button
+                  type="button"
                   key={step}
                   onClick={() => jumpToStep(step)}
                   className={`rounded-2xl py-2 text-[10px] font-black border ${
@@ -561,6 +565,7 @@ const ResultPage: React.FC = () => {
 
                 <div className="flex flex-col gap-3">
                   <button
+                    type="button"
                     onClick={handleNextStep}
                     className="w-full py-4 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 font-black text-white"
                   >
@@ -568,6 +573,7 @@ const ResultPage: React.FC = () => {
                   </button>
 
                   <button
+                    type="button"
                     onClick={handleBackToTop}
                     className="w-full py-4 rounded-full border border-white/15 bg-white/5 font-black text-gray-200"
                   >
@@ -648,7 +654,11 @@ const ResultPage: React.FC = () => {
                 exit={{ scale: 0.92 }}
                 className="bg-[#1a0e2d] border border-purple-500/40 w-full max-w-sm rounded-[32px] p-8 relative shadow-[0_0_50px_rgba(168,85,247,0.4)]"
               >
-                <button onClick={() => setShowManual(false)} className="absolute top-6 right-6 text-gray-500 text-xl">
+                <button
+                  type="button"
+                  onClick={() => setShowManual(false)}
+                  className="absolute top-6 right-6 text-gray-500 text-xl"
+                >
                   ✕
                 </button>
 
@@ -659,6 +669,7 @@ const ResultPage: React.FC = () => {
                 </div>
 
                 <button
+                  type="button"
                   onClick={() => setShowManual(false)}
                   className="w-full mt-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full font-black text-white shadow-lg"
                 >
