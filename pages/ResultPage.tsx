@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { buildFortuneBundle } from '../services/fortuneEngine';
 
@@ -37,6 +37,7 @@ const PAID_URL = 'https://aisou-fortune-host.vercel.app/';
 const ResultPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { sessionId } = useParams();
   const topAnchorRef = useRef<HTMLDivElement | null>(null);
 
   const [data, setData] = useState<any>(null);
@@ -47,16 +48,15 @@ const ResultPage: React.FC = () => {
   const [animatedConfessionRate, setAnimatedConfessionRate] = useState(0);
   const [animatedIntimacyLevel, setAnimatedIntimacyLevel] = useState(0);
 
-  // 重要: 鑑定のたびに data と画面状態を完全リセット
   useEffect(() => {
     try {
       let nextData = null;
 
       if (location.state) {
         nextData = location.state;
-        localStorage.setItem('last_fortune_data', JSON.stringify(location.state));
+        sessionStorage.setItem('free_result_data', JSON.stringify(location.state));
       } else {
-        const saved = localStorage.getItem('last_fortune_data');
+        const saved = sessionStorage.getItem('free_result_data');
         nextData = saved ? JSON.parse(saved) : null;
       }
 
@@ -77,7 +77,7 @@ const ResultPage: React.FC = () => {
       setAnimatedConfessionRate(0);
       setAnimatedIntimacyLevel(0);
     }
-  }, [location.key, location.state]);
+  }, [sessionId, location.state]);
 
   const fortune = useMemo(() => {
     try {
@@ -119,18 +119,15 @@ const ResultPage: React.FC = () => {
     window.location.href = PAID_URL;
   };
 
-  // 無料版は score の次に locked へ行くだけ
   const handleNextStep = () => {
     if (currentStep === 'score') {
       setCurrentStep('emotion');
       setTimeout(() => {
         scrollToTopAnchor();
       }, 60);
-      return;
     }
   };
 
-  // 無料版では score 以外はロック画面のみ
   const jumpToStep = (step: RevealStep) => {
     if (step === 'intro') return;
 
@@ -169,7 +166,6 @@ const ResultPage: React.FC = () => {
     const timer = setInterval(() => {
       frame += 1;
       const progress = frame / totalFrames;
-
       const eased = progress < 1 ? 1 - Math.pow(1 - progress, 3) : 1;
       const overshoot =
         progress < 0.84
@@ -177,10 +173,7 @@ const ResultPage: React.FC = () => {
           : Math.sin((progress - 0.84) * Math.PI * 4.2) * 3.2 * (1 - progress);
 
       current = Math.round(target * eased + overshoot);
-
-      if (current > 100) current = 100;
-      if (current < 0) current = 0;
-
+      current = Math.max(0, Math.min(100, current));
       setScore(current);
 
       if (frame >= totalFrames) {
@@ -190,7 +183,7 @@ const ResultPage: React.FC = () => {
     }, 26);
 
     return () => clearInterval(timer);
-  }, [fortune, safeFinalScore, currentStep, location.key]);
+  }, [fortune, safeFinalScore, currentStep, sessionId]);
 
   useEffect(() => {
     if (!fortune || currentStep !== 'score') {
@@ -241,9 +234,8 @@ const ResultPage: React.FC = () => {
       clearInterval(confessionTimer);
       clearInterval(intimacyTimer);
     };
-  }, [fortune, safeConfessionRate, safeIntimacyLevel, currentStep, location.key]);
+  }, [fortune, safeConfessionRate, safeIntimacyLevel, currentStep, sessionId]);
 
-  // 毎回イントロを出す
   useEffect(() => {
     if (!data) return;
 
@@ -252,10 +244,8 @@ const ResultPage: React.FC = () => {
       setCurrentStep('score');
     }, 3000);
 
-    return () => {
-      clearTimeout(hideTimer);
-    };
-  }, [data, location.key]);
+    return () => clearTimeout(hideTimer);
+  }, [data, sessionId]);
 
   const scoreGlowClass =
     safeFinalScore >= 90
@@ -327,7 +317,7 @@ const ResultPage: React.FC = () => {
 
           <div className="absolute inset-0 flex items-center justify-center p-4">
             <div className="w-full max-w-sm text-center">
-              <div className="mx-auto mb-4 w-16 h-16 rounded-full border border-white/15 bg-white/5 flex items-center justify-center text-2xl shadow-[0_0_30px_rgba(168,85,247,0.22)]">
+              <div className="mx-auto mb-4 w-16 h-16 rounded-full border border-white/15 bg-white/5 flex items-center justify-center text-2xl">
                 🔒
               </div>
 
@@ -355,24 +345,12 @@ const ResultPage: React.FC = () => {
                 をすべて見ることができます。
               </p>
 
-              <div className="rounded-3xl border border-pink-400/20 bg-gradient-to-r from-pink-500/12 via-purple-500/10 to-indigo-500/12 p-4 mb-5">
-                <p className="text-xs text-white leading-relaxed font-semibold">
-                  続きを解放して、
-                  <br />
-                  本当の答えを確認してください。
-                </p>
-              </div>
-
               <button
                 onClick={openPaidPage}
-                className="w-full py-4 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 font-black text-white shadow-[0_18px_50px_rgba(236,72,153,0.3)] active:scale-95 transition-all"
+                className="w-full py-4 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 font-black text-white"
               >
                 本音・未来・結論をすべて見る
               </button>
-
-              <p className="mt-3 text-[11px] text-gray-400">
-                続きは有料版で解放されます
-              </p>
             </div>
           </div>
         </div>
@@ -384,13 +362,7 @@ const ResultPage: React.FC = () => {
     return (
       <div className="min-h-screen bg-[#05020a] text-white flex items-center justify-center p-6">
         <div className="w-full max-w-md rounded-[32px] border border-white/10 bg-[#13091f]/80 p-8 text-center shadow-2xl">
-          <p className="text-[10px] tracking-[0.35em] text-purple-300 mb-3 uppercase">
-            free result
-          </p>
           <h1 className="text-2xl font-black mb-3">鑑定データがありません</h1>
-          <p className="text-sm text-gray-300 leading-relaxed mb-6">
-            先に入力画面から鑑定を行ってください。
-          </p>
           <button
             onClick={() => navigate('/compatibility-free')}
             className="w-full py-4 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 font-black text-white"
@@ -406,13 +378,7 @@ const ResultPage: React.FC = () => {
     return (
       <div className="min-h-screen bg-[#05020a] text-white flex items-center justify-center p-6">
         <div className="w-full max-w-md rounded-[32px] border border-white/10 bg-[#13091f]/80 p-8 text-center shadow-2xl">
-          <p className="text-[10px] tracking-[0.35em] text-purple-300 mb-3 uppercase">
-            free result
-          </p>
           <h1 className="text-2xl font-black mb-3">鑑定結果を生成できませんでした</h1>
-          <p className="text-sm text-gray-300 leading-relaxed mb-6">
-            入力内容を確認して、もう一度お試しください。
-          </p>
           <button
             onClick={() => navigate('/compatibility-free')}
             className="w-full py-4 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 font-black text-white"
@@ -427,20 +393,6 @@ const ResultPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#05020a] text-white p-4 font-sans relative overflow-x-hidden">
       <div ref={topAnchorRef} />
-
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,#2b1144_0%,#12091f_35%,#05020a_75%)]" />
-        <motion.div
-          animate={{ opacity: [0.28, 0.5, 0.28], scale: [1, 1.08, 1] }}
-          transition={{ duration: 6, repeat: Infinity }}
-          className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[440px] h-[440px] rounded-full bg-purple-700/15 blur-3xl"
-        />
-        <motion.div
-          animate={{ opacity: [0.1, 0.2, 0.1], scale: [1, 1.04, 1] }}
-          transition={{ duration: 5, repeat: Infinity, delay: 1 }}
-          className="absolute bottom-[10%] right-[-10%] w-[300px] h-[300px] rounded-full bg-pink-500/10 blur-3xl"
-        />
-      </div>
 
       <AnimatePresence>
         {showIntroOverlay && (
@@ -467,7 +419,7 @@ const ResultPage: React.FC = () => {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.2 }}
                 onClick={skipIntro}
-                className="px-5 py-3 rounded-full border border-white/15 bg-white/5 text-xs tracking-widest text-gray-200 active:scale-95"
+                className="px-5 py-3 rounded-full border border-white/15 bg-white/5 text-xs tracking-widest text-gray-200"
               >
                 無料で見る
               </motion.button>
@@ -479,7 +431,7 @@ const ResultPage: React.FC = () => {
       <div className="max-w-md mx-auto relative z-10 pb-28">
         <div className="sticky top-0 z-40 pt-2 pb-4 bg-gradient-to-b from-[#05020a] via-[#05020a]/95 to-transparent backdrop-blur-sm">
           <div className="flex justify-between items-center mb-3">
-            <div className="bg-gradient-to-r from-[#ff7e61]/20 via-[#f9a620]/10 to-[#22d3ee]/20 border border-white/20 rounded-full px-4 py-1.5 shadow-lg backdrop-blur-md text-left">
+            <div className="bg-gradient-to-r from-[#ff7e61]/20 via-[#f9a620]/10 to-[#22d3ee]/20 border border-white/20 rounded-full px-4 py-1.5">
               <span className="bg-gradient-to-r from-[#ff7e61] via-[#f9a620] to-[#22d3ee] bg-clip-text text-transparent text-[10px] font-black tracking-[0.18em] uppercase">
                 {safeDisplayDate} 無料鑑定
               </span>
@@ -487,7 +439,7 @@ const ResultPage: React.FC = () => {
 
             <button
               onClick={() => setShowManual(true)}
-              className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-purple-300 shadow-lg active:scale-90 transition-transform backdrop-blur-md text-lg"
+              className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-purple-300"
             >
               🔖
             </button>
@@ -512,10 +464,10 @@ const ResultPage: React.FC = () => {
                 <button
                   key={step}
                   onClick={() => jumpToStep(step)}
-                  className={`rounded-2xl py-2 text-[10px] font-black transition-all border ${
+                  className={`rounded-2xl py-2 text-[10px] font-black border ${
                     isActive
                       ? 'bg-purple-700/80 border-purple-300/40 text-white'
-                      : 'bg-white/10 border-white/10 text-gray-200 active:scale-95'
+                      : 'bg-white/10 border-white/10 text-gray-200'
                   }`}
                 >
                   {STEP_LABELS[step]} {isLocked ? '🔒' : ''}
@@ -526,15 +478,11 @@ const ResultPage: React.FC = () => {
         </div>
 
         <header className="text-left mb-6 mt-2">
-          <p className="text-[10px] tracking-[0.35em] text-purple-300 mb-2 uppercase">
-            only for you
-          </p>
           <h1 className="text-3xl font-black mb-2 leading-tight">
             あなた <span className="text-gray-600 font-light mx-1">&</span>{' '}
             <span className="text-[#f9a620]">{safePartnerName}</span>
           </h1>
           <div className="flex items-center gap-2 flex-wrap">
-            <p className="text-gray-500 text-[10px] tracking-widest font-bold">鑑定番号: MS-2026-V3</p>
             <span className="text-[10px] px-2 py-1 rounded-full border border-white/10 bg-white/5 text-purple-200">
               関係性：{safeRelationship}
             </span>
@@ -559,24 +507,8 @@ const ResultPage: React.FC = () => {
                   <div className="flex justify-center">
                     <div className="relative w-44 h-44 flex items-center justify-center">
                       <svg className="w-full h-full transform -rotate-90">
-                        <circle
-                          cx="88"
-                          cy="88"
-                          r="74"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          fill="transparent"
-                          className="text-white/5"
-                        />
-                        <circle
-                          cx="88"
-                          cy="88"
-                          r="60"
-                          stroke="currentColor"
-                          strokeWidth="1"
-                          fill="transparent"
-                          className="text-white/5"
-                        />
+                        <circle cx="88" cy="88" r="74" stroke="currentColor" strokeWidth="2" fill="transparent" className="text-white/5" />
+                        <circle cx="88" cy="88" r="60" stroke="currentColor" strokeWidth="1" fill="transparent" className="text-white/5" />
                         <motion.circle
                           cx="88"
                           cy="88"
@@ -601,40 +533,25 @@ const ResultPage: React.FC = () => {
                   </div>
 
                   <div className="space-y-3">
-                    <div className="bg-[#1a0e2d]/70 border border-white/10 rounded-[22px] p-4 text-center shadow-xl backdrop-blur-sm origin-left">
-                      <p className="text-[10px] text-pink-300 font-bold mb-1 tracking-wider uppercase">告白成功率</p>
+                    <div className="bg-[#1a0e2d]/70 border border-white/10 rounded-[22px] p-4 text-center">
+                      <p className="text-[10px] text-pink-300 font-bold mb-1 uppercase">告白成功率</p>
                       <div className="text-2xl font-black text-white mb-2">
                         {animatedConfessionRate}
                         <span className="text-xs ml-0.5">%</span>
                       </div>
-                      <div className="w-full h-1.5 bg-black/40 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-pink-500 to-rose-400 origin-left"
-                          style={{ width: `${animatedConfessionRate}%` }}
-                        />
-                      </div>
                     </div>
 
-                    <div className="bg-[#1a0e2d]/70 border border-white/10 rounded-[22px] p-4 text-center shadow-xl backdrop-blur-sm origin-left">
-                      <p className="text-[10px] text-blue-300 font-bold mb-1 tracking-wider uppercase">二人の親密度</p>
+                    <div className="bg-[#1a0e2d]/70 border border-white/10 rounded-[22px] p-4 text-center">
+                      <p className="text-[10px] text-blue-300 font-bold mb-1 uppercase">二人の親密度</p>
                       <div className="text-2xl font-black text-white mb-2">
                         {animatedIntimacyLevel}
                         <span className="text-xs ml-0.5">%</span>
-                      </div>
-                      <div className="w-full h-1.5 bg-black/40 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 origin-left"
-                          style={{ width: `${animatedIntimacyLevel}%` }}
-                        />
                       </div>
                     </div>
                   </div>
                 </div>
 
                 <div className="text-center">
-                  <p className="text-[10px] tracking-[0.35em] text-purple-300 mb-2 uppercase">
-                    special reading
-                  </p>
                   <h2 className="text-xl font-black mb-3 leading-tight">
                     二人の波動は、
                     <span className="bg-gradient-to-r from-pink-400 via-[#f9a620] to-cyan-300 bg-clip-text text-transparent">
@@ -647,18 +564,11 @@ const ResultPage: React.FC = () => {
                         : '変化の途中にあります'}
                     </span>
                   </h2>
-                  <p className="text-sm text-gray-300 leading-relaxed">
-                    あなたの入力情報から導かれたこの数値は、
-                    {safePartnerName}さんとの今の関係性・感情の温度を総合したものです。
-                  </p>
                 </div>
               </div>
 
               <div className="mt-6 space-y-4">
                 <div className="rounded-[28px] border border-pink-400/15 bg-gradient-to-r from-pink-500/10 via-purple-500/10 to-indigo-500/10 p-5 text-center">
-                  <p className="text-[10px] tracking-[0.28em] text-pink-300 mb-2 uppercase">
-                    free preview
-                  </p>
                   <p className="text-sm text-gray-100 leading-relaxed">
                     無料版ではここまで確認できます。
                     この先で、相手の本音・二人の未来・結論が解放されます。
@@ -668,21 +578,21 @@ const ResultPage: React.FC = () => {
                 <div className="flex flex-col gap-3">
                   <button
                     onClick={handleNextStep}
-                    className="w-full py-4 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 font-black text-white shadow-[0_14px_40px_rgba(168,85,247,0.35)] active:scale-95 transition-all"
+                    className="w-full py-4 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 font-black text-white"
                   >
                     相手の本音を少しだけ見る
                   </button>
 
                   <button
                     onClick={openPaidPage}
-                    className="w-full py-4 rounded-full bg-white/8 border border-white/15 font-black text-gray-200 active:scale-95 transition-all backdrop-blur-md"
+                    className="w-full py-4 rounded-full bg-white/8 border border-white/15 font-black text-gray-200"
                   >
                     すべての鑑定結果を見る
                   </button>
 
                   <button
                     onClick={handleBackToTop}
-                    className="w-full py-4 rounded-full border border-white/15 bg-white/5 font-black text-gray-200 active:scale-95 transition-all"
+                    className="w-full py-4 rounded-full border border-white/15 bg-white/5 font-black text-gray-200"
                   >
                     入力画面に戻る
                   </button>
@@ -746,92 +656,7 @@ const ResultPage: React.FC = () => {
             />
           )}
         </AnimatePresence>
-
-        {currentStep !== 'score' && (
-          <div className="fixed bottom-4 left-0 right-0 z-40 px-4">
-            <div className="max-w-md mx-auto">
-              <button
-                onClick={openPaidPage}
-                className="w-full py-4 rounded-full bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 font-black text-white shadow-[0_18px_50px_rgba(236,72,153,0.28)] active:scale-95 transition-all"
-              >
-                続きの鑑定をすべて見る
-              </button>
-            </div>
-          </div>
-        )}
       </div>
-
-      <AnimatePresence>
-        {showManual && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-xl flex items-center justify-center p-6 text-left"
-          >
-            <motion.div
-              initial={{ scale: 0.92 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.92 }}
-              className="bg-[#1a0e2d] border border-purple-500/40 w-full max-w-sm rounded-[32px] p-8 relative shadow-[0_0_50px_rgba(168,85,247,0.4)]"
-            >
-              <button onClick={() => setShowManual(false)} className="absolute top-6 right-6 text-gray-500 text-xl">
-                ✕
-              </button>
-
-              <h2 className="text-2xl font-black text-purple-300 mb-6">🔖 取扱説明書</h2>
-
-              <div className="space-y-6 text-sm text-gray-300 leading-relaxed overflow-y-auto max-h-[50vh] pr-2">
-                <section>
-                  <h3 className="text-purple-400 font-black mb-1">1. 無料版について</h3>
-                  <p>
-                    無料版では、相性スコア・告白成功率・親密度まで確認できます。
-                    この先の本音・未来・結論は有料版で解放されます。
-                  </p>
-                </section>
-
-                <section>
-                  <h3 className="text-[#f9a620] font-black mb-1">2. 鑑定の流れ</h3>
-                  <p>
-                    この鑑定は「点数 → 本音 → 運命 → 分析 → 流れ → 結論」の順で構成されています。
-                    無料版では、最初に二人の相性の核だけを体験できます。
-                  </p>
-                </section>
-
-                <section>
-                  <h3 className="text-pink-400 font-black mb-1">3. 無料で見られる範囲</h3>
-                  <p>
-                    無料版では、最初のスコア表示のみ公開されます。
-                    それ以降の鑑定内容はロックされており、有料版でのみ確認できます。
-                  </p>
-                </section>
-
-                <section>
-                  <h3 className="text-blue-400 font-black mb-1">4. 有料版で分かること</h3>
-                  <p>
-                    有料版では、相手の本音、関係が動く流れ、詳細分析、最後の結論まで解放されます。
-                  </p>
-                </section>
-
-                <section>
-                  <h3 className="text-rose-300 font-black mb-1">5. プライバシー</h3>
-                  <p>
-                    ご入力いただいた情報はクラウド上には保存されず、
-                    お使いのスマートフォンやブラウザ内部にのみ保持されます。
-                  </p>
-                </section>
-              </div>
-
-              <button
-                onClick={() => setShowManual(false)}
-                className="w-full mt-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full font-black text-white shadow-lg"
-              >
-                理解しました
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 };
