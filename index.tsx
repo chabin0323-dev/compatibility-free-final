@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import FreeApp from "./FreeApp";
+import MainApp from "./MainApp";
 
 const rootElement = document.getElementById("root");
 
@@ -10,6 +10,6 @@ if (!rootElement) {
 
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
-    <FreeApp />
+    <MainApp />
   </React.StrictMode>
 );
