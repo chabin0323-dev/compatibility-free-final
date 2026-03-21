@@ -31,7 +31,7 @@ const STEP_LABELS = {
   final: '結論',
 };
 
-// ★ noteリンク
+// ✅ noteリンク
 const PAID_URL = 'https://note.com/like_swan6953/n/nf547dbe67453';
 
 const ResultPage: React.FC = () => {
@@ -61,17 +61,17 @@ const ResultPage: React.FC = () => {
   }, [data]);
 
   // ---------------------------
-  // noteへ
+  // 🔥 noteへ
   // ---------------------------
   const openPaidPage = () => {
     window.open(PAID_URL, '_blank');
   };
 
   // ---------------------------
-  // トップへ戻る
+  // 🔥 正しいトップへ戻る
   // ---------------------------
   const goTop = () => {
-    navigate('/compatibility-free');
+    navigate('/free'); // ←ここが最重要
   };
 
   useEffect(() => {
@@ -90,9 +90,6 @@ const ResultPage: React.FC = () => {
     );
   }
 
-  // ---------------------------
-  // 🔒 ロック画面
-  // ---------------------------
   const LockedSection = ({ title }: { title: string }) => (
     <div className="bg-[#160a2b] p-6 rounded-2xl mb-6 text-center">
       <h2 className="text-xl font-bold mb-4">{title}</h2>
@@ -101,7 +98,7 @@ const ResultPage: React.FC = () => {
         ここに本来の鑑定内容が表示されます
       </div>
 
-      {/* ★ note */}
+      {/* note */}
       <button
         onClick={openPaidPage}
         className="w-full py-4 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 font-bold mb-3"
@@ -109,7 +106,7 @@ const ResultPage: React.FC = () => {
         本音・未来・結論をすべて見る
       </button>
 
-      {/* ★ 追加：トップ戻る */}
+      {/* トップ戻る */}
       <button
         onClick={goTop}
         className="w-full py-4 rounded-full border border-white/20 bg-white/5"
@@ -168,7 +165,7 @@ const ResultPage: React.FC = () => {
             本音を見る
           </button>
 
-          {/* ★ トップ戻る */}
+          {/* トップ戻る */}
           <button
             onClick={goTop}
             className="w-full mt-3 py-4 border rounded-full"
