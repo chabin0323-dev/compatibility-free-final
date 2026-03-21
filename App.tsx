@@ -10,7 +10,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Navigate to="/compatibility-free" replace />} />
           <Route path="/compatibility-free" element={<FreePage />} />
-          <Route path="/result" element={<ResultPage />} />
+          <Route path="/result/:sessionId" element={<ResultPage />} />
         </Routes>
       </div>
     </BrowserRouter>
