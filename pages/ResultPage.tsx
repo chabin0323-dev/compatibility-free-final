@@ -31,7 +31,7 @@ const STEP_LABELS: Record<Exclude<RevealStep, 'intro'>, string> = {
   final: '結論',
 };
 
-// ここを note の決済ページURL に変更してください
+// ここを note の販売ページURLに変更してください
 const PAID_URL = 'https://aisou-fortune-host.vercel.app/';
 
 const ResultPage: React.FC = () => {
@@ -39,6 +39,7 @@ const ResultPage: React.FC = () => {
   const navigate = useNavigate();
   const topAnchorRef = useRef<HTMLDivElement | null>(null);
 
+  const [data, setData] = useState<any>(null);
   const [showManual, setShowManual] = useState(false);
   const [score, setScore] = useState(0);
   const [currentStep, setCurrentStep] = useState<RevealStep>('intro');
@@ -46,22 +47,37 @@ const ResultPage: React.FC = () => {
   const [animatedConfessionRate, setAnimatedConfessionRate] = useState(0);
   const [animatedIntimacyLevel, setAnimatedIntimacyLevel] = useState(0);
 
-  const [data] = useState<any>(() => {
+  // 重要: 鑑定のたびに data と画面状態を完全リセット
+  useEffect(() => {
     try {
+      let nextData = null;
+
       if (location.state) {
+        nextData = location.state;
         localStorage.setItem('last_fortune_data', JSON.stringify(location.state));
-        return location.state;
+      } else {
+        const saved = localStorage.getItem('last_fortune_data');
+        nextData = saved ? JSON.parse(saved) : null;
       }
 
-      const saved = localStorage.getItem('last_fortune_data');
-      if (!saved) return null;
-
-      return JSON.parse(saved);
+      setData(nextData);
+      setShowManual(false);
+      setScore(0);
+      setCurrentStep('intro');
+      setShowIntroOverlay(true);
+      setAnimatedConfessionRate(0);
+      setAnimatedIntimacyLevel(0);
     } catch (error) {
-      console.error('last_fortune_data load error:', error);
-      return null;
+      console.error('result init error:', error);
+      setData(null);
+      setShowManual(false);
+      setScore(0);
+      setCurrentStep('intro');
+      setShowIntroOverlay(true);
+      setAnimatedConfessionRate(0);
+      setAnimatedIntimacyLevel(0);
     }
-  });
+  }, [location.key, location.state]);
 
   const fortune = useMemo(() => {
     try {
@@ -112,26 +128,16 @@ const ResultPage: React.FC = () => {
       }, 60);
       return;
     }
-
-    openPaidPage();
   };
 
-  // 無料版では score 以外はすべてロック画面へ固定
+  // 無料版では score 以外はロック画面のみ
   const jumpToStep = (step: RevealStep) => {
     if (step === 'intro') return;
 
     if (step === 'score') {
       setCurrentStep('score');
-    } else if (step === 'emotion') {
-      setCurrentStep('emotion');
-    } else if (step === 'destiny') {
-      setCurrentStep('destiny');
-    } else if (step === 'detail') {
-      setCurrentStep('detail');
-    } else if (step === 'biorhythm') {
-      setCurrentStep('biorhythm');
-    } else if (step === 'final') {
-      setCurrentStep('final');
+    } else {
+      setCurrentStep(step);
     }
 
     setTimeout(() => {
@@ -148,7 +154,7 @@ const ResultPage: React.FC = () => {
   };
 
   useEffect(() => {
-    if (!fortune) {
+    if (!fortune || currentStep !== 'score') {
       setScore(0);
       return;
     }
@@ -184,10 +190,10 @@ const ResultPage: React.FC = () => {
     }, 26);
 
     return () => clearInterval(timer);
-  }, [fortune, safeFinalScore]);
+  }, [fortune, safeFinalScore, currentStep, location.key]);
 
   useEffect(() => {
-    if (!fortune) {
+    if (!fortune || currentStep !== 'score') {
       setAnimatedConfessionRate(0);
       setAnimatedIntimacyLevel(0);
       return;
@@ -235,9 +241,12 @@ const ResultPage: React.FC = () => {
       clearInterval(confessionTimer);
       clearInterval(intimacyTimer);
     };
-  }, [fortune, safeConfessionRate, safeIntimacyLevel]);
+  }, [fortune, safeConfessionRate, safeIntimacyLevel, currentStep, location.key]);
 
+  // 毎回イントロを出す
   useEffect(() => {
+    if (!data) return;
+
     const hideTimer = setTimeout(() => {
       setShowIntroOverlay(false);
       setCurrentStep('score');
@@ -246,7 +255,7 @@ const ResultPage: React.FC = () => {
     return () => {
       clearTimeout(hideTimer);
     };
-  }, []);
+  }, [data, location.key]);
 
   const scoreGlowClass =
     safeFinalScore >= 90
