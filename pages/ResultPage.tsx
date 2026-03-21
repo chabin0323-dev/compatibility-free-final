@@ -31,8 +31,8 @@ const STEP_LABELS: Record<Exclude<RevealStep, 'intro'>, string> = {
   final: '結論',
 };
 
-// ここを note の販売ページURLに変更してください
-const PAID_URL = 'https://aisou-fortune-host.vercel.app/';
+// 必要なら note のURLに変更
+const PAID_URL = 'https://compatibility-free-final.vercel.app/';
 
 const ResultPage: React.FC = () => {
   const location = useLocation();
@@ -119,6 +119,7 @@ const ResultPage: React.FC = () => {
     window.location.href = PAID_URL;
   };
 
+  // 無料版では score の次はロック画面へ行くだけ
   const handleNextStep = () => {
     if (currentStep === 'score') {
       setCurrentStep('emotion');
@@ -128,6 +129,7 @@ const ResultPage: React.FC = () => {
     }
   };
 
+  // 無料版では score 以外は全部ロック画面だけ
   const jumpToStep = (step: RevealStep) => {
     if (step === 'intro') return;
 
@@ -302,14 +304,6 @@ const ResultPage: React.FC = () => {
                   <div className="h-3 rounded-full bg-white/10 w-[76%]" />
                 </div>
               </div>
-
-              <div className="bg-white/5 rounded-3xl p-5 border border-white/5">
-                <div className="h-4 w-28 rounded-full bg-white/10 mb-4" />
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="h-24 rounded-2xl bg-white/10" />
-                  <div className="h-24 rounded-2xl bg-white/10" />
-                </div>
-              </div>
             </div>
           </div>
 
@@ -334,15 +328,7 @@ const ResultPage: React.FC = () => {
               </h4>
 
               <p className="text-sm text-gray-200 leading-relaxed mb-5">
-                ここから先では、
-                <br />
-                ・相手が今あなたに抱いている本音
-                <br />
-                ・関係が動く決定的な流れ
-                <br />
-                ・このご縁の結論
-                <br />
-                をすべて見ることができます。
+                有料版では続きを確認できます。
               </p>
 
               <button
@@ -411,7 +397,6 @@ const ResultPage: React.FC = () => {
 
               <p className="text-sm text-gray-300 leading-relaxed mb-8">
                 まずは相性スコアだけを無料で確認できます。
-                この先の本音・未来・結論は有料版で解放されます。
               </p>
 
               <motion.button
@@ -571,7 +556,6 @@ const ResultPage: React.FC = () => {
                 <div className="rounded-[28px] border border-pink-400/15 bg-gradient-to-r from-pink-500/10 via-purple-500/10 to-indigo-500/10 p-5 text-center">
                   <p className="text-sm text-gray-100 leading-relaxed">
                     無料版ではここまで確認できます。
-                    この先で、相手の本音・二人の未来・結論が解放されます。
                   </p>
                 </div>
 
@@ -581,13 +565,6 @@ const ResultPage: React.FC = () => {
                     className="w-full py-4 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 font-black text-white"
                   >
                     相手の本音を少しだけ見る
-                  </button>
-
-                  <button
-                    onClick={openPaidPage}
-                    className="w-full py-4 rounded-full bg-white/8 border border-white/15 font-black text-gray-200"
-                  >
-                    すべての鑑定結果を見る
                   </button>
 
                   <button
@@ -654,6 +631,41 @@ const ResultPage: React.FC = () => {
               previewText="この関係の結論は、この先で明らかになります。"
               accent="text-purple-300"
             />
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {showManual && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-xl flex items-center justify-center p-6 text-left"
+            >
+              <motion.div
+                initial={{ scale: 0.92 }}
+                animate={{ scale: 1 }}
+                exit={{ scale: 0.92 }}
+                className="bg-[#1a0e2d] border border-purple-500/40 w-full max-w-sm rounded-[32px] p-8 relative shadow-[0_0_50px_rgba(168,85,247,0.4)]"
+              >
+                <button onClick={() => setShowManual(false)} className="absolute top-6 right-6 text-gray-500 text-xl">
+                  ✕
+                </button>
+
+                <h2 className="text-2xl font-black text-purple-300 mb-6">🔖 取扱説明書</h2>
+                <div className="space-y-4 text-sm text-gray-300 leading-relaxed">
+                  <p>無料版では、最初のスコア表示のみ公開されます。</p>
+                  <p>本音・未来・結論はロック表示となります。</p>
+                </div>
+
+                <button
+                  onClick={() => setShowManual(false)}
+                  className="w-full mt-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full font-black text-white shadow-lg"
+                >
+                  理解しました
+                </button>
+              </motion.div>
+            </motion.div>
           )}
         </AnimatePresence>
       </div>
