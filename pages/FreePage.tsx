@@ -28,7 +28,11 @@ const FreePage: React.FC = () => {
   useEffect(() => {
     const saved = localStorage.getItem('fortune_name_history');
     if (saved) {
-      setNameHistory(JSON.parse(saved));
+      try {
+        setNameHistory(JSON.parse(saved));
+      } catch {
+        setNameHistory([]);
+      }
     }
   }, []);
 
@@ -45,14 +49,29 @@ const FreePage: React.FC = () => {
     setNameHistory(updatedHistory);
     localStorage.setItem('fortune_name_history', JSON.stringify(updatedHistory));
 
-    // ローディング開始（神秘的なリングを表示）
+    // 結果画面へ渡すデータ
+    const fortuneInput = {
+      yourBloodType: bloodType,
+      yourEto: zodiac,
+      yourConstellation: constellation,
+      yourDob: `${year}-${month}-${day}`,
+      partnerName,
+      relationship,
+      selectedDate,
+      isFixed,
+    };
+
+    // 毎回新しい結果URLにする
+    const sessionId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+    // ローディング開始
     setIsLoading(true);
 
-    // --- 3秒後に結果画面へ遷移 ---
+    // 3秒後に結果画面へ遷移
     setTimeout(() => {
       setIsLoading(false);
-      navigate('/result', {
-        state: { partnerName, relationship, selectedDate },
+      navigate(`/result/${sessionId}`, {
+        state: fortuneInput,
       });
     }, 3000);
   };
@@ -67,7 +86,6 @@ const FreePage: React.FC = () => {
 
   // 日本時間で「本日」「明日」を表示する
   const now = new Date();
-
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
 
@@ -80,7 +98,6 @@ const FreePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#0a0612] text-white p-4 font-sans overflow-x-hidden relative">
-      {/* --- 神秘的なリングのローディング演出 --- */}
       <AnimatePresence>
         {isLoading && (
           <motion.div
@@ -89,7 +106,6 @@ const FreePage: React.FC = () => {
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-[#0a0612]/90 backdrop-blur-sm z-50 flex flex-col items-center justify-center gap-8"
           >
-            {/* 神秘的なリング本体 */}
             <motion.div
               className="w-24 h-24 rounded-full border-2 border-transparent relative"
               style={{
@@ -101,7 +117,6 @@ const FreePage: React.FC = () => {
               animate={{ rotate: 360 }}
               transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
             >
-              {/* 光の粒 */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-pink-300 rounded-full shadow-[0_0_10px_rgba(236,72,153,0.8)]" />
               <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-3 h-3 bg-indigo-300 rounded-full shadow-[0_0_10px_rgba(99,102,241,0.8)]" />
             </motion.div>
@@ -119,7 +134,6 @@ const FreePage: React.FC = () => {
       </AnimatePresence>
 
       <div className="relative z-10 max-w-sm mx-auto pt-4 pb-8">
-        {/* ロゴ */}
         <div className="flex justify-between items-start mb-4 py-1">
           <div>
             <h1 className="text-[38px] font-bold flex items-center tracking-tighter leading-none">
@@ -139,7 +153,6 @@ const FreePage: React.FC = () => {
           </button>
         </div>
 
-        {/* 入力カード */}
         <div className="bg-[#1a0e2d]/60 backdrop-blur-2xl border border-white/[0.08] rounded-[32px] p-6 shadow-2xl mb-4">
           <div className="mb-6">
             <div className="flex justify-between items-center mb-3">
@@ -247,7 +260,6 @@ const FreePage: React.FC = () => {
               />
             </div>
 
-            {/* 履歴表示エリア */}
             {nameHistory.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-4">
                 {nameHistory.map((name, index) => (
@@ -283,12 +295,10 @@ const FreePage: React.FC = () => {
           </div>
         </div>
 
-        {/* エラーテロップ */}
         <div className="h-6 mb-2 text-center text-red-400 text-xs font-bold">
           {errorMessage && <span className="animate-pulse">{errorMessage}</span>}
         </div>
 
-        {/* ボタン AREA */}
         <div className="space-y-4">
           <div className="flex gap-2">
             <button
