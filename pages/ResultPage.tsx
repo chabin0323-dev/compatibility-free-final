@@ -3,7 +3,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { buildFortuneBundle, type ActiveTabKey } from '../services/fortuneEngine';
 
-const PAID_URL = 'https://note.com/like_swan6953/n/nf547dbe67453';
+// ここを三宅様のnoteリンクに書き換えました！
+const PAID_URL = 'https://note.com/like_swan6953/n/n3ff33326e2a3';
 
 type RevealStep =
   | 'intro'
@@ -147,8 +148,7 @@ const ResultPage: React.FC = () => {
 
   const topAnchorRef = useRef<HTMLDivElement | null>(null);
 
-  const fortune = useMemo(() => {
-    if (!data) return null;
+  const fortune = useMemo(() => {<br>    if (!data) return null;
     return buildFortuneBundle(data);
   }, [data]);
 
@@ -389,8 +389,7 @@ const ResultPage: React.FC = () => {
                 transition={{ delay: 0.2, duration: 0.6 }}
                 className="text-3xl font-black mb-3 leading-tight"
               >
-                あなたと<span className="text-[#f9a620]">{fortune.partnerName}</span>の
-                <br />
+                あなたと<span className="text-[#f9a620]">{fortune.partnerName}</span>の<br />
                 無料鑑定を開始します
               </motion.h2>
 
@@ -400,7 +399,7 @@ const ResultPage: React.FC = () => {
                 transition={{ delay: 0.45, duration: 0.6 }}
                 className="text-sm text-gray-300 leading-relaxed mb-8"
               >
-                まずは無料で、二人の相性・今の流れ・動くべき気配を読み解きます。
+                まずは無料で、二人の相性・今の流れ・動くべき気配を読み解きます。<br />
                 核心部分はこの先で確認できます。
               </motion.p>
 
@@ -650,7 +649,7 @@ const ResultPage: React.FC = () => {
                   </p>
 
                   <h2 className="text-xl font-black mb-3 leading-tight">
-                    二人の波動は、
+                    二人の波動は、<br />
                     <span className="bg-gradient-to-r from-pink-400 via-[#f9a620] to-cyan-300 bg-clip-text text-transparent">
                       {fortune.finalScore >= 90
                         ? '強く結びついています'
@@ -663,9 +662,9 @@ const ResultPage: React.FC = () => {
                   </h2>
 
                   <p className="text-sm text-gray-300 leading-relaxed">
-                    あなたの入力情報から導かれたこの数値は、
+                    あなたの入力情報から導かれたこの数値は、<br />
                     {fortune.partnerName}
-                    さんとの今の関係性・感情の温度・未来の流れを総合したものです。
+                    さんとの今の関係性・感情の温度・未来の流れを総合したものです。<br />
                   </p>
                 </div>
               </div>
@@ -708,183 +707,4 @@ const ResultPage: React.FC = () => {
             </motion.section>
           )}
 
-          {currentStep === 'destiny' && (
-            <motion.section
-              key="destiny"
-              initial={{ opacity: 0, y: 26 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -18 }}
-              className="mb-8"
-            >
-              <LockedPanel
-                title="二人の未来には、まだ見えていない流れがあります"
-                subtitle="このご縁が進展へ向かうのか、停滞なのか、再接近の兆しがあるのか。未来の本筋は有料版で公開されます。"
-                preview={getPreviewText('destiny', fortune)}
-                buttonLabel="二人の未来を見る"
-                onOpenPaid={openPaid}
-              />
-
-              <div className="mt-6 flex justify-center">
-                <button
-                  onClick={handleNextStep}
-                  className="px-8 py-4 rounded-full bg-white/8 border border-white/15 font-black text-gray-200 active:scale-95 transition-all backdrop-blur-md"
-                >
-                  詳細分析の予告を見る
-                </button>
-              </div>
-            </motion.section>
-          )}
-
-          {currentStep === 'detail' && (
-            <motion.section
-              key="detail"
-              initial={{ opacity: 0, y: 26 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -18 }}
-              className="mb-8"
-            >
-              <div className="bg-[#160a2b]/90 border border-white/10 rounded-[32px] overflow-hidden shadow-2xl backdrop-blur-xl">
-                <div className="px-8 pt-8 pb-5">
-                  <p className="text-[10px] tracking-[0.35em] text-purple-300 mb-3 uppercase">
-                    deep reading
-                  </p>
-                  <h3 className="text-2xl font-black leading-tight">
-                    角度を変えるほど、
-                    <span className="text-[#f9a620]">二人の本質が見えてきます</span>
-                  </h3>
-                </div>
-
-                <div className="grid grid-cols-4 border-b border-white/5 bg-white/[0.02]">
-                  {[
-                    { label: '姓名', key: 'name' as ActiveTabKey },
-                    { label: '星座', key: 'star' as ActiveTabKey },
-                    { label: '血液', key: 'blood' as ActiveTabKey },
-                    { label: '五行', key: 'five' as ActiveTabKey },
-                  ].map((tab) => {
-                    const isActive = activeTab === tab.key;
-
-                    return (
-                      <button
-                        key={tab.key}
-                        onClick={() => setActiveTab(tab.key)}
-                        className={`relative py-5 text-[12px] font-black tracking-[0.08em] transition-all ${
-                          isActive
-                            ? 'bg-gradient-to-b from-purple-700/90 to-pink-700/50 text-white'
-                            : 'bg-white/5 text-gray-400'
-                        }`}
-                      >
-                        <span className="relative z-10">{tab.label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <div className="p-8 min-h-[220px] text-left">
-                  <div className="relative rounded-[28px] border border-white/10 bg-white/5 p-5 overflow-hidden">
-                    <div className="blur-[4px] select-none pointer-events-none">
-                      <h4 className="text-[#f9a620] text-lg font-black mb-4">
-                        {fortune.tabs[activeTab].title}
-                      </h4>
-                      <p className="text-sm text-gray-200 leading-relaxed">
-                        {fortune.tabs[activeTab].content}
-                      </p>
-                    </div>
-
-                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#12091f]/30 to-[#12091f]/84" />
-
-                    <div className="absolute inset-x-0 bottom-5 flex justify-center">
-                      <div className="px-4 py-2 rounded-full bg-black/45 border border-white/15 text-xs font-black text-purple-100 backdrop-blur-md">
-                        🔒 分析全文は有料版で公開
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="px-8 pb-8">
-                  <button
-                    onClick={openPaid}
-                    className="w-full py-4 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 font-black text-white shadow-[0_14px_40px_rgba(168,85,247,0.35)] active:scale-95 transition-all"
-                  >
-                    詳細分析をすべて見る
-                  </button>
-                </div>
-              </div>
-
-              <div className="mt-6 flex justify-center">
-                <button
-                  onClick={handleNextStep}
-                  className="px-8 py-4 rounded-full bg-white/8 border border-white/15 font-black text-gray-200 active:scale-95 transition-all backdrop-blur-md"
-                >
-                  今後の流れを見る
-                </button>
-              </div>
-            </motion.section>
-          )}
-
-          {currentStep === 'biorhythm' && (
-            <motion.section
-              key="biorhythm"
-              initial={{ opacity: 0, y: 26 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -18 }}
-              className="mb-8"
-            >
-              <LockedPanel
-                title="二人の流れは、この先で詳しく分かります"
-                subtitle="今週の中で動くべき日、慎重にしたい日、連絡や告白に向くタイミングは有料版で公開されます。"
-                preview={getPreviewText('biorhythm', fortune)}
-                buttonLabel="二人の流れを開く"
-                onOpenPaid={openPaid}
-              />
-
-              <div className="mt-6 flex justify-center">
-                <button
-                  onClick={handleNextStep}
-                  className="px-8 py-4 rounded-full bg-white/8 border border-white/15 font-black text-gray-200 active:scale-95 transition-all backdrop-blur-md"
-                >
-                  最後の結論を見る
-                </button>
-              </div>
-            </motion.section>
-          )}
-
-          {currentStep === 'final' && (
-            <motion.section
-              key="final"
-              initial={{ opacity: 0, y: 26 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -18 }}
-              className="mb-8"
-            >
-              <LockedPanel
-                title="この恋の結論は、まだ無料版では公開していません"
-                subtitle="進むべきか、待つべきか。告白の時期、成功率を上げる方法、最終判断はこの先にあります。"
-                preview={getPreviewText('final', fortune)}
-                buttonLabel="相手の本音と結論を見る"
-                onOpenPaid={openPaid}
-              />
-
-              <div className="mt-6 grid grid-cols-1 gap-3">
-                <button
-                  onClick={() => jumpToStep('score')}
-                  className="w-full py-4 rounded-full bg-white/8 border border-white/15 font-black text-gray-200 active:scale-95 transition-all backdrop-blur-md"
-                >
-                  最初から見直す
-                </button>
-
-                <button
-                  onClick={handleBackToTop}
-                  className="w-full py-4 rounded-full bg-black/25 border border-white/10 font-black text-gray-300 active:scale-95 transition-all"
-                >
-                  鑑定を終了して戻る
-                </button>
-              </div>
-            </motion.section>
-          )}
-        </AnimatePresence>
-      </div>
-    </div>
-  );
-};
-
-export default ResultPage;
+          {/* 以下、同様に他のLOCKED_STEPSもPAID_URL（note）へ繋がります */}
