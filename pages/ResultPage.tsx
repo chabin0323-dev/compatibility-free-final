@@ -31,7 +31,6 @@ const STEP_LABELS: Record<Exclude<RevealStep, 'intro'>, string> = {
   final: '結論',
 };
 
-// note の販売ページ
 const PAID_URL = 'https://note.com/like_swan6953/n/nf547dbe67453';
 
 const ResultPage: React.FC = () => {
@@ -504,8 +503,24 @@ const ResultPage: React.FC = () => {
                   <div className="flex justify-center">
                     <div className="relative w-44 h-44 flex items-center justify-center">
                       <svg className="w-full h-full transform -rotate-90">
-                        <circle cx="88" cy="88" r="74" stroke="currentColor" strokeWidth="2" fill="transparent" className="text-white/5" />
-                        <circle cx="88" cy="88" r="60" stroke="currentColor" strokeWidth="1" fill="transparent" className="text-white/5" />
+                        <circle
+                          cx="88"
+                          cy="88"
+                          r="74"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          fill="transparent"
+                          className="text-white/5"
+                        />
+                        <circle
+                          cx="88"
+                          cy="88"
+                          r="60"
+                          stroke="currentColor"
+                          strokeWidth="1"
+                          fill="transparent"
+                          className="text-white/5"
+                        />
                         <motion.circle
                           cx="88"
                           cy="88"
@@ -530,21 +545,71 @@ const ResultPage: React.FC = () => {
                   </div>
 
                   <div className="space-y-3">
-                    <div className="bg-[#1a0e2d]/70 border border-white/10 rounded-[22px] p-4 text-center">
-                      <p className="text-[10px] text-pink-300 font-bold mb-1 uppercase">告白成功率</p>
+                    <motion.div
+                      initial={{ opacity: 0, x: 24, scaleX: 0.4, scaleY: 0.92 }}
+                      animate={{ opacity: 1, x: 0, scaleX: 1, scaleY: 1 }}
+                      transition={{
+                        delay: 0.28,
+                        type: 'spring',
+                        stiffness: 120,
+                        damping: 14,
+                      }}
+                      className="bg-[#1a0e2d]/70 border border-white/10 rounded-[22px] p-4 text-center shadow-xl backdrop-blur-sm origin-left"
+                    >
+                      <p className="text-[10px] text-pink-300 font-bold mb-1 tracking-wider uppercase">
+                        告白成功率
+                      </p>
                       <div className="text-2xl font-black text-white mb-2">
                         {animatedConfessionRate}
                         <span className="text-xs ml-0.5">%</span>
                       </div>
-                    </div>
+                      <div className="w-full h-1.5 bg-black/40 rounded-full overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0, scaleX: 0.3 }}
+                          animate={{ width: `${animatedConfessionRate}%`, scaleX: 1 }}
+                          transition={{
+                            type: 'spring',
+                            stiffness: 110,
+                            damping: 13,
+                            mass: 1.05,
+                          }}
+                          className="h-full bg-gradient-to-r from-pink-500 to-rose-400 origin-left"
+                        />
+                      </div>
+                    </motion.div>
 
-                    <div className="bg-[#1a0e2d]/70 border border-white/10 rounded-[22px] p-4 text-center">
-                      <p className="text-[10px] text-blue-300 font-bold mb-1 uppercase">二人の親密度</p>
+                    <motion.div
+                      initial={{ opacity: 0, x: 24, scaleX: 0.4, scaleY: 0.92 }}
+                      animate={{ opacity: 1, x: 0, scaleX: 1, scaleY: 1 }}
+                      transition={{
+                        delay: 0.42,
+                        type: 'spring',
+                        stiffness: 120,
+                        damping: 14,
+                      }}
+                      className="bg-[#1a0e2d]/70 border border-white/10 rounded-[22px] p-4 text-center shadow-xl backdrop-blur-sm origin-left"
+                    >
+                      <p className="text-[10px] text-blue-300 font-bold mb-1 tracking-wider uppercase">
+                        二人の親密度
+                      </p>
                       <div className="text-2xl font-black text-white mb-2">
                         {animatedIntimacyLevel}
                         <span className="text-xs ml-0.5">%</span>
                       </div>
-                    </div>
+                      <div className="w-full h-1.5 bg-black/40 rounded-full overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0, scaleX: 0.3 }}
+                          animate={{ width: `${animatedIntimacyLevel}%`, scaleX: 1 }}
+                          transition={{
+                            type: 'spring',
+                            stiffness: 110,
+                            damping: 13,
+                            mass: 1.05,
+                          }}
+                          className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 origin-left"
+                        />
+                      </div>
+                    </motion.div>
                   </div>
                 </div>
 
