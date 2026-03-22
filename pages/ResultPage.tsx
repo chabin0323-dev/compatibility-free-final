@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { buildFortuneBundle, type ActiveTabKey } from '../services/fortuneEngine';
 
-const PAID_URL = 'https://note.com/your-note';
+const PAID_URL = 'https://note.com/like_swan6953/n/nf547dbe67453';
 
 type RevealStep =
   | 'intro'
@@ -33,36 +33,49 @@ const STEP_LABELS: Record<Exclude<RevealStep, 'intro'>, string> = {
   final: '結論',
 };
 
-const LOCKED_STEPS: RevealStep[] = ['emotion', 'destiny', 'detail', 'final'];
+const LOCKED_STEPS: RevealStep[] = ['emotion', 'destiny', 'detail', 'biorhythm', 'final'];
 
-function truncateText(text: string, max = 78) {
+function truncateText(text: string, max = 90) {
   if (!text) return '';
   if (text.length <= max) return text;
   return `${text.slice(0, max)}...`;
 }
 
-function getPreviewText(step: RevealStep, fortune: ReturnType<typeof buildFortuneBundle>) {
+function getPreviewText(
+  step: RevealStep,
+  fortune: ReturnType<typeof buildFortuneBundle>
+) {
   switch (step) {
     case 'emotion':
       return truncateText(
         `今、${fortune.partnerName}さんの心には、あなたを無視できない感情の揺れが出ています。${fortune.tabs.blood.content}`,
-        92
+        96
       );
+
     case 'destiny':
       return truncateText(
         `このご縁は偶然より深い意味を持っています。${fortune.destinyAnalysis.content}`,
-        92
+        96
       );
+
     case 'detail':
       return truncateText(
         `${fortune.tabs.name.title}。${fortune.tabs.name.content}`,
-        92
+        96
       );
+
+    case 'biorhythm':
+      return truncateText(
+        `今週は動いて良い日と慎重にしたい日の差が出やすい流れです。${fortune.biorhythmData[0]?.note ?? ''}`,
+        96
+      );
+
     case 'final':
       return truncateText(
-        `${fortune.actionGuide} この恋をどう動かすべきかの結論がここにあります。`,
-        92
+        `${fortune.actionGuide} この恋をどう動かすべきかの最終判断がここにあります。`,
+        96
       );
+
     default:
       return '';
   }
@@ -72,27 +85,29 @@ const LockedPanel: React.FC<{
   title: string;
   subtitle: string;
   preview: string;
-  buttonLabel?: string;
+  buttonLabel: string;
   onOpenPaid: () => void;
-}> = ({ title, subtitle, preview, buttonLabel = '続きを有料版で見る', onOpenPaid }) => {
+}> = ({ title, subtitle, preview, buttonLabel, onOpenPaid }) => {
   return (
     <div className="bg-[#1a0e2d]/80 border border-white/10 rounded-[32px] p-8 shadow-2xl backdrop-blur-xl">
-      <p className="text-[10px] tracking-[0.35em] text-pink-300 mb-3 uppercase">locked reading</p>
-      <h3 className="text-2xl font-black mb-4 leading-tight">
-        {title}
-      </h3>
-      <p className="text-sm text-gray-300 leading-relaxed mb-5">
-        {subtitle}
+      <p className="text-[10px] tracking-[0.35em] text-pink-300 mb-3 uppercase">
+        locked reading
       </p>
+
+      <h3 className="text-2xl font-black mb-4 leading-tight">{title}</h3>
+
+      <p className="text-sm text-gray-300 leading-relaxed mb-5">{subtitle}</p>
 
       <div className="relative rounded-[28px] border border-white/10 bg-white/5 p-5 overflow-hidden mb-6">
         <div className="blur-[4px] select-none pointer-events-none">
           <p className="text-sm text-gray-200 leading-relaxed">{preview}</p>
           <p className="text-sm text-gray-200 leading-relaxed mt-3">
-            この先では、相手の本音・未来・動く時期・最終結論まで深く読み解かれます。
+            この先では、相手の本音・二人の未来・動くべき時期・最終結論まで深く読み解かれます。
           </p>
         </div>
+
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#12091f]/35 to-[#12091f]/82" />
+
         <div className="absolute inset-x-0 bottom-5 flex justify-center">
           <div className="px-4 py-2 rounded-full bg-black/45 border border-white/15 text-xs font-black text-purple-100 backdrop-blur-md">
             🔒 ここから先は有料版で公開
@@ -207,6 +222,7 @@ const ResultPage: React.FC = () => {
           : Math.sin((progress - 0.84) * Math.PI * 4.2) * 3.2 * (1 - progress);
 
       current = Math.round(target * eased + overshoot);
+
       if (current > 100) current = 100;
       if (current < 0) current = 0;
 
@@ -300,16 +316,19 @@ const ResultPage: React.FC = () => {
 
       <div className="fixed inset-0 z-0 pointer-events-none">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,#2b1144_0%,#12091f_35%,#05020a_75%)]" />
+
         <motion.div
           animate={{ opacity: [0.28, 0.5, 0.28], scale: [1, 1.08, 1] }}
           transition={{ duration: 6, repeat: Infinity }}
           className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[440px] h-[440px] rounded-full bg-purple-700/15 blur-3xl"
         />
+
         <motion.div
           animate={{ opacity: [0.1, 0.2, 0.1], scale: [1, 1.04, 1] }}
           transition={{ duration: 5, repeat: Infinity, delay: 1 }}
           className="absolute bottom-[10%] right-[-10%] w-[300px] h-[300px] rounded-full bg-pink-500/10 blur-3xl"
         />
+
         {[...Array(20)].map((_, i) => (
           <motion.div
             key={i}
@@ -356,7 +375,9 @@ const ResultPage: React.FC = () => {
                 />
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center">
-                    <p className="text-[10px] tracking-[0.45em] text-purple-200/80 mb-2">FREE READING</p>
+                    <p className="text-[10px] tracking-[0.45em] text-purple-200/80 mb-2">
+                      FREE READING
+                    </p>
                     <p className="text-4xl">✦</p>
                   </div>
                 </div>
@@ -451,12 +472,16 @@ const ResultPage: React.FC = () => {
           <p className="text-[10px] tracking-[0.35em] text-purple-300 mb-2 uppercase">
             only for you
           </p>
+
           <h1 className="text-3xl font-black mb-2 leading-tight">
             あなた <span className="text-gray-600 font-light mx-1">&</span>{' '}
             <span className="text-[#f9a620]">{fortune.partnerName}</span>
           </h1>
+
           <div className="flex items-center gap-2 flex-wrap">
-            <p className="text-gray-500 text-[10px] tracking-widest font-bold">鑑定番号: MS-2026-V3</p>
+            <p className="text-gray-500 text-[10px] tracking-widest font-bold">
+              鑑定番号: MS-2026-V3
+            </p>
             <span className="text-[10px] px-2 py-1 rounded-full border border-white/10 bg-white/5 text-purple-200">
               関係性：{fortune.relationship}
             </span>
@@ -482,7 +507,10 @@ const ResultPage: React.FC = () => {
                     <motion.div
                       initial={{ rotate: -220, scale: 0.86, opacity: 0.2 }}
                       animate={{ rotate: 0, scale: 1, opacity: 1 }}
-                      transition={{ duration: 2.2, ease: [0.22, 1, 0.36, 1] }}
+                      transition={{
+                        duration: 2.2,
+                        ease: [0.22, 1, 0.36, 1],
+                      }}
                       className="relative w-44 h-44 flex items-center justify-center"
                     >
                       <motion.div
@@ -490,6 +518,7 @@ const ResultPage: React.FC = () => {
                         transition={{ duration: 2.8, repeat: Infinity }}
                         className="absolute inset-4 rounded-full bg-pink-500/10 blur-2xl"
                       />
+
                       <svg className="w-full h-full transform -rotate-90">
                         <circle
                           cx="88"
@@ -521,7 +550,10 @@ const ResultPage: React.FC = () => {
                           className={`text-pink-500 ${scoreGlowClass}`}
                           initial={{ strokeDashoffset: 464.96 }}
                           animate={{ strokeDashoffset: 464.96 - (464.96 * score) / 100 }}
-                          transition={{ duration: 2.1, ease: [0.16, 1, 0.3, 1] }}
+                          transition={{
+                            duration: 2.1,
+                            ease: [0.16, 1, 0.3, 1],
+                          }}
                         />
                       </svg>
 
@@ -534,7 +566,9 @@ const ResultPage: React.FC = () => {
                           }
                           transition={{ duration: 1.15 }}
                         >
-                          <span className="text-6xl font-black italic tracking-tighter">{score}</span>
+                          <span className="text-6xl font-black italic tracking-tighter">
+                            {score}
+                          </span>
                           <span className="text-base font-bold block -mt-2">点</span>
                         </motion.div>
                       </div>
@@ -545,10 +579,17 @@ const ResultPage: React.FC = () => {
                     <motion.div
                       initial={{ opacity: 0, x: 24, scaleX: 0.4, scaleY: 0.92 }}
                       animate={{ opacity: 1, x: 0, scaleX: 1, scaleY: 1 }}
-                      transition={{ delay: 0.28, type: 'spring', stiffness: 120, damping: 14 }}
+                      transition={{
+                        delay: 0.28,
+                        type: 'spring',
+                        stiffness: 120,
+                        damping: 14,
+                      }}
                       className="bg-[#1a0e2d]/70 border border-white/10 rounded-[22px] p-4 text-center shadow-xl backdrop-blur-sm origin-left"
                     >
-                      <p className="text-[10px] text-pink-300 font-bold mb-1 tracking-wider uppercase">告白成功率</p>
+                      <p className="text-[10px] text-pink-300 font-bold mb-1 tracking-wider uppercase">
+                        告白成功率
+                      </p>
                       <div className="text-2xl font-black text-white mb-2">
                         {animatedConfessionRate}
                         <span className="text-xs ml-0.5">%</span>
@@ -557,7 +598,12 @@ const ResultPage: React.FC = () => {
                         <motion.div
                           initial={{ width: 0, scaleX: 0.3 }}
                           animate={{ width: `${animatedConfessionRate}%`, scaleX: 1 }}
-                          transition={{ type: 'spring', stiffness: 110, damping: 13, mass: 1.05 }}
+                          transition={{
+                            type: 'spring',
+                            stiffness: 110,
+                            damping: 13,
+                            mass: 1.05,
+                          }}
                           className="h-full bg-gradient-to-r from-pink-500 to-rose-400 origin-left"
                         />
                       </div>
@@ -566,10 +612,17 @@ const ResultPage: React.FC = () => {
                     <motion.div
                       initial={{ opacity: 0, x: 24, scaleX: 0.4, scaleY: 0.92 }}
                       animate={{ opacity: 1, x: 0, scaleX: 1, scaleY: 1 }}
-                      transition={{ delay: 0.42, type: 'spring', stiffness: 120, damping: 14 }}
+                      transition={{
+                        delay: 0.42,
+                        type: 'spring',
+                        stiffness: 120,
+                        damping: 14,
+                      }}
                       className="bg-[#1a0e2d]/70 border border-white/10 rounded-[22px] p-4 text-center shadow-xl backdrop-blur-sm origin-left"
                     >
-                      <p className="text-[10px] text-blue-300 font-bold mb-1 tracking-wider uppercase">二人の親密度</p>
+                      <p className="text-[10px] text-blue-300 font-bold mb-1 tracking-wider uppercase">
+                        二人の親密度
+                      </p>
                       <div className="text-2xl font-black text-white mb-2">
                         {animatedIntimacyLevel}
                         <span className="text-xs ml-0.5">%</span>
@@ -578,7 +631,12 @@ const ResultPage: React.FC = () => {
                         <motion.div
                           initial={{ width: 0, scaleX: 0.3 }}
                           animate={{ width: `${animatedIntimacyLevel}%`, scaleX: 1 }}
-                          transition={{ type: 'spring', stiffness: 110, damping: 13, mass: 1.05 }}
+                          transition={{
+                            type: 'spring',
+                            stiffness: 110,
+                            damping: 13,
+                            mass: 1.05,
+                          }}
                           className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 origin-left"
                         />
                       </div>
@@ -590,6 +648,7 @@ const ResultPage: React.FC = () => {
                   <p className="text-[10px] tracking-[0.35em] text-purple-300 mb-2 uppercase">
                     special reading
                   </p>
+
                   <h2 className="text-xl font-black mb-3 leading-tight">
                     二人の波動は、
                     <span className="bg-gradient-to-r from-pink-400 via-[#f9a620] to-cyan-300 bg-clip-text text-transparent">
@@ -602,9 +661,11 @@ const ResultPage: React.FC = () => {
                         : '変化の途中にあります'}
                     </span>
                   </h2>
+
                   <p className="text-sm text-gray-300 leading-relaxed">
                     あなたの入力情報から導かれたこの数値は、
-                    {fortune.partnerName}さんとの今の関係性・感情の温度・未来の流れを総合したものです。
+                    {fortune.partnerName}
+                    さんとの今の関係性・感情の温度・未来の流れを総合したものです。
                   </p>
                 </div>
               </div>
@@ -684,7 +745,9 @@ const ResultPage: React.FC = () => {
             >
               <div className="bg-[#160a2b]/90 border border-white/10 rounded-[32px] overflow-hidden shadow-2xl backdrop-blur-xl">
                 <div className="px-8 pt-8 pb-5">
-                  <p className="text-[10px] tracking-[0.35em] text-purple-300 mb-3 uppercase">deep reading</p>
+                  <p className="text-[10px] tracking-[0.35em] text-purple-300 mb-3 uppercase">
+                    deep reading
+                  </p>
                   <h3 className="text-2xl font-black leading-tight">
                     角度を変えるほど、
                     <span className="text-[#f9a620]">二人の本質が見えてきます</span>
@@ -726,7 +789,9 @@ const ResultPage: React.FC = () => {
                         {fortune.tabs[activeTab].content}
                       </p>
                     </div>
+
                     <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#12091f]/30 to-[#12091f]/84" />
+
                     <div className="absolute inset-x-0 bottom-5 flex justify-center">
                       <div className="px-4 py-2 rounded-full bg-black/45 border border-white/15 text-xs font-black text-purple-100 backdrop-blur-md">
                         🔒 分析全文は有料版で公開
@@ -764,77 +829,18 @@ const ResultPage: React.FC = () => {
               exit={{ opacity: 0, y: -18 }}
               className="mb-8"
             >
-              <div className="bg-[#160a2b]/80 border border-white/10 rounded-[32px] p-8 shadow-2xl backdrop-blur-md">
-                <p className="text-[10px] tracking-[0.35em] text-purple-300 mb-3 uppercase text-center">
-                  next 7 days
-                </p>
-                <h3 className="text-2xl font-black text-center mb-8 leading-tight">
-                  二人の流れは、
-                  <span className="text-[#f9a620]">この7日でこう動きます</span>
-                </h3>
-
-                <div className="space-y-5">
-                  {fortune.biorhythmData.map((item, i) => (
-                    <motion.div
-                      key={`${item.date}-${i}`}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.06 }}
-                      className="bg-white/5 rounded-2xl p-5 border border-white/5 text-left"
-                    >
-                      <div className="flex justify-between items-center mb-3">
-                        <div className="flex items-center gap-3">
-                          <span className={`text-sm font-black ${i === 0 ? 'text-pink-500' : 'text-gray-300'}`}>
-                            {item.date}
-                          </span>
-                          {i === 0 && (
-                            <span className="text-[9px] px-2 py-1 rounded-full border border-pink-400/30 bg-pink-500/10 text-pink-200">
-                              鑑定日
-                            </span>
-                          )}
-                          <div className="flex text-[12px] tracking-widest">
-                            <span className="text-[#f9a620]">{'★'.repeat(item.activeStars)}</span>
-                            <span className="text-gray-600">{'★'.repeat(item.inactiveStars)}</span>
-                          </div>
-                        </div>
-                        <span className="text-[11px] font-mono text-gray-400">{item.score}%</span>
-                      </div>
-
-                      <div className="w-full bg-black/40 h-1.5 rounded-full overflow-hidden mb-3">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${item.score}%` }}
-                          transition={{ duration: 1.1 }}
-                          className={`h-full rounded-full ${
-                            item.score >= 90
-                              ? 'bg-gradient-to-r from-pink-500 to-yellow-400'
-                              : item.score >= 70
-                              ? 'bg-gradient-to-r from-purple-500 to-pink-500'
-                              : item.score >= 50
-                              ? 'bg-gradient-to-r from-indigo-500 to-purple-600'
-                              : 'bg-gradient-to-r from-slate-500 to-indigo-700'
-                          }`}
-                        />
-                      </div>
-
-                      <p className="text-[11px] text-gray-400 leading-relaxed">{item.note}</p>
-                    </motion.div>
-                  ))}
-                </div>
-
-                <div className="mt-8 rounded-3xl border border-white/10 bg-black/20 p-5">
-                  <p className="text-[10px] tracking-[0.3em] text-purple-300 mb-2 uppercase">無料版で分かること</p>
-                  <p className="text-sm text-gray-300 leading-relaxed">
-                    今週は、動いて良い日と慎重にしたい日の差が出やすい流れです。
-                    ただし、いつ本当に動くべきか、何を言うべきかの核心は有料版で公開されます。
-                  </p>
-                </div>
-              </div>
+              <LockedPanel
+                title="二人の流れは、この先で詳しく分かります"
+                subtitle="今週の中で動くべき日、慎重にしたい日、連絡や告白に向くタイミングは有料版で公開されます。"
+                preview={getPreviewText('biorhythm', fortune)}
+                buttonLabel="二人の流れを開く"
+                onOpenPaid={openPaid}
+              />
 
               <div className="mt-6 flex justify-center">
                 <button
                   onClick={handleNextStep}
-                  className="px-8 py-4 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 font-black text-white shadow-[0_14px_40px_rgba(168,85,247,0.35)] active:scale-95 transition-all"
+                  className="px-8 py-4 rounded-full bg-white/8 border border-white/15 font-black text-gray-200 active:scale-95 transition-all backdrop-blur-md"
                 >
                   最後の結論を見る
                 </button>
