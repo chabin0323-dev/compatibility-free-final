@@ -6,7 +6,6 @@ import UsageManual from '../components/UsageManual';
 const FreePage: React.FC = () => {
   const navigate = useNavigate();
 
-  // 入力状態
   const [bloodType, setBloodType] = useState('O型');
   const [zodiac, setZodiac] = useState('子');
   const [constellation, setConstellation] = useState('牡羊座');
@@ -17,14 +16,12 @@ const FreePage: React.FC = () => {
   const [relationship, setRelationship] = useState('');
   const [isFixed, setIsFixed] = useState(true);
 
-  // 履歴保存・エラー・ローディング・マニュアル用の状態
   const [nameHistory, setNameHistory] = useState<string[]>([]);
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [selectedDate, setSelectedDate] = useState<'today' | 'tomorrow'>('today');
   const [showManual, setShowManual] = useState(false);
 
-  // 起動時にブラウザから履歴を読み込む
   useEffect(() => {
     const saved = localStorage.getItem('fortune_name_history');
     if (saved) {
@@ -36,6 +33,17 @@ const FreePage: React.FC = () => {
     }
   }, []);
 
+  useEffect(() => {
+    const existingScript = document.getElementById('busuanzi-script');
+    if (existingScript) return;
+
+    const script = document.createElement('script');
+    script.id = 'busuanzi-script';
+    script.src = '//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js';
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
+
   const handleStartDivination = () => {
     setErrorMessage('');
 
@@ -44,12 +52,10 @@ const FreePage: React.FC = () => {
       return;
     }
 
-    // 新しい名前を履歴に追加（重複は避ける、最新5件）
     const updatedHistory = [partnerName, ...nameHistory.filter((n) => n !== partnerName)].slice(0, 5);
     setNameHistory(updatedHistory);
     localStorage.setItem('fortune_name_history', JSON.stringify(updatedHistory));
 
-    // 結果画面へ渡すデータ
     const fortuneInput = {
       yourBloodType: bloodType,
       yourEto: zodiac,
@@ -61,13 +67,10 @@ const FreePage: React.FC = () => {
       isFixed,
     };
 
-    // 毎回新しい結果URLにする
     const sessionId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
-    // ローディング開始
     setIsLoading(true);
 
-    // 3秒後に結果画面へ遷移
     setTimeout(() => {
       setIsLoading(false);
       navigate(`/result/${sessionId}`, {
@@ -84,7 +87,6 @@ const FreePage: React.FC = () => {
   const constellations = ['牡羊座', '牡牛座', '双子座', '蟹座', '獅子座', '乙女座', '天秤座', '蠍座', '射手座', '山羊座', '水瓶座', '魚座'];
   const relationships = ['恋人', '片思い', '夫婦', '友人', '仕事仲間', '商談相手', '上司'];
 
-  // 日本時間で「本日」「明日」を表示する
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
@@ -334,6 +336,20 @@ const FreePage: React.FC = () => {
           >
             鑑定を開始する
           </button>
+        </div>
+
+        <div className="mt-8 text-[11px] text-gray-500/80 text-center leading-6">
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+            <span id="busuanzi_container_site_pv" style={{ display: 'none' }}>
+              累計アクセス <span id="busuanzi_value_site_pv"></span>
+            </span>
+            <span id="busuanzi_container_site_uv" style={{ display: 'none' }}>
+              訪問ユーザー <span id="busuanzi_value_site_uv"></span>
+            </span>
+            <span id="busuanzi_container_page_pv" style={{ display: 'none' }}>
+              このページ閲覧 <span id="busuanzi_value_page_pv"></span>
+            </span>
+          </div>
         </div>
       </div>
 
