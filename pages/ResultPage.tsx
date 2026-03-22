@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { buildFortuneBundle, type ActiveTabKey } from '../services/fortuneEngine';
 
-const PAID_URL = 'https://note.com/like_swan6953/n/nf547dbe67453';
+const PAID_URL = 'https://note.com/like_swan6953/n/n3ff33326e2a3';
 
 type RevealStep =
   | 'intro'
