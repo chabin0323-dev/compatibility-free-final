@@ -33,15 +33,34 @@ const FreePage: React.FC = () => {
     }
   }, []);
 
+  // アクセス解析を毎回再読込
   useEffect(() => {
-    const existingScript = document.getElementById('busuanzi-script');
-    if (existingScript) return;
+    const oldScript = document.getElementById('busuanzi-script');
+    if (oldScript) {
+      oldScript.remove();
+    }
+
+    const sitePv = document.getElementById('busuanzi_container_site_pv');
+    const siteUv = document.getElementById('busuanzi_container_site_uv');
+    const pagePv = document.getElementById('busuanzi_container_page_pv');
+
+    if (sitePv) sitePv.style.display = 'none';
+    if (siteUv) siteUv.style.display = 'none';
+    if (pagePv) pagePv.style.display = 'none';
 
     const script = document.createElement('script');
     script.id = 'busuanzi-script';
     script.src = '//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js';
     script.async = true;
+
     document.body.appendChild(script);
+
+    return () => {
+      const currentScript = document.getElementById('busuanzi-script');
+      if (currentScript) {
+        currentScript.remove();
+      }
+    };
   }, []);
 
   const handleStartDivination = () => {
@@ -340,13 +359,13 @@ const FreePage: React.FC = () => {
 
         <div className="mt-8 text-[11px] text-gray-500/80 text-center leading-6">
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
-            <span id="busuanzi_container_site_pv" style={{ display: 'none' }}>
+            <span id="busuanzi_container_site_pv">
               累計アクセス <span id="busuanzi_value_site_pv"></span>
             </span>
-            <span id="busuanzi_container_site_uv" style={{ display: 'none' }}>
+            <span id="busuanzi_container_site_uv">
               訪問ユーザー <span id="busuanzi_value_site_uv"></span>
             </span>
-            <span id="busuanzi_container_page_pv" style={{ display: 'none' }}>
+            <span id="busuanzi_container_page_pv">
               このページ閲覧 <span id="busuanzi_value_page_pv"></span>
             </span>
           </div>
