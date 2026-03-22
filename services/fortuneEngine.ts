@@ -68,50 +68,50 @@ const RELATIONSHIP_LABELS: Record<string, string> = {
 };
 
 const RELATIONSHIP_BASE: Record<string, number> = {
-  恋人: 8,
-  片思い: -2,
-  夫婦: 10,
-  友人: 4,
-  仕事仲間: 3,
-  商談相手: 2,
-  上司: 1,
+  恋人: 6,
+  片思い: -6,
+  夫婦: 7,
+  友人: 1,
+  仕事仲間: 0,
+  商談相手: -1,
+  上司: -3,
 };
 
 const BLOOD_BASE: Record<string, number> = {
-  A型: 5,
-  B型: 1,
-  O型: 6,
-  AB型: 4,
+  A型: 2,
+  B型: 0,
+  O型: 3,
+  AB型: 1,
 };
 
 const STAR_BASE: Record<string, number> = {
-  牡羊座: 4,
-  牡牛座: 6,
-  双子座: 3,
-  蟹座: 6,
-  獅子座: 5,
-  乙女座: 6,
-  天秤座: 5,
-  蠍座: 7,
-  射手座: 4,
-  山羊座: 6,
-  水瓶座: 3,
-  魚座: 7,
+  牡羊座: 1,
+  牡牛座: 3,
+  双子座: 1,
+  蟹座: 3,
+  獅子座: 2,
+  乙女座: 3,
+  天秤座: 2,
+  蠍座: 4,
+  射手座: 1,
+  山羊座: 3,
+  水瓶座: 1,
+  魚座: 4,
 };
 
 const ETO_BASE: Record<string, number> = {
-  子: 5,
-  丑: 4,
-  寅: 6,
-  卯: 5,
-  辰: 6,
-  巳: 4,
-  午: 5,
-  未: 6,
-  申: 4,
-  酉: 5,
-  戌: 6,
-  亥: 7,
+  子: 2,
+  丑: 1,
+  寅: 3,
+  卯: 2,
+  辰: 3,
+  巳: 1,
+  午: 2,
+  未: 3,
+  申: 1,
+  酉: 2,
+  戌: 3,
+  亥: 4,
 };
 
 const HIDDEN_FEELINGS = [
@@ -250,18 +250,18 @@ function getBaseScore(input: Required<FortuneInput>, seedKey: string): number {
   const targetDate = getTargetDate(input.selectedDate as DivinationDate);
   const dateSeed = formatDateSeed(targetDate);
 
-  const blood = BLOOD_BASE[input.yourBloodType] ?? 3;
-  const eto = ETO_BASE[input.yourEto] ?? 3;
-  const star = STAR_BASE[input.yourConstellation] ?? 3;
-  const relation = RELATIONSHIP_BASE[input.relationship] ?? 2;
-  const dobInfluence = input.yourDob ? hashString(input.yourDob) % 8 : 3;
-  const nameInfluence = hashString(input.partnerName) % 10;
-  const dailyInfluence = hashString(`${seedKey}|${dateSeed}|daily-base`) % 14;
+  const blood = BLOOD_BASE[input.yourBloodType] ?? 1;
+  const eto = ETO_BASE[input.yourEto] ?? 1;
+  const star = STAR_BASE[input.yourConstellation] ?? 1;
+  const relation = RELATIONSHIP_BASE[input.relationship] ?? 0;
+  const dobInfluence = input.yourDob ? hashString(input.yourDob) % 6 : 2;
+  const nameInfluence = hashString(input.partnerName) % 6;
+  const dailyInfluence = hashString(`${seedKey}|${dateSeed}|daily-base`) % 10;
 
   return clamp(
-    58 + blood + eto + star + relation + dobInfluence + nameInfluence + dailyInfluence,
-    62,
-    98
+    42 + blood + eto + star + relation + dobInfluence + nameInfluence + dailyInfluence,
+    40,
+    78
   );
 }
 
@@ -274,14 +274,14 @@ function buildAdvice(score: number, relationship: string, seedKey: string): stri
   ]);
 
   if (relationship === '片思い') {
-    return score >= 85
-      ? `今は追い風です。${emotion}`
+    return score >= 66
+      ? `今は小さな追い風があります。${emotion}`
       : `関係を急進させるより、信頼を育てる行動が先です。${emotion}`;
   }
 
   if (relationship === '恋人' || relationship === '夫婦') {
-    return score >= 85
-      ? `絆を深める好機です。感謝と愛情を言葉で見せるほど運気が上がります。`
+    return score >= 66
+      ? `絆を深めやすい流れです。感謝や安心感を言葉で見せるほど運気が整います。`
       : `近さに甘えず、丁寧な対話を意識すると誤解を防げます。`;
   }
 
@@ -295,32 +295,36 @@ function buildAdvice(score: number, relationship: string, seedKey: string): stri
 function buildOverallText(score: number, input: Required<FortuneInput>, seedKey: string): string {
   const hiddenFeeling = pick(`${seedKey}-hidden`, HIDDEN_FEELINGS);
 
-  if (score >= 90) {
-    return `二人の総合運勢は極めて強く、気持ちと流れが噛み合いやすい最上位帯です。${input.partnerName}さんとの関係は、少しの行動でも大きな進展に繋がりやすく、${hiddenFeeling}`;
+  if (score >= 70) {
+    return `二人の総合運勢は比較的安定しており、気持ちと流れが噛み合いやすい時期です。${input.partnerName}さんとの関係は、派手な進展よりも自然な会話や気遣いが強く効きます。${hiddenFeeling}`;
   }
 
-  if (score >= 78) {
-    return `二人の総合運勢は非常に安定しており、信頼を積み重ねるほど結果が大きく育つ流れです。派手さよりも自然な会話や気遣いが強く効き、関係性に確かな温度が生まれています。`;
+  if (score >= 56) {
+    return `二人の総合運勢はゆっくり育つ流れです。焦って答えを出すより、信頼を積み重ねるほど関係の温度が上がりやすくなります。`;
   }
 
-  return `二人の総合運勢は発展途上ですが、学びの多いご縁です。焦って答えを出すより、やり取りの質を高めるほど相性は伸びていきます。今は土台作りが未来の強い結びつきに変わる段階です。`;
+  return `二人の総合運勢は慎重に育てるべき段階です。今は結果を急ぐより、やり取りの質を高めることが未来の進展につながります。`;
 }
 
 function buildDestinyText(score: number, input: Required<FortuneInput>, seedKey: string): string {
   const pastLife = pick(`${seedKey}-pastlife`, PAST_LIFE_STORIES);
 
-  if (score >= 88) {
-    return `${pastLife} 今回のご縁は偶然ではなく、再会に近い力を感じます。${input.relationship}という今の立場を超えて、魂の深い部分で引き合いやすい相性です。`;
+  if (score >= 70) {
+    return `${pastLife} 今回のご縁は偶然ではなく、今の関係性を超えた引力が感じられます。ゆっくりでも意味のある進展が生まれやすい相性です。`;
   }
 
-  if (score >= 75) {
-    return `${pastLife} 今世では、支え合いながら関係を育てることで強い意味を持つご縁です。急展開より、理解を深める過程に運命の意味があります。`;
+  if (score >= 56) {
+    return `${pastLife} 今世では、支え合いながら関係を育てることで意味を持つご縁です。急展開より、理解を深める過程に価値があります。`;
   }
 
   return `${pastLife} ただし今は試練も混ざりやすく、相手を理解する姿勢が運命の扉を開きます。難しさの中にこそ、この関係の本当の価値が隠れています。`;
 }
 
-function buildTabDetails(score: number, input: Required<FortuneInput>, seedKey: string): Record<ActiveTabKey, FortuneDetail> {
+function buildTabDetails(
+  score: number,
+  input: Required<FortuneInput>,
+  seedKey: string
+): Record<ActiveTabKey, FortuneDetail> {
   const partnerNameShort = input.partnerName || 'お相手';
   const starHint = input.yourConstellation || 'あなたの星座';
   const bloodHint = input.yourBloodType || 'あなたの血液型';
@@ -328,28 +332,28 @@ function buildTabDetails(score: number, input: Required<FortuneInput>, seedKey: 
   const hiddenFeeling = pick(`${seedKey}-tab-hidden`, HIDDEN_FEELINGS);
 
   const name: FortuneDetail =
-    score >= 85
+    score >= 68
       ? {
-          title: '姓名判断：強い引力の縁',
-          content: `${partnerNameShort}さんの名前の波動とあなたの運気は強く共鳴しています。呼びかけやメッセージなど「名前を丁寧に扱う」ほど親密運が上がり、関係の進展が早まりやすい相です。`,
+          title: '姓名判断：引力が生まれやすい縁',
+          content: `${partnerNameShort}さんの名前の波動とあなたの運気は穏やかに共鳴しています。呼びかけやメッセージなど、名前を丁寧に扱うほど親密運が整いやすい相です。`,
         }
-      : score >= 72
+      : score >= 54
       ? {
           title: '姓名判断：信頼育成型',
-          content: `${partnerNameShort}さんとの縁は、名前が持つ響きによって安定感が育つ相です。派手な展開より、丁寧なやり取りや継続した接点が大きな意味を持ちます。`,
+          content: `${partnerNameShort}さんとの縁は、派手な進展よりも丁寧なやり取りによって安定感が育つ相です。継続した接点が大きな意味を持ちます。`,
         }
       : {
           title: '姓名判断：距離調整の相',
-          content: `今は名前の波動にやや揺れがあり、気持ちの温度差が出やすい時期です。呼び方や言い方を柔らかくすると空気が整い、関係は改善しやすくなります。`,
+          content: `今は名前の波動にやや揺れがあり、気持ちの温度差が出やすい時期です。呼び方や言い方を柔らかくすると空気が整いやすくなります。`,
         };
 
   const star: FortuneDetail =
-    score >= 85
+    score >= 68
       ? {
-          title: '占星術：恋愛運上昇配置',
-          content: `${starHint}の運気は${input.selectedDate === 'tomorrow' ? '明日' : '本日'}、対人面で大きく追い風です。想いを伝える・距離を縮める・本音を共有する流れに強く、自然体ほど魅力が伝わります。`,
+          title: '占星術：対人運上昇配置',
+          content: `${starHint}の運気は${input.selectedDate === 'tomorrow' ? '明日' : '本日'}、対人面でやや追い風です。自然体の会話ほど魅力が伝わりやすい配置です。`,
         }
-      : score >= 72
+      : score >= 54
       ? {
           title: '占星術：安定交流配置',
           content: `${starHint}は、急進より信頼形成に強い配置です。共通点を見つける会話や、相手の話を受け止める姿勢が関係運を底上げします。`,
@@ -360,12 +364,12 @@ function buildTabDetails(score: number, input: Required<FortuneInput>, seedKey: 
         };
 
   const blood: FortuneDetail =
-    score >= 85
+    score >= 68
       ? {
           title: '血液型：情感共鳴',
-          content: `${bloodHint}の特性が良い形で働き、相手に安心感と印象の強さを同時に残せる相です。${hiddenFeeling}`,
+          content: `${bloodHint}の特性が良い形で働き、相手に安心感と印象の強さを残せる相です。${hiddenFeeling}`,
         }
-      : score >= 72
+      : score >= 54
       ? {
           title: '血液型：補完バランス',
           content: `${bloodHint}らしい性質が、相手との間で補完関係を作りやすい流れです。押し引きのバランスを意識すると親密度が安定して伸びます。`,
@@ -376,15 +380,15 @@ function buildTabDetails(score: number, input: Required<FortuneInput>, seedKey: 
         };
 
   const five: FortuneDetail =
-    score >= 85
+    score >= 68
       ? {
-          title: '五行思想：強運循環',
-          content: `${etoHint}が持つ気の流れは${partnerNameShort}さんとの関係で活性化しやすく、出会い・再接近・信頼深化に良い循環が出ています。行動するほど運気が巡る配置です。`,
+          title: '五行思想：良循環の兆し',
+          content: `${etoHint}が持つ気の流れは${partnerNameShort}さんとの関係で整いやすく、信頼深化に向く循環が出ています。`,
         }
-      : score >= 72
+      : score >= 54
       ? {
           title: '五行思想：安定循環',
-          content: `${etoHint}の気は今、穏やかに育つ運勢です。急激な進展より、日常のやり取りや小さな信頼で関係を安定させるほど五行の巡りが整います。`,
+          content: `${etoHint}の気は今、穏やかに育つ運勢です。急激な進展より、日常のやり取りや小さな信頼で関係を安定させるほど巡りが整います。`,
         }
       : {
           title: '五行思想：調律の時',
@@ -398,67 +402,67 @@ function buildActionGuide(score: number, relationship: string, selectedDate: Div
   const dayWord = selectedDate === 'tomorrow' ? '明日' : '今日';
 
   if (relationship === '片思い') {
-    return score >= 85
-      ? `${dayWord}は想いを前に進める好機です。短くても良いので、相手が安心できる一言を先に届けてください。`
+    return score >= 66
+      ? `${dayWord}は想いを少し前に進める好機です。短くても良いので、相手が安心できる一言を先に届けてください。`
       : `${dayWord}は距離を詰めすぎず、心地よい会話の余韻を残すことが最優先です。`;
   }
 
   if (relationship === '恋人' || relationship === '夫婦') {
-    return score >= 85
-      ? `${dayWord}は愛情表現が強く届きます。感謝・労い・未来の話のどれかを一つ言葉にしてください。`
-      : `${dayWord}は小さなすれ違いを防ぐ日です。相手の話を途中で遮らず、最後まで聞く意識が運命を整えます。`;
+    return score >= 66
+      ? `${dayWord}は愛情表現が届きやすい日です。感謝・労い・未来の話のどれかを一つ言葉にしてください。`
+      : `${dayWord}は小さなすれ違いを防ぐ日です。相手の話を途中で遮らず、最後まで聞く意識が運気を整えます。`;
   }
 
   if (relationship === '仕事仲間' || relationship === '商談相手' || relationship === '上司') {
-    return `${dayWord}は結論を急がず、確認を丁寧に。相手の立場を尊重した一言が評価と信頼を大きく押し上げます。`;
+    return `${dayWord}は結論を急がず、確認を丁寧に。相手の立場を尊重した一言が評価と信頼を押し上げます。`;
   }
 
   return `${dayWord}は自然な笑顔と柔らかい返答が鍵です。無理に印象を作るより、安心感を渡すことを優先してください。`;
 }
 
 function getStarCount(score: number): number {
-  if (score >= 88) return 5;
-  if (score >= 72) return 4;
-  if (score >= 56) return 3;
-  if (score >= 40) return 2;
+  if (score >= 82) return 5;
+  if (score >= 68) return 4;
+  if (score >= 52) return 3;
+  if (score >= 36) return 2;
   return 1;
 }
 
 function buildBiorhythmNote(score: number, cautionSeed: number): string {
   const cautionType = cautionSeed % 4;
 
-  if (score >= 88) {
+  if (score >= 82) {
     if (cautionType === 0) {
-      return '最高潮の日。流れは非常に良いですが、勢いで結論を急ぎすぎると温度差が出やすいので一呼吸置いて進めてください。';
+      return 'ピーク日。流れは非常に良いですが、勢いで結論を急ぎすぎると温度差が出やすいので一呼吸置いて進めてください。';
     }
     if (cautionType === 1) {
-      return '最高潮の日。想いは伝わりやすい反面、言いすぎには注意。優しさを先に乗せると運気を最大限活かせます。';
+      return 'ピーク日。想いは伝わりやすい反面、言いすぎには注意。優しさを先に乗せると運気を活かせます。';
     }
     if (cautionType === 2) {
-      return '最高潮の日。大きな進展が期待できますが、相手の都合を無視しないことが成功の決め手です。';
+      return 'ピーク日。進展が期待できますが、相手の都合を無視しないことが成功の決め手です。';
     }
-    return '最高潮の日。魅力が強く届く一方、自分本位に見えないよう丁寧な言葉選びを意識すると完璧です。';
+    return 'ピーク日。魅力が届きやすい一方、自分本位に見えないよう丁寧な言葉選びを意識すると安定します。';
   }
 
-  if (score >= 72) {
+  if (score >= 68) {
     if (cautionType === 0) {
-      return '好調日。会話や接近に向く流れですが、焦って距離を詰めすぎると逆効果なので自然体を守ると吉です。';
+      return 'イベント日。会話や接近に向く流れですが、焦って距離を詰めすぎると逆効果なので自然体を守ると吉です。';
     }
     if (cautionType === 1) {
-      return '好調日。信頼が深まりやすい一方、思い込みで判断せず相手の反応を見ながら進めると安定します。';
+      return 'イベント日。信頼が深まりやすい一方、思い込みで判断せず相手の反応を見ながら進めると安定します。';
     }
     if (cautionType === 2) {
-      return '好調日。気持ちは通じやすいですが、細かな配慮を忘れないことがさらに運気を押し上げます。';
+      return 'イベント日。気持ちは通じやすいですが、細かな配慮を忘れないことがさらに運気を押し上げます。';
     }
-    return '好調日。良い流れがありますが、期待を上げすぎず穏やかに接するほど長続きする運勢です。';
+    return 'イベント日。良い流れがありますが、期待を上げすぎず穏やかに接するほど長続きする運勢です。';
   }
 
-  if (score >= 56) {
-    return '安定日。無理に強い行動を起こさなくても大丈夫です。丁寧な返答と自然な気遣いがそのまま好印象になります。';
+  if (score >= 52) {
+    return '通常日。無理に強い行動を起こさなくても大丈夫です。丁寧な返答と自然な気遣いがそのまま好印象になります。';
   }
 
-  if (score >= 40) {
-    return '調整日。言葉の選び方ひとつで印象が変わりやすいので、結論を急がず落ち着いた対応を心がけてください。';
+  if (score >= 36) {
+    return '注意日。言葉の選び方ひとつで印象が変わりやすいので、結論を急がず落ち着いた対応を心がけてください。';
   }
 
   return '慎重日。今は答えを急ぐより、自分の気持ちと相手の状況を整えることが優先です。静かな行動が流れを立て直します。';
@@ -466,9 +470,9 @@ function buildBiorhythmNote(score: number, cautionSeed: number): string {
 
 function getBiorhythmScoreForDate(seedKey: string, date: Date): number {
   const dateSeed = formatDateSeed(date);
-  const base = 28;
-  const spread = hashString(`${seedKey}|${dateSeed}|bio-score`) % 69;
-  return clamp(base + spread, 22, 96);
+  const base = 24;
+  const spread = hashString(`${seedKey}|${dateSeed}|bio-score`) % 59;
+  return clamp(base + spread, 20, 86);
 }
 
 function buildBiorhythmData(seedKey: string, selectedDate: DivinationDate): BiorhythmItem[] {
@@ -504,20 +508,40 @@ export function buildFortuneBundle(rawInput: any): FortuneBundle {
   const displayDate = formatDisplayDate(targetDate);
 
   const finalScore = getBaseScore(input, seedKey);
+
+  const confessionBase =
+    input.relationship === '片思い'
+      ? finalScore - 22
+      : input.relationship === '恋人' || input.relationship === '夫婦'
+      ? finalScore - 8
+      : finalScore - 16;
+
   const confessionRate = clamp(
-    finalScore + (hashString(`${seedKey}|${formatDateSeed(targetDate)}|confession`) % 9) - 4,
-    45,
-    100
+    confessionBase + (hashString(`${seedKey}|${formatDateSeed(targetDate)}|confession`) % 9) - 4,
+    18,
+    68
   );
+
+  const intimacyBase =
+    input.relationship === '片思い'
+      ? finalScore - 10
+      : input.relationship === '恋人' || input.relationship === '夫婦'
+      ? finalScore + 4
+      : finalScore - 4;
+
   const intimacyLevel = clamp(
-    finalScore - 5 + (hashString(`${seedKey}|${formatDateSeed(targetDate)}|intimacy`) % 11) - 5,
-    38,
-    100
+    intimacyBase + (hashString(`${seedKey}|${formatDateSeed(targetDate)}|intimacy`) % 11) - 5,
+    24,
+    82
   );
 
   const advice = buildAdvice(finalScore, input.relationship, seedKey);
-  const luckyNumber = (hashString(`${seedKey}|${formatDateSeed(targetDate)}|lucky-number`) % 99) + 1;
-  const luckyColor = pick(`${seedKey}|${formatDateSeed(targetDate)}|lucky-color`, LUCKY_COLORS);
+  const luckyNumber =
+    (hashString(`${seedKey}|${formatDateSeed(targetDate)}|lucky-number`) % 99) + 1;
+  const luckyColor = pick(
+    `${seedKey}|${formatDateSeed(targetDate)}|lucky-color`,
+    LUCKY_COLORS
+  );
 
   const generalFortune: FortuneDetail = {
     title: '⬢ 二人の総合運勢',
@@ -530,8 +554,15 @@ export function buildFortuneBundle(rawInput: any): FortuneBundle {
   };
 
   const tabs = buildTabDetails(finalScore, input, seedKey);
-  const biorhythmData = buildBiorhythmData(seedKey, input.selectedDate as DivinationDate);
-  const actionGuide = buildActionGuide(finalScore, input.relationship, input.selectedDate as DivinationDate);
+  const biorhythmData = buildBiorhythmData(
+    seedKey,
+    input.selectedDate as DivinationDate
+  );
+  const actionGuide = buildActionGuide(
+    finalScore,
+    input.relationship,
+    input.selectedDate as DivinationDate
+  );
 
   return {
     displayDate,
