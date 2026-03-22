@@ -1,219 +1,881 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { buildFortuneBundle } from '../services/fortuneEngine';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { buildFortuneBundle, type ActiveTabKey } from '../services/fortuneEngine';
 
-const NOTE_URL = 'https://note.com/your-note';
+const PAID_URL = 'https://note.com/your-note';
 
-type TabKey = 'score' | 'feeling' | 'destiny' | 'analysis' | 'flow' | 'final';
+type RevealStep =
+  | 'intro'
+  | 'score'
+  | 'emotion'
+  | 'destiny'
+  | 'detail'
+  | 'biorhythm'
+  | 'final';
 
-const TABS: { key: TabKey; label: string }[] = [
-  { key: 'score', label: '点数' },
-  { key: 'feeling', label: '本音' },
-  { key: 'destiny', label: '運命' },
-  { key: 'analysis', label: '分析' },
-  { key: 'flow', label: '流れ' },
-  { key: 'final', label: '結論' },
+const STEP_ORDER: RevealStep[] = [
+  'intro',
+  'score',
+  'emotion',
+  'destiny',
+  'detail',
+  'biorhythm',
+  'final',
 ];
 
-function percentBar(value: number, colorClass: string) {
+const STEP_LABELS: Record<Exclude<RevealStep, 'intro'>, string> = {
+  score: '点数',
+  emotion: '本音',
+  destiny: '運命',
+  detail: '分析',
+  biorhythm: '流れ',
+  final: '結論',
+};
+
+const LOCKED_STEPS: RevealStep[] = ['emotion', 'destiny', 'detail', 'final'];
+
+function truncateText(text: string, max = 78) {
+  if (!text) return '';
+  if (text.length <= max) return text;
+  return `${text.slice(0, max)}...`;
+}
+
+function getPreviewText(step: RevealStep, fortune: ReturnType<typeof buildFortuneBundle>) {
+  switch (step) {
+    case 'emotion':
+      return truncateText(
+        `今、${fortune.partnerName}さんの心には、あなたを無視できない感情の揺れが出ています。${fortune.tabs.blood.content}`,
+        92
+      );
+    case 'destiny':
+      return truncateText(
+        `このご縁は偶然より深い意味を持っています。${fortune.destinyAnalysis.content}`,
+        92
+      );
+    case 'detail':
+      return truncateText(
+        `${fortune.tabs.name.title}。${fortune.tabs.name.content}`,
+        92
+      );
+    case 'final':
+      return truncateText(
+        `${fortune.actionGuide} この恋をどう動かすべきかの結論がここにあります。`,
+        92
+      );
+    default:
+      return '';
+  }
+}
+
+const LockedPanel: React.FC<{
+  title: string;
+  subtitle: string;
+  preview: string;
+  buttonLabel?: string;
+  onOpenPaid: () => void;
+}> = ({ title, subtitle, preview, buttonLabel = '続きを有料版で見る', onOpenPaid }) => {
   return (
-    <div className="w-full h-2 rounded-full bg-black/40 overflow-hidden">
-      <div
-        className={`h-full rounded-full ${colorClass}`}
-        style={{ width: `${Math.max(0, Math.min(100, value))}%` }}
-      />
+    <div className="bg-[#1a0e2d]/80 border border-white/10 rounded-[32px] p-8 shadow-2xl backdrop-blur-xl">
+      <p className="text-[10px] tracking-[0.35em] text-pink-300 mb-3 uppercase">locked reading</p>
+      <h3 className="text-2xl font-black mb-4 leading-tight">
+        {title}
+      </h3>
+      <p className="text-sm text-gray-300 leading-relaxed mb-5">
+        {subtitle}
+      </p>
+
+      <div className="relative rounded-[28px] border border-white/10 bg-white/5 p-5 overflow-hidden mb-6">
+        <div className="blur-[4px] select-none pointer-events-none">
+          <p className="text-sm text-gray-200 leading-relaxed">{preview}</p>
+          <p className="text-sm text-gray-200 leading-relaxed mt-3">
+            この先では、相手の本音・未来・動く時期・最終結論まで深く読み解かれます。
+          </p>
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#12091f]/35 to-[#12091f]/82" />
+        <div className="absolute inset-x-0 bottom-5 flex justify-center">
+          <div className="px-4 py-2 rounded-full bg-black/45 border border-white/15 text-xs font-black text-purple-100 backdrop-blur-md">
+            🔒 ここから先は有料版で公開
+          </div>
+        </div>
+      </div>
+
+      <button
+        onClick={onOpenPaid}
+        className="w-full py-4 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 font-black text-white shadow-[0_14px_40px_rgba(168,85,247,0.35)] active:scale-95 transition-all"
+      >
+        {buttonLabel}
+      </button>
     </div>
   );
-}
-
-function buildHeadline(score: number) {
-  if (score >= 86) return '二人の波動は、美しく共鳴しています';
-  if (score >= 76) return '二人の縁は、静かに強く結びついています';
-  if (score >= 66) return '二人の関係は、動き方次第で深まる流れです';
-  return '二人の関係は、慎重に育てるほど光ります';
-}
-
-function buildLead(score: number, partnerName: string) {
-  if (score >= 86) {
-    return `あなたの入力情報から導かれた数値は、${partnerName}さんとの今の関係性・感情の温度・未来の流れを総合したものです。`;
-  }
-  if (score >= 76) {
-    return `この結果は、${partnerName}さんとの相性だけでなく、今の距離感や動くべき順番まで含めて読み解いたものです。`;
-  }
-  return `この数値は、${partnerName}さんとの関係性をもとに、今の空気感・親密度・未来の流れを分析した結果です。`;
-}
-
-function getScoreRingStyle(score: number) {
-  const deg = Math.round((Math.max(0, Math.min(100, score)) / 100) * 360);
-  return {
-    background: `conic-gradient(#ec4899 0deg ${deg}deg, rgba(255,255,255,0.08) ${deg}deg 360deg)`,
-  };
-}
+};
 
 const ResultPage: React.FC = () => {
-  const navigate = useNavigate();
   const location = useLocation();
-  const params = useParams<{ sessionId: string }>();
-  const [activeTab, setActiveTab] = useState<TabKey>('score');
+  const navigate = useNavigate();
 
-  const inputState = (location.state ?? null) as any;
-
-  useEffect(() => {
-    if (!inputState) {
-      navigate('/compatibility-free', { replace: true });
+  const [data] = useState<any>(() => {
+    if (location.state) {
+      localStorage.setItem('last_fortune_data', JSON.stringify(location.state));
+      return location.state;
     }
-  }, [inputState, navigate]);
+    const saved = localStorage.getItem('last_fortune_data');
+    return saved ? JSON.parse(saved) : null;
+  });
 
-  const bundle = useMemo(() => {
-    if (!inputState) return null;
-    return buildFortuneBundle(inputState);
-  }, [inputState]);
+  const [score, setScore] = useState(0);
+  const [activeTab, setActiveTab] = useState<ActiveTabKey>('name');
+  const [currentStep, setCurrentStep] = useState<RevealStep>('intro');
+  const [showIntroOverlay, setShowIntroOverlay] = useState(true);
+  const [animatedConfessionRate, setAnimatedConfessionRate] = useState(0);
+  const [animatedIntimacyLevel, setAnimatedIntimacyLevel] = useState(0);
 
-  if (!bundle) return null;
+  const topAnchorRef = useRef<HTMLDivElement | null>(null);
 
-  const handlePaid = () => {
-    window.location.href = NOTE_URL;
+  const fortune = useMemo(() => {
+    if (!data) return null;
+    return buildFortuneBundle(data);
+  }, [data]);
+
+  const stepIndex = STEP_ORDER.indexOf(currentStep);
+  const progressPercent = ((stepIndex + 1) / STEP_ORDER.length) * 100;
+
+  const openPaid = () => {
+    window.location.href = PAID_URL;
   };
 
-  const scoreHeadline = buildHeadline(bundle.finalScore);
-  const scoreLead = buildLead(bundle.finalScore, bundle.partnerName);
-  const sessionLabel = params.sessionId ? `MS-${new Date().getFullYear()}-V3` : 'MS-2026-V3';
+  const handleBackToTop = () => {
+    navigate('/compatibility-free', {
+      state: {
+        keepPartnerName: data?.partnerName,
+        keepRelationship: data?.relationship,
+      },
+    });
+  };
+
+  const scrollToTopAnchor = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (topAnchorRef.current) {
+      topAnchorRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  const handleNextStep = () => {
+    const currentIndex = STEP_ORDER.indexOf(currentStep);
+    if (currentIndex < STEP_ORDER.length - 1) {
+      const nextStep = STEP_ORDER[currentIndex + 1];
+      setCurrentStep(nextStep);
+      setTimeout(() => {
+        scrollToTopAnchor();
+      }, 60);
+    }
+  };
+
+  const jumpToStep = (step: RevealStep) => {
+    if (step === 'intro') return;
+    setCurrentStep(step);
+    setTimeout(() => {
+      scrollToTopAnchor();
+    }, 60);
+  };
+
+  const skipIntro = () => {
+    setShowIntroOverlay(false);
+    setCurrentStep('score');
+    setTimeout(() => {
+      scrollToTopAnchor();
+    }, 60);
+  };
+
+  useEffect(() => {
+    if (!fortune) return;
+
+    setScore(0);
+
+    let current = 0;
+    const target = fortune.finalScore;
+    const totalFrames = 92;
+    let frame = 0;
+
+    const timer = setInterval(() => {
+      frame += 1;
+      const progress = frame / totalFrames;
+      const eased = progress < 1 ? 1 - Math.pow(1 - progress, 3) : 1;
+      const overshoot =
+        progress < 0.84
+          ? 0
+          : Math.sin((progress - 0.84) * Math.PI * 4.2) * 3.2 * (1 - progress);
+
+      current = Math.round(target * eased + overshoot);
+      if (current > 100) current = 100;
+      if (current < 0) current = 0;
+
+      setScore(current);
+
+      if (frame >= totalFrames) {
+        clearInterval(timer);
+        setScore(target);
+      }
+    }, 26);
+
+    return () => clearInterval(timer);
+  }, [fortune]);
+
+  useEffect(() => {
+    if (!fortune) return;
+
+    setAnimatedConfessionRate(0);
+    setAnimatedIntimacyLevel(0);
+
+    let confessionFrame = 0;
+    let intimacyFrame = 0;
+    const confessionFrames = 64;
+    const intimacyFrames = 70;
+
+    const confessionTimer = setInterval(() => {
+      confessionFrame += 1;
+      const p = confessionFrame / confessionFrames;
+      const eased = 1 - Math.pow(1 - p, 3);
+      const overshoot =
+        p < 0.76 ? 0 : Math.sin((p - 0.76) * Math.PI * 3) * 5.2 * (1 - p);
+      const next = Math.round(fortune.confessionRate * eased + overshoot);
+      setAnimatedConfessionRate(Math.max(0, Math.min(100, next)));
+
+      if (confessionFrame >= confessionFrames) {
+        clearInterval(confessionTimer);
+        setAnimatedConfessionRate(fortune.confessionRate);
+      }
+    }, 24);
+
+    const intimacyTimer = setInterval(() => {
+      intimacyFrame += 1;
+      const p = intimacyFrame / intimacyFrames;
+      const eased = 1 - Math.pow(1 - p, 3);
+      const overshoot =
+        p < 0.76 ? 0 : Math.sin((p - 0.76) * Math.PI * 3) * 5.2 * (1 - p);
+      const next = Math.round(fortune.intimacyLevel * eased + overshoot);
+      setAnimatedIntimacyLevel(Math.max(0, Math.min(100, next)));
+
+      if (intimacyFrame >= intimacyFrames) {
+        clearInterval(intimacyTimer);
+        setAnimatedIntimacyLevel(fortune.intimacyLevel);
+      }
+    }, 24);
+
+    return () => {
+      clearInterval(confessionTimer);
+      clearInterval(intimacyTimer);
+    };
+  }, [fortune]);
+
+  useEffect(() => {
+    const hideTimer = setTimeout(() => {
+      setShowIntroOverlay(false);
+      setCurrentStep('score');
+    }, 5000);
+
+    return () => {
+      clearTimeout(hideTimer);
+    };
+  }, []);
+
+  if (!data || !fortune) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center text-purple-200 font-bold">
+        鑑定データ復元中...
+      </div>
+    );
+  }
+
+  const scoreGlowClass =
+    fortune.finalScore >= 90
+      ? 'drop-shadow-[0_0_18px_rgba(251,191,36,0.5)]'
+      : fortune.finalScore >= 80
+      ? 'drop-shadow-[0_0_18px_rgba(236,72,153,0.45)]'
+      : 'drop-shadow-[0_0_18px_rgba(168,85,247,0.4)]';
 
   return (
-    <div className="min-h-screen bg-[#0a0612] text-white px-4 py-4">
-      <div className="max-w-md mx-auto">
+    <div className="min-h-screen bg-[#05020a] text-white p-4 font-sans relative overflow-x-hidden">
+      <div ref={topAnchorRef} />
+
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,#2b1144_0%,#12091f_35%,#05020a_75%)]" />
         <motion.div
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45 }}
-        >
-          <div className="flex items-start justify-between gap-3 mb-4">
-            <div className="rounded-full border border-[#ff8b5e]/30 bg-gradient-to-r from-[#2b120d] to-[#0d2731] px-5 py-3 shadow-lg">
-              <div className="text-[11px] tracking-[0.22em] text-[#ff996f]">
-                {bundle.displayDate} 鑑定書
-              </div>
+          animate={{ opacity: [0.28, 0.5, 0.28], scale: [1, 1.08, 1] }}
+          transition={{ duration: 6, repeat: Infinity }}
+          className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[440px] h-[440px] rounded-full bg-purple-700/15 blur-3xl"
+        />
+        <motion.div
+          animate={{ opacity: [0.1, 0.2, 0.1], scale: [1, 1.04, 1] }}
+          transition={{ duration: 5, repeat: Infinity, delay: 1 }}
+          className="absolute bottom-[10%] right-[-10%] w-[300px] h-[300px] rounded-full bg-pink-500/10 blur-3xl"
+        />
+        {[...Array(20)].map((_, i) => (
+          <motion.div
+            key={i}
+            animate={{ opacity: [0.08, 0.5, 0.08], y: [0, -8, 0] }}
+            transition={{ duration: 3 + (i % 5) * 0.6, repeat: Infinity, delay: i * 0.18 }}
+            style={{
+              top: `${(i * 9.7) % 100}%`,
+              left: `${(i * 17.2) % 100}%`,
+            }}
+            className="absolute w-[2px] h-[2px] bg-white rounded-full"
+          />
+        ))}
+      </div>
+
+      <AnimatePresence>
+        {showIntroOverlay && (
+          <motion.div
+            key="intro-overlay"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0, transition: { duration: 0.5 } }}
+            className="fixed inset-0 z-[120] bg-[#05020a]/95 backdrop-blur-xl flex items-center justify-center px-6"
+          >
+            <div className="w-full max-w-md text-center relative">
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.8 }}
+                className="relative mx-auto w-56 h-56 mb-10"
+              >
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 18, repeat: Infinity, ease: 'linear' }}
+                  className="absolute inset-0 rounded-full border border-purple-400/20"
+                />
+                <motion.div
+                  animate={{ rotate: -360 }}
+                  transition={{ duration: 12, repeat: Infinity, ease: 'linear' }}
+                  className="absolute inset-3 rounded-full border border-pink-300/20"
+                />
+                <motion.div
+                  animate={{ opacity: [0.4, 0.9, 0.4], scale: [0.96, 1.04, 0.96] }}
+                  transition={{ duration: 2.8, repeat: Infinity }}
+                  className="absolute inset-10 rounded-full bg-gradient-to-br from-purple-500/25 via-pink-400/20 to-yellow-300/20 blur-xl"
+                />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center">
+                    <p className="text-[10px] tracking-[0.45em] text-purple-200/80 mb-2">FREE READING</p>
+                    <p className="text-4xl">✦</p>
+                  </div>
+                </div>
+              </motion.div>
+
+              <motion.h2
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.6 }}
+                className="text-3xl font-black mb-3 leading-tight"
+              >
+                あなたと<span className="text-[#f9a620]">{fortune.partnerName}</span>の
+                <br />
+                無料鑑定を開始します
+              </motion.h2>
+
+              <motion.p
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.45, duration: 0.6 }}
+                className="text-sm text-gray-300 leading-relaxed mb-8"
+              >
+                まずは無料で、二人の相性・今の流れ・動くべき気配を読み解きます。
+                核心部分はこの先で確認できます。
+              </motion.p>
+
+              <motion.button
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.6 }}
+                onClick={skipIntro}
+                className="px-5 py-3 rounded-full border border-white/15 bg-white/5 text-xs tracking-widest text-gray-200 active:scale-95"
+              >
+                すぐに見る
+              </motion.button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="max-w-md mx-auto relative z-10 pb-28">
+        <div className="sticky top-0 z-40 pt-2 pb-4 bg-gradient-to-b from-[#05020a] via-[#05020a]/95 to-transparent backdrop-blur-sm">
+          <div className="flex justify-between items-center mb-3">
+            <div className="bg-gradient-to-r from-[#ff7e61]/20 via-[#f9a620]/10 to-[#22d3ee]/20 border border-white/20 rounded-full px-4 py-1.5 shadow-lg backdrop-blur-md text-left">
+              <span className="bg-gradient-to-r from-[#ff7e61] via-[#f9a620] to-[#22d3ee] bg-clip-text text-transparent text-[10px] font-black tracking-[0.18em] uppercase">
+                {fortune.displayDate} 鑑定書
+              </span>
             </div>
 
             <button
-              onClick={() => navigate('/compatibility-free')}
-              className="w-14 h-14 rounded-full border border-white/10 bg-white/[0.05] flex items-center justify-center text-xl shadow-lg"
+              onClick={handleBackToTop}
+              className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-purple-300 shadow-lg active:scale-90 transition-transform backdrop-blur-md text-lg"
             >
-              🎟️
+              ←
             </button>
           </div>
 
-          <div className="w-full h-2 rounded-full bg-white/10 overflow-hidden mb-5">
-            <div className="h-full w-[28%] bg-gradient-to-r from-pink-500 via-violet-500 to-cyan-400" />
+          <div className="mb-3">
+            <div className="w-full h-1.5 rounded-full bg-white/5 overflow-hidden">
+              <motion.div
+                animate={{ width: `${progressPercent}%` }}
+                transition={{ duration: 0.45 }}
+                className="h-full bg-gradient-to-r from-pink-500 via-purple-400 to-cyan-400"
+              />
+            </div>
           </div>
 
-          <div className="flex gap-2 overflow-x-auto pb-1 mb-6 scrollbar-hide">
-            {TABS.map((tab) => {
-              const isActive = activeTab === tab.key;
+          <div className="grid grid-cols-6 gap-2">
+            {(['score', 'emotion', 'destiny', 'detail', 'biorhythm', 'final'] as const).map((step) => {
+              const isActive = currentStep === step;
+              const isLocked = LOCKED_STEPS.includes(step);
+
               return (
                 <button
-                  key={tab.key}
-                  onClick={() => setActiveTab(tab.key)}
-                  className={`shrink-0 px-6 py-3 rounded-full text-sm font-bold border transition-all ${
+                  key={step}
+                  onClick={() => jumpToStep(step)}
+                  className={`rounded-2xl py-2 text-[10px] font-black transition-all border ${
                     isActive
-                      ? 'bg-gradient-to-r from-violet-600 to-purple-500 border-purple-300/40 text-white shadow-lg'
-                      : 'bg-white/[0.06] border-white/10 text-white/90'
+                      ? 'bg-purple-700/80 border-purple-300/40 text-white'
+                      : 'bg-white/10 border-white/10 text-gray-200 active:scale-95'
                   }`}
                 >
-                  {tab.label}
+                  {STEP_LABELS[step]}
+                  {isLocked ? '🔒' : ''}
                 </button>
               );
             })}
           </div>
+        </div>
 
-          <div className="mb-3 text-[11px] tracking-[0.35em] text-white/70">
-            ONLY FOR YOU
+        <header className="text-left mb-6 mt-2">
+          <p className="text-[10px] tracking-[0.35em] text-purple-300 mb-2 uppercase">
+            only for you
+          </p>
+          <h1 className="text-3xl font-black mb-2 leading-tight">
+            あなた <span className="text-gray-600 font-light mx-1">&</span>{' '}
+            <span className="text-[#f9a620]">{fortune.partnerName}</span>
+          </h1>
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className="text-gray-500 text-[10px] tracking-widest font-bold">鑑定番号: MS-2026-V3</p>
+            <span className="text-[10px] px-2 py-1 rounded-full border border-white/10 bg-white/5 text-purple-200">
+              関係性：{fortune.relationship}
+            </span>
           </div>
+        </header>
 
-          <div className="mb-3">
-            <h1 className="text-[28px] sm:text-[32px] font-bold leading-tight tracking-tight">
-              あなた <span className="text-white/35">&amp;</span>{' '}
-              <span className="text-[#ffb21c]">{bundle.partnerName}</span>
-            </h1>
-          </div>
+        <AnimatePresence mode="wait">
+          {currentStep === 'score' && (
+            <motion.section
+              key="score"
+              initial={{ opacity: 0, y: 26 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -18 }}
+              className="mb-8"
+            >
+              <div className="bg-[#13091f]/70 border border-white/10 rounded-[32px] px-5 py-6 shadow-2xl backdrop-blur-xl">
+                <p className="text-center text-[10px] tracking-[0.35em] text-gray-400 mb-3 uppercase">
+                  destiny score
+                </p>
 
-          <div className="flex items-center gap-3 text-sm mb-8">
-            <div className="text-white/45">鑑定番号: {sessionLabel}</div>
-            <div className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-white/90">
-              関係性：{bundle.relationship}
-            </div>
-          </div>
+                <div className="grid grid-cols-[1.1fr_0.9fr] gap-4 items-center mb-5">
+                  <div className="flex justify-center">
+                    <motion.div
+                      initial={{ rotate: -220, scale: 0.86, opacity: 0.2 }}
+                      animate={{ rotate: 0, scale: 1, opacity: 1 }}
+                      transition={{ duration: 2.2, ease: [0.22, 1, 0.36, 1] }}
+                      className="relative w-44 h-44 flex items-center justify-center"
+                    >
+                      <motion.div
+                        animate={{ scale: [1, 1.03, 1], opacity: [0.55, 0.95, 0.55] }}
+                        transition={{ duration: 2.8, repeat: Infinity }}
+                        className="absolute inset-4 rounded-full bg-pink-500/10 blur-2xl"
+                      />
+                      <svg className="w-full h-full transform -rotate-90">
+                        <circle
+                          cx="88"
+                          cy="88"
+                          r="74"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          fill="transparent"
+                          className="text-white/5"
+                        />
+                        <circle
+                          cx="88"
+                          cy="88"
+                          r="60"
+                          stroke="currentColor"
+                          strokeWidth="1"
+                          fill="transparent"
+                          className="text-white/5"
+                        />
+                        <motion.circle
+                          cx="88"
+                          cy="88"
+                          r="74"
+                          stroke="currentColor"
+                          strokeWidth="12"
+                          fill="transparent"
+                          strokeDasharray={464.96}
+                          strokeDashoffset={464.96 - (464.96 * score) / 100}
+                          className={`text-pink-500 ${scoreGlowClass}`}
+                          initial={{ strokeDashoffset: 464.96 }}
+                          animate={{ strokeDashoffset: 464.96 - (464.96 * score) / 100 }}
+                          transition={{ duration: 2.1, ease: [0.16, 1, 0.3, 1] }}
+                        />
+                      </svg>
 
-          <div className="rounded-[36px] border border-white/10 bg-gradient-to-b from-[#160424] to-[#0b0617] px-5 py-8 shadow-[0_0_50px_rgba(168,85,247,0.09)]">
-            <div className="text-center text-[12px] tracking-[0.38em] text-white/65 mb-7">
-              DESTINY SCORE
-            </div>
+                      <div className="absolute text-center">
+                        <motion.div
+                          animate={
+                            score === fortune.finalScore
+                              ? { scale: [1, 1.06, 0.985, 1] }
+                              : { scale: 1 }
+                          }
+                          transition={{ duration: 1.15 }}
+                        >
+                          <span className="text-6xl font-black italic tracking-tighter">{score}</span>
+                          <span className="text-base font-bold block -mt-2">点</span>
+                        </motion.div>
+                      </div>
+                    </motion.div>
+                  </div>
 
-            <div className="grid grid-cols-[1.2fr_1fr] gap-4 items-center mb-10">
-              <div className="flex items-center justify-center">
-                <div
-                  className="w-[220px] h-[220px] rounded-full p-[16px] shadow-[0_0_40px_rgba(236,72,153,0.18)]"
-                  style={getScoreRingStyle(bundle.finalScore)}
+                  <div className="space-y-3">
+                    <motion.div
+                      initial={{ opacity: 0, x: 24, scaleX: 0.4, scaleY: 0.92 }}
+                      animate={{ opacity: 1, x: 0, scaleX: 1, scaleY: 1 }}
+                      transition={{ delay: 0.28, type: 'spring', stiffness: 120, damping: 14 }}
+                      className="bg-[#1a0e2d]/70 border border-white/10 rounded-[22px] p-4 text-center shadow-xl backdrop-blur-sm origin-left"
+                    >
+                      <p className="text-[10px] text-pink-300 font-bold mb-1 tracking-wider uppercase">告白成功率</p>
+                      <div className="text-2xl font-black text-white mb-2">
+                        {animatedConfessionRate}
+                        <span className="text-xs ml-0.5">%</span>
+                      </div>
+                      <div className="w-full h-1.5 bg-black/40 rounded-full overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0, scaleX: 0.3 }}
+                          animate={{ width: `${animatedConfessionRate}%`, scaleX: 1 }}
+                          transition={{ type: 'spring', stiffness: 110, damping: 13, mass: 1.05 }}
+                          className="h-full bg-gradient-to-r from-pink-500 to-rose-400 origin-left"
+                        />
+                      </div>
+                    </motion.div>
+
+                    <motion.div
+                      initial={{ opacity: 0, x: 24, scaleX: 0.4, scaleY: 0.92 }}
+                      animate={{ opacity: 1, x: 0, scaleX: 1, scaleY: 1 }}
+                      transition={{ delay: 0.42, type: 'spring', stiffness: 120, damping: 14 }}
+                      className="bg-[#1a0e2d]/70 border border-white/10 rounded-[22px] p-4 text-center shadow-xl backdrop-blur-sm origin-left"
+                    >
+                      <p className="text-[10px] text-blue-300 font-bold mb-1 tracking-wider uppercase">二人の親密度</p>
+                      <div className="text-2xl font-black text-white mb-2">
+                        {animatedIntimacyLevel}
+                        <span className="text-xs ml-0.5">%</span>
+                      </div>
+                      <div className="w-full h-1.5 bg-black/40 rounded-full overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0, scaleX: 0.3 }}
+                          animate={{ width: `${animatedIntimacyLevel}%`, scaleX: 1 }}
+                          transition={{ type: 'spring', stiffness: 110, damping: 13, mass: 1.05 }}
+                          className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 origin-left"
+                        />
+                      </div>
+                    </motion.div>
+                  </div>
+                </div>
+
+                <div className="text-center">
+                  <p className="text-[10px] tracking-[0.35em] text-purple-300 mb-2 uppercase">
+                    special reading
+                  </p>
+                  <h2 className="text-xl font-black mb-3 leading-tight">
+                    二人の波動は、
+                    <span className="bg-gradient-to-r from-pink-400 via-[#f9a620] to-cyan-300 bg-clip-text text-transparent">
+                      {fortune.finalScore >= 90
+                        ? '強く結びついています'
+                        : fortune.finalScore >= 80
+                        ? '美しく共鳴しています'
+                        : fortune.finalScore >= 70
+                        ? '静かに引き合っています'
+                        : '変化の途中にあります'}
+                    </span>
+                  </h2>
+                  <p className="text-sm text-gray-300 leading-relaxed">
+                    あなたの入力情報から導かれたこの数値は、
+                    {fortune.partnerName}さんとの今の関係性・感情の温度・未来の流れを総合したものです。
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-6 flex justify-center">
+                <button
+                  onClick={handleNextStep}
+                  className="px-8 py-4 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 font-black text-white shadow-[0_14px_40px_rgba(168,85,247,0.35)] active:scale-95 transition-all"
                 >
-                  <div className="w-full h-full rounded-full bg-[#17071f] border border-white/5 flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="text-[72px] leading-none font-bold">{bundle.finalScore}</div>
-                      <div className="text-[24px] font-bold mt-1">点</div>
+                  相手の本音へ進む
+                </button>
+              </div>
+            </motion.section>
+          )}
+
+          {currentStep === 'emotion' && (
+            <motion.section
+              key="emotion"
+              initial={{ opacity: 0, y: 26 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -18 }}
+              className="mb-8"
+            >
+              <LockedPanel
+                title={`${fortune.partnerName}さんの本音は、この先で明らかになります`}
+                subtitle="今、相手があなたをどう見ているか。好意・迷い・距離感の核心は有料版で公開されます。"
+                preview={getPreviewText('emotion', fortune)}
+                buttonLabel="相手の本音を開く"
+                onOpenPaid={openPaid}
+              />
+
+              <div className="mt-6 flex justify-center">
+                <button
+                  onClick={handleNextStep}
+                  className="px-8 py-4 rounded-full bg-white/8 border border-white/15 font-black text-gray-200 active:scale-95 transition-all backdrop-blur-md"
+                >
+                  運命分析の予告を見る
+                </button>
+              </div>
+            </motion.section>
+          )}
+
+          {currentStep === 'destiny' && (
+            <motion.section
+              key="destiny"
+              initial={{ opacity: 0, y: 26 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -18 }}
+              className="mb-8"
+            >
+              <LockedPanel
+                title="二人の未来には、まだ見えていない流れがあります"
+                subtitle="このご縁が進展へ向かうのか、停滞なのか、再接近の兆しがあるのか。未来の本筋は有料版で公開されます。"
+                preview={getPreviewText('destiny', fortune)}
+                buttonLabel="二人の未来を見る"
+                onOpenPaid={openPaid}
+              />
+
+              <div className="mt-6 flex justify-center">
+                <button
+                  onClick={handleNextStep}
+                  className="px-8 py-4 rounded-full bg-white/8 border border-white/15 font-black text-gray-200 active:scale-95 transition-all backdrop-blur-md"
+                >
+                  詳細分析の予告を見る
+                </button>
+              </div>
+            </motion.section>
+          )}
+
+          {currentStep === 'detail' && (
+            <motion.section
+              key="detail"
+              initial={{ opacity: 0, y: 26 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -18 }}
+              className="mb-8"
+            >
+              <div className="bg-[#160a2b]/90 border border-white/10 rounded-[32px] overflow-hidden shadow-2xl backdrop-blur-xl">
+                <div className="px-8 pt-8 pb-5">
+                  <p className="text-[10px] tracking-[0.35em] text-purple-300 mb-3 uppercase">deep reading</p>
+                  <h3 className="text-2xl font-black leading-tight">
+                    角度を変えるほど、
+                    <span className="text-[#f9a620]">二人の本質が見えてきます</span>
+                  </h3>
+                </div>
+
+                <div className="grid grid-cols-4 border-b border-white/5 bg-white/[0.02]">
+                  {[
+                    { label: '姓名', key: 'name' as ActiveTabKey },
+                    { label: '星座', key: 'star' as ActiveTabKey },
+                    { label: '血液', key: 'blood' as ActiveTabKey },
+                    { label: '五行', key: 'five' as ActiveTabKey },
+                  ].map((tab) => {
+                    const isActive = activeTab === tab.key;
+
+                    return (
+                      <button
+                        key={tab.key}
+                        onClick={() => setActiveTab(tab.key)}
+                        className={`relative py-5 text-[12px] font-black tracking-[0.08em] transition-all ${
+                          isActive
+                            ? 'bg-gradient-to-b from-purple-700/90 to-pink-700/50 text-white'
+                            : 'bg-white/5 text-gray-400'
+                        }`}
+                      >
+                        <span className="relative z-10">{tab.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="p-8 min-h-[220px] text-left">
+                  <div className="relative rounded-[28px] border border-white/10 bg-white/5 p-5 overflow-hidden">
+                    <div className="blur-[4px] select-none pointer-events-none">
+                      <h4 className="text-[#f9a620] text-lg font-black mb-4">
+                        {fortune.tabs[activeTab].title}
+                      </h4>
+                      <p className="text-sm text-gray-200 leading-relaxed">
+                        {fortune.tabs[activeTab].content}
+                      </p>
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#12091f]/30 to-[#12091f]/84" />
+                    <div className="absolute inset-x-0 bottom-5 flex justify-center">
+                      <div className="px-4 py-2 rounded-full bg-black/45 border border-white/15 text-xs font-black text-purple-100 backdrop-blur-md">
+                        🔒 分析全文は有料版で公開
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="space-y-5">
-                <div className="rounded-[28px] border border-white/10 bg-white/[0.03] px-5 py-5">
-                  <div className="text-sm font-bold text-center text-white mb-3">告白成功率</div>
-                  <div className="text-[24px] font-bold text-center mb-4">
-                    {bundle.confessionRate}%
-                  </div>
-                  {percentBar(bundle.confessionRate, 'bg-gradient-to-r from-pink-500 to-rose-400')}
-                </div>
-
-                <div className="rounded-[28px] border border-white/10 bg-white/[0.03] px-5 py-5">
-                  <div className="text-sm font-bold text-center text-white mb-3">二人の親密度</div>
-                  <div className="text-[24px] font-bold text-center mb-4">
-                    {bundle.intimacyLevel}%
-                  </div>
-                  {percentBar(
-                    bundle.intimacyLevel,
-                    'bg-gradient-to-r from-blue-500 to-cyan-400'
-                  )}
+                <div className="px-8 pb-8">
+                  <button
+                    onClick={openPaid}
+                    className="w-full py-4 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 font-black text-white shadow-[0_14px_40px_rgba(168,85,247,0.35)] active:scale-95 transition-all"
+                  >
+                    詳細分析をすべて見る
+                  </button>
                 </div>
               </div>
-            </div>
 
-            <div className="text-center text-[12px] tracking-[0.35em] text-white/65 mb-4">
-              SPECIAL READING
-            </div>
+              <div className="mt-6 flex justify-center">
+                <button
+                  onClick={handleNextStep}
+                  className="px-8 py-4 rounded-full bg-white/8 border border-white/15 font-black text-gray-200 active:scale-95 transition-all backdrop-blur-md"
+                >
+                  今後の流れを見る
+                </button>
+              </div>
+            </motion.section>
+          )}
 
-            <h2 className="text-center text-[26px] leading-tight font-bold mb-5">
-              二人の波動は、<span className="text-pink-400">美しく</span>
-              <span className="text-orange-300">共鳴</span>
-              <span className="text-emerald-300">しています</span>
-            </h2>
+          {currentStep === 'biorhythm' && (
+            <motion.section
+              key="biorhythm"
+              initial={{ opacity: 0, y: 26 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -18 }}
+              className="mb-8"
+            >
+              <div className="bg-[#160a2b]/80 border border-white/10 rounded-[32px] p-8 shadow-2xl backdrop-blur-md">
+                <p className="text-[10px] tracking-[0.35em] text-purple-300 mb-3 uppercase text-center">
+                  next 7 days
+                </p>
+                <h3 className="text-2xl font-black text-center mb-8 leading-tight">
+                  二人の流れは、
+                  <span className="text-[#f9a620]">この7日でこう動きます</span>
+                </h3>
 
-            <p className="text-center text-[16px] leading-8 text-white/85 max-w-[520px] mx-auto">
-              {scoreLead}
-            </p>
-          </div>
+                <div className="space-y-5">
+                  {fortune.biorhythmData.map((item, i) => (
+                    <motion.div
+                      key={`${item.date}-${i}`}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.06 }}
+                      className="bg-white/5 rounded-2xl p-5 border border-white/5 text-left"
+                    >
+                      <div className="flex justify-between items-center mb-3">
+                        <div className="flex items-center gap-3">
+                          <span className={`text-sm font-black ${i === 0 ? 'text-pink-500' : 'text-gray-300'}`}>
+                            {item.date}
+                          </span>
+                          {i === 0 && (
+                            <span className="text-[9px] px-2 py-1 rounded-full border border-pink-400/30 bg-pink-500/10 text-pink-200">
+                              鑑定日
+                            </span>
+                          )}
+                          <div className="flex text-[12px] tracking-widest">
+                            <span className="text-[#f9a620]">{'★'.repeat(item.activeStars)}</span>
+                            <span className="text-gray-600">{'★'.repeat(item.inactiveStars)}</span>
+                          </div>
+                        </div>
+                        <span className="text-[11px] font-mono text-gray-400">{item.score}%</span>
+                      </div>
 
-          <button
-            onClick={handlePaid}
-            className="w-full mt-8 rounded-full py-5 text-[20px] font-bold bg-gradient-to-r from-violet-600 via-fuchsia-500 to-pink-500 shadow-[0_12px_35px_rgba(217,70,239,0.3)] active:scale-[0.98] transition-transform"
-          >
-            相手の本音へ進む
-          </button>
+                      <div className="w-full bg-black/40 h-1.5 rounded-full overflow-hidden mb-3">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${item.score}%` }}
+                          transition={{ duration: 1.1 }}
+                          className={`h-full rounded-full ${
+                            item.score >= 90
+                              ? 'bg-gradient-to-r from-pink-500 to-yellow-400'
+                              : item.score >= 70
+                              ? 'bg-gradient-to-r from-purple-500 to-pink-500'
+                              : item.score >= 50
+                              ? 'bg-gradient-to-r from-indigo-500 to-purple-600'
+                              : 'bg-gradient-to-r from-slate-500 to-indigo-700'
+                          }`}
+                        />
+                      </div>
 
-          <div className="mt-4 text-center text-sm text-white/55 leading-7">
-            この先では、相手の本音・二人の未来・動くべき時期・最終結論まで確認できます。
-          </div>
+                      <p className="text-[11px] text-gray-400 leading-relaxed">{item.note}</p>
+                    </motion.div>
+                  ))}
+                </div>
 
-          <div className="h-8" />
-        </motion.div>
+                <div className="mt-8 rounded-3xl border border-white/10 bg-black/20 p-5">
+                  <p className="text-[10px] tracking-[0.3em] text-purple-300 mb-2 uppercase">無料版で分かること</p>
+                  <p className="text-sm text-gray-300 leading-relaxed">
+                    今週は、動いて良い日と慎重にしたい日の差が出やすい流れです。
+                    ただし、いつ本当に動くべきか、何を言うべきかの核心は有料版で公開されます。
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-6 flex justify-center">
+                <button
+                  onClick={handleNextStep}
+                  className="px-8 py-4 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 font-black text-white shadow-[0_14px_40px_rgba(168,85,247,0.35)] active:scale-95 transition-all"
+                >
+                  最後の結論を見る
+                </button>
+              </div>
+            </motion.section>
+          )}
+
+          {currentStep === 'final' && (
+            <motion.section
+              key="final"
+              initial={{ opacity: 0, y: 26 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -18 }}
+              className="mb-8"
+            >
+              <LockedPanel
+                title="この恋の結論は、まだ無料版では公開していません"
+                subtitle="進むべきか、待つべきか。告白の時期、成功率を上げる方法、最終判断はこの先にあります。"
+                preview={getPreviewText('final', fortune)}
+                buttonLabel="相手の本音と結論を見る"
+                onOpenPaid={openPaid}
+              />
+
+              <div className="mt-6 grid grid-cols-1 gap-3">
+                <button
+                  onClick={() => jumpToStep('score')}
+                  className="w-full py-4 rounded-full bg-white/8 border border-white/15 font-black text-gray-200 active:scale-95 transition-all backdrop-blur-md"
+                >
+                  最初から見直す
+                </button>
+
+                <button
+                  onClick={handleBackToTop}
+                  className="w-full py-4 rounded-full bg-black/25 border border-white/10 font-black text-gray-300 active:scale-95 transition-all"
+                >
+                  鑑定を終了して戻る
+                </button>
+              </div>
+            </motion.section>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
