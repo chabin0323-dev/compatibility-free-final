@@ -8,16 +8,9 @@ function App() {
     <BrowserRouter>
       <div className="min-h-screen bg-[#0a0612]">
         <Routes>
-          {/* 初期アクセス → 無料版へ */}
           <Route path="/" element={<Navigate to="/compatibility-free" replace />} />
-
-          {/* 無料版 */}
           <Route path="/compatibility-free" element={<FreePage />} />
-
-          {/* 結果ページ */}
           <Route path="/result/:sessionId" element={<ResultPage />} />
-
-          {/* 404対策 */}
           <Route path="*" element={<Navigate to="/compatibility-free" replace />} />
         </Routes>
       </div>
