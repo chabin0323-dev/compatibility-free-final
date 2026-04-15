@@ -1,4 +1,3 @@
-
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -52,31 +51,26 @@ function getPreviewText(
         `今、${fortune.partnerName}さんの心には、あなたを無視できない感情の揺れが出ています。${fortune.tabs.blood.content}`,
         96
       );
-
     case 'destiny':
       return truncateText(
         `このご縁は偶然より深い意味を持っています。${fortune.destinyAnalysis.content}`,
         96
       );
-
     case 'detail':
       return truncateText(
         `${fortune.tabs.name.title}。${fortune.tabs.name.content}`,
         96
       );
-
     case 'biorhythm':
       return truncateText(
         `今週は動いて良い日と慎重にしたい日の差が出やすい流れです。${fortune.biorhythmData[0]?.note ?? ''}`,
         96
       );
-
     case 'final':
       return truncateText(
         `${fortune.actionGuide} この恋をどう動かすべきかの最終判断がここにあります。`,
         96
       );
-
     default:
       return '';
   }
@@ -94,11 +88,8 @@ const LockedPanel: React.FC<{
       <p className="text-[10px] tracking-[0.35em] text-pink-300 mb-3 uppercase">
         locked reading
       </p>
-
       <h3 className="text-2xl font-black mb-4 leading-tight">{title}</h3>
-
       <p className="text-sm text-gray-300 leading-relaxed mb-5">{subtitle}</p>
-
       <div className="relative rounded-[28px] border border-white/10 bg-white/5 p-5 overflow-hidden mb-6">
         <div className="blur-[4px] select-none pointer-events-none">
           <p className="text-sm text-gray-200 leading-relaxed">{preview}</p>
@@ -106,16 +97,13 @@ const LockedPanel: React.FC<{
             この先では、相手の本音・二人の未来・動くべき時期・最終結論まで深く読み解かれます。
           </p>
         </div>
-
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#12091f]/35 to-[#12091f]/82" />
-
         <div className="absolute inset-x-0 bottom-5 flex justify-center">
           <div className="px-4 py-2 rounded-full bg-black/45 border border-white/15 text-xs font-black text-purple-100 backdrop-blur-md">
             🔒 ここから先は有料版で公開
           </div>
         </div>
       </div>
-
       <button
         onClick={onOpenPaid}
         className="w-full py-4 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 font-black text-white shadow-[0_14px_40px_rgba(168,85,247,0.35)] active:scale-95 transition-all"
@@ -181,108 +169,70 @@ const ResultPage: React.FC = () => {
     if (currentIndex < STEP_ORDER.length - 1) {
       const nextStep = STEP_ORDER[currentIndex + 1];
       setCurrentStep(nextStep);
-      setTimeout(() => {
-        scrollToTopAnchor();
-      }, 60);
+      setTimeout(() => { scrollToTopAnchor(); }, 60);
     }
   };
 
   const jumpToStep = (step: RevealStep) => {
     if (step === 'intro') return;
     setCurrentStep(step);
-    setTimeout(() => {
-      scrollToTopAnchor();
-    }, 60);
+    setTimeout(() => { scrollToTopAnchor(); }, 60);
   };
 
   const skipIntro = () => {
     setShowIntroOverlay(false);
     setCurrentStep('score');
-    setTimeout(() => {
-      scrollToTopAnchor();
-    }, 60);
+    setTimeout(() => { scrollToTopAnchor(); }, 60);
   };
 
   useEffect(() => {
     if (!fortune) return;
-
     setScore(0);
-
     let current = 0;
     const target = fortune.finalScore;
     const totalFrames = 92;
     let frame = 0;
-
     const timer = setInterval(() => {
       frame += 1;
       const progress = frame / totalFrames;
       const eased = progress < 1 ? 1 - Math.pow(1 - progress, 3) : 1;
-      const overshoot =
-        progress < 0.84
-          ? 0
-          : Math.sin((progress - 0.84) * Math.PI * 4.2) * 3.2 * (1 - progress);
-
+      const overshoot = progress < 0.84 ? 0 : Math.sin((progress - 0.84) * Math.PI * 4.2) * 3.2 * (1 - progress);
       current = Math.round(target * eased + overshoot);
-
       if (current > 100) current = 100;
       if (current < 0) current = 0;
-
       setScore(current);
-
-      if (frame >= totalFrames) {
-        clearInterval(timer);
-        setScore(target);
-      }
+      if (frame >= totalFrames) { clearInterval(timer); setScore(target); }
     }, 26);
-
     return () => clearInterval(timer);
   }, [fortune]);
 
   useEffect(() => {
     if (!fortune) return;
-
     setAnimatedConfessionRate(0);
     setAnimatedIntimacyLevel(0);
-
     let confessionFrame = 0;
     let intimacyFrame = 0;
     const confessionFrames = 64;
     const intimacyFrames = 70;
-
     const confessionTimer = setInterval(() => {
       confessionFrame += 1;
       const p = confessionFrame / confessionFrames;
       const eased = 1 - Math.pow(1 - p, 3);
-      const overshoot =
-        p < 0.76 ? 0 : Math.sin((p - 0.76) * Math.PI * 3) * 5.2 * (1 - p);
+      const overshoot = p < 0.76 ? 0 : Math.sin((p - 0.76) * Math.PI * 3) * 5.2 * (1 - p);
       const next = Math.round(fortune.confessionRate * eased + overshoot);
       setAnimatedConfessionRate(Math.max(0, Math.min(100, next)));
-
-      if (confessionFrame >= confessionFrames) {
-        clearInterval(confessionTimer);
-        setAnimatedConfessionRate(fortune.confessionRate);
-      }
+      if (confessionFrame >= confessionFrames) { clearInterval(confessionTimer); setAnimatedConfessionRate(fortune.confessionRate); }
     }, 24);
-
     const intimacyTimer = setInterval(() => {
       intimacyFrame += 1;
       const p = intimacyFrame / intimacyFrames;
       const eased = 1 - Math.pow(1 - p, 3);
-      const overshoot =
-        p < 0.76 ? 0 : Math.sin((p - 0.76) * Math.PI * 3) * 5.2 * (1 - p);
+      const overshoot = p < 0.76 ? 0 : Math.sin((p - 0.76) * Math.PI * 3) * 5.2 * (1 - p);
       const next = Math.round(fortune.intimacyLevel * eased + overshoot);
       setAnimatedIntimacyLevel(Math.max(0, Math.min(100, next)));
-
-      if (intimacyFrame >= intimacyFrames) {
-        clearInterval(intimacyTimer);
-        setAnimatedIntimacyLevel(fortune.intimacyLevel);
-      }
+      if (intimacyFrame >= intimacyFrames) { clearInterval(intimacyTimer); setAnimatedIntimacyLevel(fortune.intimacyLevel); }
     }, 24);
-
-    return () => {
-      clearInterval(confessionTimer);
-      clearInterval(intimacyTimer);
-    };
+    return () => { clearInterval(confessionTimer); clearInterval(intimacyTimer); };
   }, [fortune]);
 
   useEffect(() => {
@@ -290,10 +240,7 @@ const ResultPage: React.FC = () => {
       setShowIntroOverlay(false);
       setCurrentStep('score');
     }, 5000);
-
-    return () => {
-      clearTimeout(hideTimer);
-    };
+    return () => { clearTimeout(hideTimer); };
   }, []);
 
   if (!data || !fortune) {
@@ -317,28 +264,22 @@ const ResultPage: React.FC = () => {
 
       <div className="fixed inset-0 z-0 pointer-events-none">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,#2b1144_0%,#12091f_35%,#05020a_75%)]" />
-
         <motion.div
           animate={{ opacity: [0.28, 0.5, 0.28], scale: [1, 1.08, 1] }}
           transition={{ duration: 6, repeat: Infinity }}
           className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[440px] h-[440px] rounded-full bg-purple-700/15 blur-3xl"
         />
-
         <motion.div
           animate={{ opacity: [0.1, 0.2, 0.1], scale: [1, 1.04, 1] }}
           transition={{ duration: 5, repeat: Infinity, delay: 1 }}
           className="absolute bottom-[10%] right-[-10%] w-[300px] h-[300px] rounded-full bg-pink-500/10 blur-3xl"
         />
-
         {[...Array(20)].map((_, i) => (
           <motion.div
             key={i}
             animate={{ opacity: [0.08, 0.5, 0.08], y: [0, -8, 0] }}
             transition={{ duration: 3 + (i % 5) * 0.6, repeat: Infinity, delay: i * 0.18 }}
-            style={{
-              top: `${(i * 9.7) % 100}%`,
-              left: `${(i * 17.2) % 100}%`,
-            }}
+            style={{ top: `${(i * 9.7) % 100}%`, left: `${(i * 17.2) % 100}%` }}
             className="absolute w-[2px] h-[2px] bg-white rounded-full"
           />
         ))}
@@ -374,13 +315,15 @@ const ResultPage: React.FC = () => {
                   transition={{ duration: 2.8, repeat: Infinity }}
                   className="absolute inset-10 rounded-full bg-gradient-to-br from-purple-500/25 via-pink-400/20 to-yellow-300/20 blur-xl"
                 />
+                {/* ここをLoveLABロゴに変更 */}
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <p className="text-[10px] tracking-[0.45em] text-purple-200/80 mb-2">
-                      FREE READING
-                    </p>
-                    <p className="text-4xl">✦</p>
-                  </div>
+                  <motion.img
+                    src="https://raw.githubusercontent.com/chabin0323-dev/aisou-fortune-host/main/lovelab-logo.png"
+                    alt="LoveLAB"
+                    animate={{ scale: [1, 1.05, 1], filter: ['drop-shadow(0 0 10px rgba(255,100,255,0.6))', 'drop-shadow(0 0 25px rgba(255,100,255,1))', 'drop-shadow(0 0 10px rgba(255,100,255,0.6))'] }}
+                    transition={{ duration: 2.8, repeat: Infinity }}
+                    style={{ width: '130px', borderRadius: '12px' }}
+                  />
                 </div>
               </motion.div>
 
@@ -427,7 +370,6 @@ const ResultPage: React.FC = () => {
                 {fortune.displayDate} 鑑定書
               </span>
             </div>
-
             <button
               onClick={handleBackToTop}
               className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-purple-300 shadow-lg active:scale-90 transition-transform backdrop-blur-md text-lg"
@@ -450,7 +392,6 @@ const ResultPage: React.FC = () => {
             {(['score', 'emotion', 'destiny', 'detail', 'biorhythm', 'final'] as const).map((step) => {
               const isActive = currentStep === step;
               const isLocked = LOCKED_STEPS.includes(step);
-
               return (
                 <button
                   key={step}
@@ -470,19 +411,13 @@ const ResultPage: React.FC = () => {
         </div>
 
         <header className="text-left mb-6 mt-2">
-          <p className="text-[10px] tracking-[0.35em] text-purple-300 mb-2 uppercase">
-            only for you
-          </p>
-
+          <p className="text-[10px] tracking-[0.35em] text-purple-300 mb-2 uppercase">only for you</p>
           <h1 className="text-3xl font-black mb-2 leading-tight">
             あなた <span className="text-gray-600 font-light mx-1">&</span>{' '}
             <span className="text-[#f9a620]">{fortune.partnerName}</span>
           </h1>
-
           <div className="flex items-center gap-2 flex-wrap">
-            <p className="text-gray-500 text-[10px] tracking-widest font-bold">
-              鑑定番号: MS-2026-V3
-            </p>
+            <p className="text-gray-500 text-[10px] tracking-widest font-bold">鑑定番号: MS-2026-V3</p>
             <span className="text-[10px] px-2 py-1 rounded-full border border-white/10 bg-white/5 text-purple-200">
               関係性：{fortune.relationship}
             </span>
@@ -491,27 +426,15 @@ const ResultPage: React.FC = () => {
 
         <AnimatePresence mode="wait">
           {currentStep === 'score' && (
-            <motion.section
-              key="score"
-              initial={{ opacity: 0, y: 26 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -18 }}
-              className="mb-8"
-            >
+            <motion.section key="score" initial={{ opacity: 0, y: 26 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -18 }} className="mb-8">
               <div className="bg-[#13091f]/70 border border-white/10 rounded-[32px] px-5 py-6 shadow-2xl backdrop-blur-xl">
-                <p className="text-center text-[10px] tracking-[0.35em] text-gray-400 mb-3 uppercase">
-                  destiny score
-                </p>
-
+                <p className="text-center text-[10px] tracking-[0.35em] text-gray-400 mb-3 uppercase">destiny score</p>
                 <div className="grid grid-cols-[1.1fr_0.9fr] gap-4 items-center mb-5">
                   <div className="flex justify-center">
                     <motion.div
                       initial={{ rotate: -220, scale: 0.86, opacity: 0.2 }}
                       animate={{ rotate: 0, scale: 1, opacity: 1 }}
-                      transition={{
-                        duration: 2.2,
-                        ease: [0.22, 1, 0.36, 1],
-                      }}
+                      transition={{ duration: 2.2, ease: [0.22, 1, 0.36, 1] }}
                       className="relative w-44 h-44 flex items-center justify-center"
                     >
                       <motion.div
@@ -519,57 +442,22 @@ const ResultPage: React.FC = () => {
                         transition={{ duration: 2.8, repeat: Infinity }}
                         className="absolute inset-4 rounded-full bg-pink-500/10 blur-2xl"
                       />
-
                       <svg className="w-full h-full transform -rotate-90">
-                        <circle
-                          cx="88"
-                          cy="88"
-                          r="74"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          fill="transparent"
-                          className="text-white/5"
-                        />
-                        <circle
-                          cx="88"
-                          cy="88"
-                          r="60"
-                          stroke="currentColor"
-                          strokeWidth="1"
-                          fill="transparent"
-                          className="text-white/5"
-                        />
+                        <circle cx="88" cy="88" r="74" stroke="currentColor" strokeWidth="2" fill="transparent" className="text-white/5" />
+                        <circle cx="88" cy="88" r="60" stroke="currentColor" strokeWidth="1" fill="transparent" className="text-white/5" />
                         <motion.circle
-                          cx="88"
-                          cy="88"
-                          r="74"
-                          stroke="currentColor"
-                          strokeWidth="12"
-                          fill="transparent"
+                          cx="88" cy="88" r="74" stroke="currentColor" strokeWidth="12" fill="transparent"
                           strokeDasharray={464.96}
                           strokeDashoffset={464.96 - (464.96 * score) / 100}
                           className={`text-pink-500 ${scoreGlowClass}`}
                           initial={{ strokeDashoffset: 464.96 }}
                           animate={{ strokeDashoffset: 464.96 - (464.96 * score) / 100 }}
-                          transition={{
-                            duration: 2.1,
-                            ease: [0.16, 1, 0.3, 1],
-                          }}
+                          transition={{ duration: 2.1, ease: [0.16, 1, 0.3, 1] }}
                         />
                       </svg>
-
                       <div className="absolute text-center">
-                        <motion.div
-                          animate={
-                            score === fortune.finalScore
-                              ? { scale: [1, 1.06, 0.985, 1] }
-                              : { scale: 1 }
-                          }
-                          transition={{ duration: 1.15 }}
-                        >
-                          <span className="text-6xl font-black italic tracking-tighter">
-                            {score}
-                          </span>
+                        <motion.div animate={score === fortune.finalScore ? { scale: [1, 1.06, 0.985, 1] } : { scale: 1 }} transition={{ duration: 1.15 }}>
+                          <span className="text-6xl font-black italic tracking-tighter">{score}</span>
                           <span className="text-base font-bold block -mt-2">点</span>
                         </motion.div>
                       </div>
@@ -580,31 +468,16 @@ const ResultPage: React.FC = () => {
                     <motion.div
                       initial={{ opacity: 0, x: 24, scaleX: 0.4, scaleY: 0.92 }}
                       animate={{ opacity: 1, x: 0, scaleX: 1, scaleY: 1 }}
-                      transition={{
-                        delay: 0.28,
-                        type: 'spring',
-                        stiffness: 120,
-                        damping: 14,
-                      }}
+                      transition={{ delay: 0.28, type: 'spring', stiffness: 120, damping: 14 }}
                       className="bg-[#1a0e2d]/70 border border-white/10 rounded-[22px] p-4 text-center shadow-xl backdrop-blur-sm origin-left"
                     >
-                      <p className="text-[10px] text-pink-300 font-bold mb-1 tracking-wider uppercase">
-                        告白成功率
-                      </p>
-                      <div className="text-2xl font-black text-white mb-2">
-                        {animatedConfessionRate}
-                        <span className="text-xs ml-0.5">%</span>
-                      </div>
+                      <p className="text-[10px] text-pink-300 font-bold mb-1 tracking-wider uppercase">告白成功率</p>
+                      <div className="text-2xl font-black text-white mb-2">{animatedConfessionRate}<span className="text-xs ml-0.5">%</span></div>
                       <div className="w-full h-1.5 bg-black/40 rounded-full overflow-hidden">
                         <motion.div
                           initial={{ width: 0, scaleX: 0.3 }}
                           animate={{ width: `${animatedConfessionRate}%`, scaleX: 1 }}
-                          transition={{
-                            type: 'spring',
-                            stiffness: 110,
-                            damping: 13,
-                            mass: 1.05,
-                          }}
+                          transition={{ type: 'spring', stiffness: 110, damping: 13, mass: 1.05 }}
                           className="h-full bg-gradient-to-r from-pink-500 to-rose-400 origin-left"
                         />
                       </div>
@@ -613,31 +486,16 @@ const ResultPage: React.FC = () => {
                     <motion.div
                       initial={{ opacity: 0, x: 24, scaleX: 0.4, scaleY: 0.92 }}
                       animate={{ opacity: 1, x: 0, scaleX: 1, scaleY: 1 }}
-                      transition={{
-                        delay: 0.42,
-                        type: 'spring',
-                        stiffness: 120,
-                        damping: 14,
-                      }}
+                      transition={{ delay: 0.42, type: 'spring', stiffness: 120, damping: 14 }}
                       className="bg-[#1a0e2d]/70 border border-white/10 rounded-[22px] p-4 text-center shadow-xl backdrop-blur-sm origin-left"
                     >
-                      <p className="text-[10px] text-blue-300 font-bold mb-1 tracking-wider uppercase">
-                        二人の親密度
-                      </p>
-                      <div className="text-2xl font-black text-white mb-2">
-                        {animatedIntimacyLevel}
-                        <span className="text-xs ml-0.5">%</span>
-                      </div>
+                      <p className="text-[10px] text-blue-300 font-bold mb-1 tracking-wider uppercase">二人の親密度</p>
+                      <div className="text-2xl font-black text-white mb-2">{animatedIntimacyLevel}<span className="text-xs ml-0.5">%</span></div>
                       <div className="w-full h-1.5 bg-black/40 rounded-full overflow-hidden">
                         <motion.div
                           initial={{ width: 0, scaleX: 0.3 }}
                           animate={{ width: `${animatedIntimacyLevel}%`, scaleX: 1 }}
-                          transition={{
-                            type: 'spring',
-                            stiffness: 110,
-                            damping: 13,
-                            mass: 1.05,
-                          }}
+                          transition={{ type: 'spring', stiffness: 110, damping: 13, mass: 1.05 }}
                           className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 origin-left"
                         />
                       </div>
@@ -646,36 +504,21 @@ const ResultPage: React.FC = () => {
                 </div>
 
                 <div className="text-center">
-                  <p className="text-[10px] tracking-[0.35em] text-purple-300 mb-2 uppercase">
-                    special reading
-                  </p>
-
+                  <p className="text-[10px] tracking-[0.35em] text-purple-300 mb-2 uppercase">special reading</p>
                   <h2 className="text-xl font-black mb-3 leading-tight">
                     二人の波動は、
                     <span className="bg-gradient-to-r from-pink-400 via-[#f9a620] to-cyan-300 bg-clip-text text-transparent">
-                      {fortune.finalScore >= 90
-                        ? '強く結びついています'
-                        : fortune.finalScore >= 80
-                        ? '美しく共鳴しています'
-                        : fortune.finalScore >= 70
-                        ? '静かに引き合っています'
-                        : '変化の途中にあります'}
+                      {fortune.finalScore >= 90 ? '強く結びついています' : fortune.finalScore >= 80 ? '美しく共鳴しています' : fortune.finalScore >= 70 ? '静かに引き合っています' : '変化の途中にあります'}
                     </span>
                   </h2>
-
                   <p className="text-sm text-gray-300 leading-relaxed">
-                    あなたの入力情報から導かれたこの数値は、
-                    {fortune.partnerName}
-                    さんとの今の関係性・感情の温度・未来の流れを総合したものです。
+                    あなたの入力情報から導かれたこの数値は、{fortune.partnerName}さんとの今の関係性・感情の温度・未来の流れを総合したものです。
                   </p>
                 </div>
               </div>
 
               <div className="mt-6 flex justify-center">
-                <button
-                  onClick={handleNextStep}
-                  className="px-8 py-4 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 font-black text-white shadow-[0_14px_40px_rgba(168,85,247,0.35)] active:scale-95 transition-all"
-                >
+                <button onClick={handleNextStep} className="px-8 py-4 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 font-black text-white shadow-[0_14px_40px_rgba(168,85,247,0.35)] active:scale-95 transition-all">
                   相手の本音へ進む
                 </button>
               </div>
@@ -683,202 +526,77 @@ const ResultPage: React.FC = () => {
           )}
 
           {currentStep === 'emotion' && (
-            <motion.section
-              key="emotion"
-              initial={{ opacity: 0, y: 26 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -18 }}
-              className="mb-8"
-            >
-              <LockedPanel
-                title={`${fortune.partnerName}さんの本音は、この先で明らかになります`}
-                subtitle="今、相手があなたをどう見ているか。好意・迷い・距離感の核心は有料版で公開されます。"
-                preview={getPreviewText('emotion', fortune)}
-                buttonLabel="相手の本音を開く"
-                onOpenPaid={openPaid}
-              />
-
+            <motion.section key="emotion" initial={{ opacity: 0, y: 26 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -18 }} className="mb-8">
+              <LockedPanel title={`${fortune.partnerName}さんの本音は、この先で明らかになります`} subtitle="今、相手があなたをどう見ているか。好意・迷い・距離感の核心は有料版で公開されます。" preview={getPreviewText('emotion', fortune)} buttonLabel="相手の本音を開く" onOpenPaid={openPaid} />
               <div className="mt-6 flex justify-center">
-                <button
-                  onClick={handleNextStep}
-                  className="px-8 py-4 rounded-full bg-white/8 border border-white/15 font-black text-gray-200 active:scale-95 transition-all backdrop-blur-md"
-                >
-                  運命分析の予告を見る
-                </button>
+                <button onClick={handleNextStep} className="px-8 py-4 rounded-full bg-white/8 border border-white/15 font-black text-gray-200 active:scale-95 transition-all backdrop-blur-md">運命分析の予告を見る</button>
               </div>
             </motion.section>
           )}
 
           {currentStep === 'destiny' && (
-            <motion.section
-              key="destiny"
-              initial={{ opacity: 0, y: 26 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -18 }}
-              className="mb-8"
-            >
-              <LockedPanel
-                title="二人の未来には、まだ見えていない流れがあります"
-                subtitle="このご縁が進展へ向かうのか、停滞なのか、再接近の兆しがあるのか。未来の本筋は有料版で公開されます。"
-                preview={getPreviewText('destiny', fortune)}
-                buttonLabel="二人の未来を見る"
-                onOpenPaid={openPaid}
-              />
-
+            <motion.section key="destiny" initial={{ opacity: 0, y: 26 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -18 }} className="mb-8">
+              <LockedPanel title="二人の未来には、まだ見えていない流れがあります" subtitle="このご縁が進展へ向かうのか、停滞なのか、再接近の兆しがあるのか。未来の本筋は有料版で公開されます。" preview={getPreviewText('destiny', fortune)} buttonLabel="二人の未来を見る" onOpenPaid={openPaid} />
               <div className="mt-6 flex justify-center">
-                <button
-                  onClick={handleNextStep}
-                  className="px-8 py-4 rounded-full bg-white/8 border border-white/15 font-black text-gray-200 active:scale-95 transition-all backdrop-blur-md"
-                >
-                  詳細分析の予告を見る
-                </button>
+                <button onClick={handleNextStep} className="px-8 py-4 rounded-full bg-white/8 border border-white/15 font-black text-gray-200 active:scale-95 transition-all backdrop-blur-md">詳細分析の予告を見る</button>
               </div>
             </motion.section>
           )}
 
           {currentStep === 'detail' && (
-            <motion.section
-              key="detail"
-              initial={{ opacity: 0, y: 26 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -18 }}
-              className="mb-8"
-            >
+            <motion.section key="detail" initial={{ opacity: 0, y: 26 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -18 }} className="mb-8">
               <div className="bg-[#160a2b]/90 border border-white/10 rounded-[32px] overflow-hidden shadow-2xl backdrop-blur-xl">
                 <div className="px-8 pt-8 pb-5">
-                  <p className="text-[10px] tracking-[0.35em] text-purple-300 mb-3 uppercase">
-                    deep reading
-                  </p>
-                  <h3 className="text-2xl font-black leading-tight">
-                    角度を変えるほど、
-                    <span className="text-[#f9a620]">二人の本質が見えてきます</span>
-                  </h3>
+                  <p className="text-[10px] tracking-[0.35em] text-purple-300 mb-3 uppercase">deep reading</p>
+                  <h3 className="text-2xl font-black leading-tight">角度を変えるほど、<span className="text-[#f9a620]">二人の本質が見えてきます</span></h3>
                 </div>
-
                 <div className="grid grid-cols-4 border-b border-white/5 bg-white/[0.02]">
-                  {[
-                    { label: '姓名', key: 'name' as ActiveTabKey },
-                    { label: '星座', key: 'star' as ActiveTabKey },
-                    { label: '血液', key: 'blood' as ActiveTabKey },
-                    { label: '五行', key: 'five' as ActiveTabKey },
-                  ].map((tab) => {
+                  {[{ label: '姓名', key: 'name' as ActiveTabKey }, { label: '星座', key: 'star' as ActiveTabKey }, { label: '血液', key: 'blood' as ActiveTabKey }, { label: '五行', key: 'five' as ActiveTabKey }].map((tab) => {
                     const isActive = activeTab === tab.key;
-
                     return (
-                      <button
-                        key={tab.key}
-                        onClick={() => setActiveTab(tab.key)}
-                        className={`relative py-5 text-[12px] font-black tracking-[0.08em] transition-all ${
-                          isActive
-                            ? 'bg-gradient-to-b from-purple-700/90 to-pink-700/50 text-white'
-                            : 'bg-white/5 text-gray-400'
-                        }`}
-                      >
+                      <button key={tab.key} onClick={() => setActiveTab(tab.key)} className={`relative py-5 text-[12px] font-black tracking-[0.08em] transition-all ${isActive ? 'bg-gradient-to-b from-purple-700/90 to-pink-700/50 text-white' : 'bg-white/5 text-gray-400'}`}>
                         <span className="relative z-10">{tab.label}</span>
                       </button>
                     );
                   })}
                 </div>
-
                 <div className="p-8 min-h-[220px] text-left">
                   <div className="relative rounded-[28px] border border-white/10 bg-white/5 p-5 overflow-hidden">
                     <div className="blur-[4px] select-none pointer-events-none">
-                      <h4 className="text-[#f9a620] text-lg font-black mb-4">
-                        {fortune.tabs[activeTab].title}
-                      </h4>
-                      <p className="text-sm text-gray-200 leading-relaxed">
-                        {fortune.tabs[activeTab].content}
-                      </p>
+                      <h4 className="text-[#f9a620] text-lg font-black mb-4">{fortune.tabs[activeTab].title}</h4>
+                      <p className="text-sm text-gray-200 leading-relaxed">{fortune.tabs[activeTab].content}</p>
                     </div>
-
                     <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#12091f]/30 to-[#12091f]/84" />
-
                     <div className="absolute inset-x-0 bottom-5 flex justify-center">
-                      <div className="px-4 py-2 rounded-full bg-black/45 border border-white/15 text-xs font-black text-purple-100 backdrop-blur-md">
-                        🔒 分析全文は有料版で公開
-                      </div>
+                      <div className="px-4 py-2 rounded-full bg-black/45 border border-white/15 text-xs font-black text-purple-100 backdrop-blur-md">🔒 分析全文は有料版で公開</div>
                     </div>
                   </div>
                 </div>
-
                 <div className="px-8 pb-8">
-                  <button
-                    onClick={openPaid}
-                    className="w-full py-4 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 font-black text-white shadow-[0_14px_40px_rgba(168,85,247,0.35)] active:scale-95 transition-all"
-                  >
-                    詳細分析をすべて見る
-                  </button>
+                  <button onClick={openPaid} className="w-full py-4 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 font-black text-white shadow-[0_14px_40px_rgba(168,85,247,0.35)] active:scale-95 transition-all">詳細分析をすべて見る</button>
                 </div>
               </div>
-
               <div className="mt-6 flex justify-center">
-                <button
-                  onClick={handleNextStep}
-                  className="px-8 py-4 rounded-full bg-white/8 border border-white/15 font-black text-gray-200 active:scale-95 transition-all backdrop-blur-md"
-                >
-                  今後の流れを見る
-                </button>
+                <button onClick={handleNextStep} className="px-8 py-4 rounded-full bg-white/8 border border-white/15 font-black text-gray-200 active:scale-95 transition-all backdrop-blur-md">今後の流れを見る</button>
               </div>
             </motion.section>
           )}
 
           {currentStep === 'biorhythm' && (
-            <motion.section
-              key="biorhythm"
-              initial={{ opacity: 0, y: 26 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -18 }}
-              className="mb-8"
-            >
-              <LockedPanel
-                title="二人の流れは、この先で詳しく分かります"
-                subtitle="今週の中で動くべき日、慎重にしたい日、連絡や告白に向くタイミングは有料版で公開されます。"
-                preview={getPreviewText('biorhythm', fortune)}
-                buttonLabel="二人の流れを開く"
-                onOpenPaid={openPaid}
-              />
-
+            <motion.section key="biorhythm" initial={{ opacity: 0, y: 26 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -18 }} className="mb-8">
+              <LockedPanel title="二人の流れは、この先で詳しく分かります" subtitle="今週の中で動くべき日、慎重にしたい日、連絡や告白に向くタイミングは有料版で公開されます。" preview={getPreviewText('biorhythm', fortune)} buttonLabel="二人の流れを開く" onOpenPaid={openPaid} />
               <div className="mt-6 flex justify-center">
-                <button
-                  onClick={handleNextStep}
-                  className="px-8 py-4 rounded-full bg-white/8 border border-white/15 font-black text-gray-200 active:scale-95 transition-all backdrop-blur-md"
-                >
-                  最後の結論を見る
-                </button>
+                <button onClick={handleNextStep} className="px-8 py-4 rounded-full bg-white/8 border border-white/15 font-black text-gray-200 active:scale-95 transition-all backdrop-blur-md">最後の結論を見る</button>
               </div>
             </motion.section>
           )}
 
           {currentStep === 'final' && (
-            <motion.section
-              key="final"
-              initial={{ opacity: 0, y: 26 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -18 }}
-              className="mb-8"
-            >
-              <LockedPanel
-                title="この恋の結論は、まだ無料版では公開していません"
-                subtitle="進むべきか、待つべきか。告白の時期、成功率を上げる方法、最終判断はこの先にあります。"
-                preview={getPreviewText('final', fortune)}
-                buttonLabel="相手の本音と結論を見る"
-                onOpenPaid={openPaid}
-              />
-
+            <motion.section key="final" initial={{ opacity: 0, y: 26 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -18 }} className="mb-8">
+              <LockedPanel title="この恋の結論は、まだ無料版では公開していません" subtitle="進むべきか、待つべきか。告白の時期、成功率を上げる方法、最終判断はこの先にあります。" preview={getPreviewText('final', fortune)} buttonLabel="相手の本音と結論を見る" onOpenPaid={openPaid} />
               <div className="mt-6 grid grid-cols-1 gap-3">
-                <button
-                  onClick={() => jumpToStep('score')}
-                  className="w-full py-4 rounded-full bg-white/8 border border-white/15 font-black text-gray-200 active:scale-95 transition-all backdrop-blur-md"
-                >
-                  最初から見直す
-                </button>
-
-                <button
-                  onClick={handleBackToTop}
-                  className="w-full py-4 rounded-full bg-black/25 border border-white/10 font-black text-gray-300 active:scale-95 transition-all"
-                >
-                  鑑定を終了して戻る
-                </button>
+                <button onClick={() => jumpToStep('score')} className="w-full py-4 rounded-full bg-white/8 border border-white/15 font-black text-gray-200 active:scale-95 transition-all backdrop-blur-md">最初から見直す</button>
+                <button onClick={handleBackToTop} className="w-full py-4 rounded-full bg-black/25 border border-white/10 font-black text-gray-300 active:scale-95 transition-all">鑑定を終了して戻る</button>
               </div>
             </motion.section>
           )}
