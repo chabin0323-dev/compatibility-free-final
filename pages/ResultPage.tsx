@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { buildFortuneBundle, type ActiveTabKey } from '../services/fortuneEngine';
 
-const PAID_URL = 'https://check-seven-amber.vercel.app/';
+const PAID_URL = 'https://www.paypal.com/ncp/payment/AMEJ4V5C564UN';
 
 type RevealStep =
   | 'intro'
@@ -124,7 +124,7 @@ const LockedPanel: React.FC<{
       >
         ✨ 相手の本音と二人の未来を見る
         <br />
-        <span style={{ fontSize: '13px', opacity: 0.9 }}>780円 →</span>
+        <span style={{ fontSize: '13px', opacity: 0.9 }}>たった780円でフル解放</span>
       </button>
       <style>{`
         @keyframes shimmerBtn {
@@ -560,7 +560,7 @@ const ResultPage: React.FC = () => {
                   }}
                 >
                   ✨ 相手の本音と二人の未来を見る<br />
-                  <span style={{ fontSize: '13px', opacity: 0.9 }}>780円 →</span>
+                  <span style={{ fontSize: '13px', opacity: 0.9 }}>たった780円でフル解放</span>
                 </button>
                 <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', marginTop: '10px' }}>
                   安心のPayPal決済対応
@@ -623,7 +623,33 @@ const ResultPage: React.FC = () => {
                   </div>
                 </div>
                 <div className="px-8 pb-8">
-                  <button onClick={openPaid} className="w-full py-4 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 font-black text-white shadow-[0_14px_40px_rgba(168,85,247,0.35)] active:scale-95 transition-all">詳細分析をすべて見る</button>
+                  <div style={{ textAlign: 'center', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '36px', animation: 'unlockPulse 1.5s ease-in-out infinite', display: 'inline-block' }}>🔓</span>
+                  </div>
+                  <button
+                    onClick={openPaid}
+                    style={{
+                      width: '100%',
+                      padding: '18px',
+                      borderRadius: '9999px',
+                      background: 'linear-gradient(90deg, #9333ea, #ec4899, #f59e0b, #ec4899, #9333ea)',
+                      backgroundSize: '200% auto',
+                      animation: 'shimmerBtn 2s linear infinite',
+                      fontWeight: 900,
+                      color: 'white',
+                      boxShadow: '0 0 40px rgba(236,72,153,0.7), 0 0 80px rgba(168,85,247,0.5)',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontSize: '16px',
+                      letterSpacing: '0.05em',
+                    }}
+                  >
+                    ✨ 相手の本音と二人の未来を見る<br />
+                    <span style={{ fontSize: '13px', opacity: 0.9 }}>たった780円でフル解放</span>
+                  </button>
+                  <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', marginTop: '10px', textAlign: 'center' }}>
+                    安心のPayPal決済対応
+                  </p>
                 </div>
               </div>
               <div className="mt-6 flex justify-center">
