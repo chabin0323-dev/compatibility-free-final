@@ -106,10 +106,32 @@ const LockedPanel: React.FC<{
       </div>
       <button
         onClick={onOpenPaid}
-        className="w-full py-4 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 font-black text-white shadow-[0_14px_40px_rgba(168,85,247,0.35)] active:scale-95 transition-all"
+        style={{
+          width: '100%',
+          padding: '16px',
+          borderRadius: '9999px',
+          background: 'linear-gradient(90deg, #9333ea, #ec4899, #f59e0b, #ec4899, #9333ea)',
+          backgroundSize: '200% auto',
+          animation: 'shimmerBtn 2s linear infinite',
+          fontWeight: 900,
+          color: 'white',
+          boxShadow: '0 0 30px rgba(236,72,153,0.6), 0 0 60px rgba(168,85,247,0.4)',
+          border: 'none',
+          cursor: 'pointer',
+          fontSize: '15px',
+          letterSpacing: '0.05em',
+        }}
       >
-        {buttonLabel}
+        ✨ 相手の本音と二人の未来を見る
+        <br />
+        <span style={{ fontSize: '13px', opacity: 0.9 }}>780円 →</span>
       </button>
+      <style>{`
+        @keyframes shimmerBtn {
+          0% { background-position: 200% center; }
+          100% { background-position: -200% center; }
+        }
+      `}</style>
     </div>
   );
 };
