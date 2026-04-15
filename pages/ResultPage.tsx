@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { buildFortuneBundle, type ActiveTabKey } from '../services/fortuneEngine';
 
-const PAID_URL = 'https://note.com/like_swan6953/n/n3ff33326e2a3';
+const PAID_URL = 'https://check-seven-amber.vercel.app/';
 
 type RevealStep =
   | 'intro'
@@ -539,11 +539,39 @@ const ResultPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="mt-6 flex justify-center">
-                <button onClick={handleNextStep} className="px-8 py-4 rounded-full bg-gradient-to-r from-purple-600 to-pink-500 font-black text-white shadow-[0_14px_40px_rgba(168,85,247,0.35)] active:scale-95 transition-all">
-                  相手の本音へ進む
+              <div className="mt-6 text-center">
+                <div style={{ fontSize: '48px', marginBottom: '8px', animation: 'unlockPulse 1.5s ease-in-out infinite' }}>🔓</div>
+                <button
+                  onClick={openPaid}
+                  style={{
+                    width: '100%',
+                    padding: '18px',
+                    borderRadius: '9999px',
+                    background: 'linear-gradient(90deg, #9333ea, #ec4899, #f59e0b, #ec4899, #9333ea)',
+                    backgroundSize: '200% auto',
+                    animation: 'shimmerBtn 2s linear infinite',
+                    fontWeight: 900,
+                    color: 'white',
+                    boxShadow: '0 0 40px rgba(236,72,153,0.7), 0 0 80px rgba(168,85,247,0.5)',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '16px',
+                    letterSpacing: '0.05em',
+                  }}
+                >
+                  ✨ 相手の本音と二人の未来を見る<br />
+                  <span style={{ fontSize: '13px', opacity: 0.9 }}>780円 →</span>
                 </button>
+                <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', marginTop: '10px' }}>
+                  安心のPayPal決済対応
+                </p>
               </div>
+              <style>{`
+                @keyframes unlockPulse {
+                  0%,100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(255,200,100,0.6)); }
+                  50% { transform: scale(1.2); filter: drop-shadow(0 0 20px rgba(255,200,100,1)); }
+                }
+              `}</style>
             </motion.section>
           )}
 
