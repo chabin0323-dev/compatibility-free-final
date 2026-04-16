@@ -337,7 +337,6 @@ const ResultPage: React.FC = () => {
                   transition={{ duration: 2.8, repeat: Infinity }}
                   className="absolute inset-10 rounded-full bg-gradient-to-br from-purple-500/25 via-pink-400/20 to-yellow-300/20 blur-xl"
                 />
-                {/* ここをLoveLABロゴに変更 */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   <motion.img
                     src="https://raw.githubusercontent.com/chabin0323-dev/aisou-fortune-host/main/lovelab-logo.png"
@@ -670,6 +669,87 @@ const ResultPage: React.FC = () => {
           {currentStep === 'final' && (
             <motion.section key="final" initial={{ opacity: 0, y: 26 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -18 }} className="mb-8">
               <LockedPanel title="この恋の結論は、まだ無料版では公開していません" subtitle="進むべきか、待つべきか。告白の時期、成功率を上げる方法、最終判断はこの先にあります。" preview={getPreviewText('final', fortune)} buttonLabel="相手の本音と結論を見る" onOpenPaid={openPaid} />
+
+              {/* ── アップセルセクション ── */}
+              <div style={{
+                marginTop: '40px',
+                padding: '32px 24px',
+                background: 'linear-gradient(135deg, rgba(80,20,120,0.85) 0%, rgba(30,5,60,0.95) 100%)',
+                borderRadius: '24px',
+                border: '1px solid rgba(200,120,255,0.35)',
+                boxShadow: '0 0 40px rgba(160,80,255,0.2)',
+                textAlign: 'center',
+              }}>
+                <p style={{
+                  fontSize: '11px',
+                  letterSpacing: '0.3em',
+                  color: '#d8a0ff',
+                  marginBottom: '16px',
+                  textTransform: 'uppercase',
+                }}>
+                  next reading
+                </p>
+                <h2 style={{
+                  fontSize: '20px',
+                  fontWeight: 900,
+                  lineHeight: 1.7,
+                  marginBottom: '20px',
+                  color: 'white',
+                }}>
+                  相性鑑定で「二人の関係」がわかった今——<br />
+                  <span style={{ color: '#f9a620' }}>次は「あなた自身」を知ることで、</span><br />
+                  この恋はもっと動かせます。
+                </h2>
+                <p style={{
+                  fontSize: '14px',
+                  lineHeight: 1.9,
+                  color: 'rgba(255,255,255,0.82)',
+                  marginBottom: '12px',
+                }}>
+                  相手の気持ちや二人の流れを読み解いても、<br />
+                  <strong style={{ color: '#ffffff' }}>あなた自身の本質・使命・今年の運気</strong>を知らなければ、<br />
+                  最善のタイミングで動くことはできません。
+                </p>
+                <p style={{
+                  fontSize: '14px',
+                  lineHeight: 1.9,
+                  color: 'rgba(255,255,255,0.82)',
+                  marginBottom: '28px',
+                }}>
+                  個人鑑定では、あなたの生年月日・姓名・星座から<br />
+                  <strong style={{ color: '#f9a620' }}>「なぜこの人に惹かれるのか」「いつ動くべきか」<br />「この恋を成就させる鍵」</strong>まで深く読み解きます。
+                </p>
+                <a
+                  href="https://host-fortune.vercel.app/"
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    padding: '18px',
+                    borderRadius: '9999px',
+                    background: 'linear-gradient(90deg, #9333ea, #ec4899, #f59e0b, #ec4899, #9333ea)',
+                    backgroundSize: '200% auto',
+                    animation: 'shimmerBtn 2s linear infinite',
+                    fontWeight: 900,
+                    color: 'white',
+                    boxShadow: '0 0 40px rgba(236,72,153,0.6), 0 0 80px rgba(168,85,247,0.4)',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '16px',
+                    letterSpacing: '0.05em',
+                    textDecoration: 'none',
+                    boxSizing: 'border-box' as const,
+                  }}
+                >
+                  ✨ あなた自身の運命鑑定を見る<br />
+                  <span style={{ fontSize: '13px', opacity: 0.9 }}>特別価格 1,980円</span>
+                </a>
+                <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.35)', marginTop: '12px' }}>
+                  安心のPayPal決済対応
+                </p>
+              </div>
+
               <div className="mt-6 grid grid-cols-1 gap-3">
                 <button onClick={() => jumpToStep('score')} className="w-full py-4 rounded-full bg-white/8 border border-white/15 font-black text-gray-200 active:scale-95 transition-all backdrop-blur-md">最初から見直す</button>
                 <button onClick={handleBackToTop} className="w-full py-4 rounded-full bg-black/25 border border-white/10 font-black text-gray-300 active:scale-95 transition-all">鑑定を終了して戻る</button>
