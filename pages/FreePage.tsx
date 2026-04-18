@@ -298,21 +298,24 @@ const FreePage: React.FC = () => {
               </div>
             )}
 
-            <select
-              value={relationship}
-              onChange={(e) => {
-                setRelationship(e.target.value);
-                setErrorMessage('');
-              }}
-              className="w-full bg-[#2a174a] border border-white/10 rounded-full py-3 px-4 text-xs font-bold outline-none"
-            >
-              <option value="">現在の関係性</option>
+            <div className="grid grid-cols-4 gap-2">
               {relationships.map((r) => (
-                <option key={r} value={r}>
+                <button
+                  key={r}
+                  onClick={() => {
+                    setRelationship(r);
+                    setErrorMessage('');
+                  }}
+                  className={`py-2.5 rounded-2xl text-[11px] font-bold border transition-all active:scale-95 ${
+                    relationship === r
+                      ? 'bg-purple-600/50 border-purple-400 text-white'
+                      : 'bg-[#2a174a] border-white/10 text-gray-400'
+                  }`}
+                >
                   {r}
-                </option>
+                </button>
               ))}
-            </select>
+            </div>
           </div>
         </div>
 
