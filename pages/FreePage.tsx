@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import UsageManual from '../components/UsageManual';
@@ -22,6 +22,15 @@ const FreePage: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<'today' | 'tomorrow'>('today');
   const [showManual, setShowManual] = useState(false);
 
+  const [stats, setStats] = useState({ pv: 0, uv: 0 });
+  const [statsLoaded, setStatsLoaded] = useState(false);
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [resetPassword, setResetPassword] = useState('');
+  const [resetError, setResetError] = useState('');
+  const [resetSuccess, setResetSuccess] = useState(false);
+  const adminClickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const adminClickCount = useRef(0);
+
   useEffect(() => {
     const saved = localStorage.getItem('fortune_name_history');
     if (saved) {
@@ -33,35 +42,55 @@ const FreePage: React.FC = () => {
     }
   }, []);
 
-  // アクセス解析を毎回再読込
   useEffect(() => {
-    const oldScript = document.getElementById('busuanzi-script');
-    if (oldScript) {
-      oldScript.remove();
+    fetch('/api/visit', { method: 'POST' })
+      .then((r) => r.json())
+      .then((data) => {
+        setStats({ pv: data.total_pv ?? 0, uv: data.total_uv ?? 0 });
+        setStatsLoaded(true);
+      })
+      .catch(() => setStatsLoaded(true));
+  }, []);
+
+  const handleStatsClick = () => {
+    adminClickCount.current += 1;
+
+    if (adminClickTimer.current) clearTimeout(adminClickTimer.current);
+
+    if (adminClickCount.current >= 5) {
+      adminClickCount.current = 0;
+      setShowResetModal(true);
+      return;
     }
 
-    const sitePv = document.getElementById('busuanzi_container_site_pv');
-    const siteUv = document.getElementById('busuanzi_container_site_uv');
-    const pagePv = document.getElementById('busuanzi_container_page_pv');
+    adminClickTimer.current = setTimeout(() => {
+      adminClickCount.current = 0;
+    }, 3000);
+  };
 
-    if (sitePv) sitePv.style.display = 'none';
-    if (siteUv) siteUv.style.display = 'none';
-    if (pagePv) pagePv.style.display = 'none';
-
-    const script = document.createElement('script');
-    script.id = 'busuanzi-script';
-    script.src = '//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js';
-    script.async = true;
-
-    document.body.appendChild(script);
-
-    return () => {
-      const currentScript = document.getElementById('busuanzi-script');
-      if (currentScript) {
-        currentScript.remove();
+  const handleReset = async () => {
+    setResetError('');
+    try {
+      const res = await fetch('/api/reset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: resetPassword }),
+      });
+      if (res.ok) {
+        setStats({ pv: 0, uv: 0 });
+        setResetSuccess(true);
+        setTimeout(() => {
+          setShowResetModal(false);
+          setResetSuccess(false);
+          setResetPassword('');
+        }, 2000);
+      } else {
+        setResetError('パスワードが違います');
       }
-    };
-  }, []);
+    } catch {
+      setResetError('通信エラーが発生しました');
+    }
+  };
 
   const handleStartDivination = () => {
     setErrorMessage('');
@@ -360,20 +389,70 @@ const FreePage: React.FC = () => {
           </button>
         </div>
 
-        <div className="mt-8 text-[11px] text-gray-500/80 text-center leading-6">
+        <div
+          className="mt-8 text-[11px] text-gray-500/80 text-center leading-6 cursor-default select-none"
+          onClick={handleStatsClick}
+        >
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
-            <span id="busuanzi_container_site_pv">
-              累計アクセス <span id="busuanzi_value_site_pv"></span>
-            </span>
-            <span id="busuanzi_container_site_uv">
-              訪問ユーザー <span id="busuanzi_value_site_uv"></span>
-            </span>
-            <span id="busuanzi_container_page_pv">
-              このページ閲覧 <span id="busuanzi_value_page_pv"></span>
-            </span>
+            {statsLoaded ? (
+              <>
+                <span>累計アクセス {stats.pv.toLocaleString()}</span>
+                <span>ユニーク訪問者 {stats.uv.toLocaleString()}</span>
+              </>
+            ) : (
+              <span className="opacity-40">読み込み中...</span>
+            )}
           </div>
         </div>
       </div>
+
+      {showResetModal && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-[#1a0e2d] border border-white/10 rounded-2xl p-6 w-full max-w-xs shadow-2xl">
+            <h3 className="text-white font-bold mb-4 text-center text-sm">管理者メニュー</h3>
+            {resetSuccess ? (
+              <p className="text-green-400 text-center text-sm py-4">✓ カウントをリセットしました</p>
+            ) : (
+              <>
+                <p className="text-gray-400 text-xs text-center mb-4">
+                  アクセス数をゼロにリセットします
+                </p>
+                <input
+                  type="password"
+                  value={resetPassword}
+                  onChange={(e) => {
+                    setResetPassword(e.target.value);
+                    setResetError('');
+                  }}
+                  placeholder="管理者パスワード"
+                  className="w-full bg-[#2a174a] border border-white/10 rounded-xl py-3 px-4 text-sm text-white outline-none mb-2"
+                />
+                {resetError && (
+                  <p className="text-red-400 text-xs mb-3 text-center">{resetError}</p>
+                )}
+                <div className="flex gap-2 mt-3">
+                  <button
+                    onClick={() => {
+                      setShowResetModal(false);
+                      setResetPassword('');
+                      setResetError('');
+                    }}
+                    className="flex-1 py-2.5 rounded-xl text-xs bg-white/5 border border-white/10 text-gray-400 active:scale-95 transition-all"
+                  >
+                    キャンセル
+                  </button>
+                  <button
+                    onClick={handleReset}
+                    className="flex-1 py-2.5 rounded-xl text-xs bg-red-600/50 border border-red-500/50 text-white font-bold active:scale-95 transition-all"
+                  >
+                    リセット
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       <UsageManual isOpen={showManual} onClose={() => setShowManual(false)} />
     </div>
