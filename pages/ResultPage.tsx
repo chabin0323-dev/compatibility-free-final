@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { buildFortuneBundle, type ActiveTabKey } from '../services/fortuneEngine';
 
-const PAID_URL = 'http://pro.k-shiratori.com/';
+const PAID_URL = 'https://aisou-fortune-host.vercel.app/';
 
 type RevealStep =
   | 'intro'
