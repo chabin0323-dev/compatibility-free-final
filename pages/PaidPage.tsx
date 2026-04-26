@@ -77,7 +77,7 @@ const PaidPage: React.FC = () => {
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', marginBottom: '16px' }}>
                 <span style={{ fontSize: '24px', flexShrink: 0 }}>2️⃣</span>
                 <div>
-                  <p style={{ color: '#f7c948', fontSize: '14px', fontWeight: 'bold', margin: '0 0 4px' }}>アドレスバーを長押し</p>
+                  <p style={{ color: '#f7c948', fontSize: '14px', fontWeight: 'bold', margin: '0 0 4px' }}>アドレスバーをタップ</p>
                   <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '12px', margin: 0 }}>「ペースト」をタップしてURLを貼り付け</p>
                 </div>
               </div>
