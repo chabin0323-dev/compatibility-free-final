@@ -116,7 +116,7 @@ const ResultPage: React.FC = () => {
   const fortune = useMemo(() => { if (!data) return null; return buildFortuneBundle(data); }, [data]);
   const stepIndex = STEP_ORDER.indexOf(currentStep);
   const progressPercent = ((stepIndex + 1) / STEP_ORDER.length) * 100;
-  const openPaid = () => { window.location.href = PAID_URL; };
+  const openPaid = () => { navigate('/paid'); };
   const handleBackToTop = () => { navigate('/compatibility-free', { state: { keepPartnerName: data?.partnerName, keepRelationship: data?.relationship } }); };
   const scrollToTopAnchor = () => { window.scrollTo({ top: 0, behavior: 'smooth' }); if (topAnchorRef.current) { topAnchorRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' }); } };
   const handleNextStep = () => { const i = STEP_ORDER.indexOf(currentStep); if (i < STEP_ORDER.length - 1) { setCurrentStep(STEP_ORDER[i + 1]); setTimeout(() => { scrollToTopAnchor(); }, 60); } };
