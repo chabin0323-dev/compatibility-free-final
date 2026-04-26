@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 const PaidPage: React.FC = () => {
   const [copied, setCopied] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
   const paypalUrl = 'https://www.paypal.com/ncp/payment/AMEJ4V5C564UN';
 
   const handleDirectPayment = () => {
@@ -11,7 +12,8 @@ const PaidPage: React.FC = () => {
   const handleCopy = () => {
     navigator.clipboard.writeText(paypalUrl).then(() => {
       setCopied(true);
-      setTimeout(() => setCopied(false), 10000);
+      setShowGuide(true);
+      setTimeout(() => setCopied(false), 30000);
     }).catch(() => {
       window.location.href = paypalUrl;
     });
@@ -41,11 +43,14 @@ const PaidPage: React.FC = () => {
           <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.15)' }} />
         </div>
 
-        {/* コピーボタン */}
-        {!copied ? (
+        {/* コピー前 */}
+        {!showGuide && (
           <div style={{ background: 'rgba(147,51,234,0.15)', border: '1px solid rgba(147,51,234,0.4)', borderRadius: '16px', padding: '16px', marginBottom: '20px' }}>
+            <p style={{ color: '#f7c948', fontSize: '14px', fontWeight: 'bold', textAlign: 'center', marginBottom: '8px' }}>
+              ⚠️ 「ブラウザで開いてください」と<br />表示された方へ
+            </p>
             <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '12px', textAlign: 'center', marginBottom: '12px', lineHeight: '1.8' }}>
-              「ブラウザで開いてください」と表示された方は<br />下のボタンでURLをコピーして<br />Safariのアドレスバーにタップで貼り付けてください
+              下のボタンをタップすると<br />決済URLが自動でコピーされます
             </p>
             <button
               onClick={handleCopy}
@@ -54,29 +59,111 @@ const PaidPage: React.FC = () => {
               📋 決済URLをコピーする
             </button>
           </div>
-        ) : (
-          <div style={{ background: 'rgba(34,197,94,0.1)', border: '2px solid #22c55e', borderRadius: '16px', padding: '20px', marginBottom: '20px', textAlign: 'center' }}>
-            <p style={{ fontSize: '36px', margin: '0 0 8px' }}>✅</p>
-            <p style={{ color: '#22c55e', fontSize: '16px', fontWeight: 'bold', margin: '0 0 12px' }}>コピーしました！</p>
-            <div style={{ textAlign: 'left' }}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginBottom: '10px' }}>
-                <span style={{ fontSize: '20px', flexShrink: 0 }}>1️⃣</span>
-                <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '13px', margin: 0, lineHeight: '1.6' }}>Safariを開く</p>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginBottom: '10px' }}>
-                <span style={{ fontSize: '20px', flexShrink: 0 }}>2️⃣</span>
-                <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '13px', margin: 0, lineHeight: '1.6' }}>アドレスバーをタップ →「ペースト」をタップ</p>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                <span style={{ fontSize: '20px', flexShrink: 0 }}>3️⃣</span>
-                <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '13px', margin: 0, lineHeight: '1.6' }}>PayPalで決済完了🎉</p>
+        )}
+
+        {/* コピー後の詳細ガイド */}
+        {showGuide && (
+          <div style={{ marginBottom: '20px' }}>
+            <div style={{ background: 'rgba(34,197,94,0.1)', border: '2px solid #22c55e', borderRadius: '16px', padding: '16px', marginBottom: '16px', textAlign: 'center' }}>
+              <p style={{ fontSize: '36px', margin: '0 0 8px' }}>✅</p>
+              <p style={{ color: '#22c55e', fontSize: '16px', fontWeight: 'bold', margin: 0 }}>URLをコピーしました！</p>
+              <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', margin: '4px 0 0' }}>このページを閉じずに下の手順を見ながら進めてください</p>
+            </div>
+
+            {/* iPhoneガイド */}
+            <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '16px', marginBottom: '12px' }}>
+              <p style={{ color: '#f7c948', fontSize: '14px', fontWeight: 'bold', marginBottom: '12px' }}>
+                📱 iPhoneの方（Safari）
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                  <span style={{ background: 'linear-gradient(135deg, #9333ea, #ec4899)', borderRadius: '50%', width: '26px', height: '26px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold', color: 'white', flexShrink: 0 }}>1</span>
+                  <div>
+                    <p style={{ color: 'white', fontSize: '13px', fontWeight: 'bold', margin: '0 0 2px' }}>ホームボタンを押す</p>
+                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', margin: 0 }}>このTikTokを一度閉じてホーム画面に戻ります</p>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                  <span style={{ background: 'linear-gradient(135deg, #9333ea, #ec4899)', borderRadius: '50%', width: '26px', height: '26px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold', color: 'white', flexShrink: 0 }}>2</span>
+                  <div>
+                    <p style={{ color: 'white', fontSize: '13px', fontWeight: 'bold', margin: '0 0 2px' }}>Safariアプリを探してタップ</p>
+                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', margin: 0 }}>青いコンパスマークのアプリです🧭</p>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                  <span style={{ background: 'linear-gradient(135deg, #9333ea, #ec4899)', borderRadius: '50%', width: '26px', height: '26px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold', color: 'white', flexShrink: 0 }}>3</span>
+                  <div>
+                    <p style={{ color: 'white', fontSize: '13px', fontWeight: 'bold', margin: '0 0 2px' }}>画面上のアドレスバーをタップ</p>
+                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', margin: 0 }}>URLが入力できる細長い欄をタップします</p>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                  <span style={{ background: 'linear-gradient(135deg, #9333ea, #ec4899)', borderRadius: '50%', width: '26px', height: '26px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold', color: 'white', flexShrink: 0 }}>4</span>
+                  <div>
+                    <p style={{ color: 'white', fontSize: '13px', fontWeight: 'bold', margin: '0 0 2px' }}>「ペースト」をタップ</p>
+                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', margin: 0 }}>アドレスバーの上に「ペースト」と出てくるのでタップします</p>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                  <span style={{ background: 'linear-gradient(135deg, #9333ea, #ec4899)', borderRadius: '50%', width: '26px', height: '26px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold', color: 'white', flexShrink: 0 }}>5</span>
+                  <div>
+                    <p style={{ color: 'white', fontSize: '13px', fontWeight: 'bold', margin: '0 0 2px' }}>「Go」または「開く」をタップ</p>
+                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', margin: 0 }}>PayPalの決済ページが開きます🎉</p>
+                  </div>
+                </div>
               </div>
             </div>
+
+            {/* Androidガイド */}
+            <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '16px', marginBottom: '12px' }}>
+              <p style={{ color: '#f7c948', fontSize: '14px', fontWeight: 'bold', marginBottom: '12px' }}>
+                🤖 Androidの方（Chrome）
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                  <span style={{ background: 'linear-gradient(135deg, #3b82f6, #06b6d4)', borderRadius: '50%', width: '26px', height: '26px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold', color: 'white', flexShrink: 0 }}>1</span>
+                  <div>
+                    <p style={{ color: 'white', fontSize: '13px', fontWeight: 'bold', margin: '0 0 2px' }}>戻るボタンでホーム画面に戻る</p>
+                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', margin: 0 }}>TikTokを閉じてホーム画面に戻ります</p>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                  <span style={{ background: 'linear-gradient(135deg, #3b82f6, #06b6d4)', borderRadius: '50%', width: '26px', height: '26px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold', color: 'white', flexShrink: 0 }}>2</span>
+                  <div>
+                    <p style={{ color: 'white', fontSize: '13px', fontWeight: 'bold', margin: '0 0 2px' }}>Chromeアプリを開く</p>
+                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', margin: 0 }}>赤・黄・緑・青の丸いアイコンです🌐</p>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                  <span style={{ background: 'linear-gradient(135deg, #3b82f6, #06b6d4)', borderRadius: '50%', width: '26px', height: '26px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold', color: 'white', flexShrink: 0 }}>3</span>
+                  <div>
+                    <p style={{ color: 'white', fontSize: '13px', fontWeight: 'bold', margin: '0 0 2px' }}>アドレスバーをタップ</p>
+                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', margin: 0 }}>画面上部のURL入力欄をタップします</p>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                  <span style={{ background: 'linear-gradient(135deg, #3b82f6, #06b6d4)', borderRadius: '50%', width: '26px', height: '26px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold', color: 'white', flexShrink: 0 }}>4</span>
+                  <div>
+                    <p style={{ color: 'white', fontSize: '13px', fontWeight: 'bold', margin: '0 0 2px' }}>長押しして「貼り付け」をタップ</p>
+                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', margin: 0 }}>アドレスバーを長押しすると「貼り付け」が出ます</p>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                  <span style={{ background: 'linear-gradient(135deg, #3b82f6, #06b6d4)', borderRadius: '50%', width: '26px', height: '26px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold', color: 'white', flexShrink: 0 }}>5</span>
+                  <div>
+                    <p style={{ color: 'white', fontSize: '13px', fontWeight: 'bold', margin: '0 0 2px' }}>Enterをタップ</p>
+                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', margin: 0 }}>PayPalの決済ページが開きます🎉</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* もう一度コピーボタン */}
             <button
               onClick={handleCopy}
-              style={{ width: '100%', marginTop: '16px', padding: '12px', borderRadius: '50px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', cursor: 'pointer', fontSize: '13px', color: 'white' }}
+              style={{ width: '100%', padding: '14px', borderRadius: '50px', background: copied ? 'linear-gradient(90deg, #22c55e, #16a34a)' : 'linear-gradient(90deg, #9333ea, #ec4899)', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: 'bold', color: 'white', marginBottom: '12px' }}
             >
-              📋 もう一度コピーする
+              {copied ? '✅ コピー済み！' : '📋 もう一度URLをコピーする'}
             </button>
           </div>
         )}
