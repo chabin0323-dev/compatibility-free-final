@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { buildFortuneBundle, type ActiveTabKey } from '../services/fortuneEngine';
 
-const PAID_URL = 'const PAID_URL = 'https://nexa-lovelab.com/paid';
+const PAID_URL = 'https://nexa-lovelab.com/paid';
 
 type RevealStep =
   | 'intro'
