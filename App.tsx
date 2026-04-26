@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import FreePage from './pages/FreePage';
 import ResultPage from './pages/ResultPage';
+import PaidPage from './pages/PaidPage';
 
 function SplashScreen({ onFinish }: { onFinish: () => void }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -121,6 +122,7 @@ function App() {
           <Route path="/" element={<Navigate to="/compatibility-free" replace />} />
           <Route path="/compatibility-free" element={<FreePage />} />
           <Route path="/result/:sessionId" element={<ResultPage />} />
+          <Route path="/paid" element={<PaidPage />} />
           <Route path="*" element={<Navigate to="/compatibility-free" replace />} />
         </Routes>
       </div>
