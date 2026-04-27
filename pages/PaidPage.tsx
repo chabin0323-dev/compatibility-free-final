@@ -1,23 +1,66 @@
-import React, { useState } from 'react';
+'use client';
+
+import React, { useState, useEffect, useRef } from 'react';
 
 const PaidPage: React.FC = () => {
   const [copied, setCopied] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
-  const paypalUrl = 'https://www.paypal.com/ncp/payment/AMEJ4V5C564UN';
-
-  const handleDirectPayment = () => {
-    window.location.href = paypalUrl;
-  };
+  const paypalRef = useRef<HTMLDivElement>(null);
+  const rendered = useRef(false);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(paypalUrl).then(() => {
+    const url = window.location.href;
+    navigator.clipboard.writeText(url).then(() => {
       setCopied(true);
       setShowGuide(true);
       setTimeout(() => setCopied(false), 30000);
     }).catch(() => {
-      window.location.href = paypalUrl;
+      prompt('このURLをコピーしてください:', url);
     });
   };
+
+  useEffect(() => {
+    if (rendered.current) return;
+
+    const script = document.createElement('script');
+    script.src = 'https://www.paypal.com/sdk/js?client-id=AfUn22zK4UsNWfThHlT_1sqvEi8gmtXHZ4jWMYafWPrX4bBorPFvMY8ZTuZAqTfVXygpK95YmdkZsj-N&currency=JPY&locale=ja_JP';
+    script.async = true;
+    script.onload = () => {
+      if (rendered.current) return;
+      rendered.current = true;
+
+      (window as any).paypal.Buttons({
+        style: {
+          layout: 'vertical',
+          color: 'gold',
+          shape: 'pill',
+          label: 'pay',
+          height: 50
+        },
+        createOrder: function(_data: any, actions: any) {
+          return actions.order.create({
+            purchase_units: [{
+              amount: {
+                value: '780',
+                currency_code: 'JPY'
+              },
+              description: 'NEXA LoveLab 使い放題プラン'
+            }]
+          });
+        },
+        onApprove: function(_data: any, actions: any) {
+          return actions.order.capture().then(function() {
+            window.location.href = '/thanks';
+          });
+        },
+        onError: function(err: any) {
+          console.error('PayPal Error:', err);
+          alert('決済中にエラーが発生しました。\nしばらくしてから再度お試しください。');
+        }
+      }).render(paypalRef.current);
+    };
+    document.body.appendChild(script);
+  }, []);
 
   return (
     <div style={{ backgroundColor: '#0f021b', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'sans-serif', padding: '20px' }}>
@@ -31,9 +74,14 @@ const PaidPage: React.FC = () => {
 
         <p style={{ fontWeight: 'bold', fontSize: '28px', color: '#ff4da6', margin: '16px 0', textAlign: 'center' }}>使い放題 780円</p>
 
-        {/* メイン決済ボタン */}
-        <div onClick={handleDirectPayment} style={{ cursor: 'pointer', textAlign: 'center', marginBottom: '16px' }}>
+        {/* 鍵画像 */}
+        <div style={{ textAlign: 'center', marginBottom: '16px' }}>
           <img src="/image_7.png" style={{ width: '100%', maxWidth: '360px', borderRadius: '12px' }} alt="button" />
+        </div>
+
+        {/* PayPalボタン */}
+        <div ref={paypalRef} id="paypal-button-container" style={{ marginBottom: '16px' }}>
+          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '14px', textAlign: 'center', padding: '10px' }}>決済ボタンを読み込み中...</p>
         </div>
 
         {/* 区切り */}
@@ -72,93 +120,44 @@ const PaidPage: React.FC = () => {
 
             {/* iPhoneガイド */}
             <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '16px', marginBottom: '12px' }}>
-              <p style={{ color: '#f7c948', fontSize: '14px', fontWeight: 'bold', marginBottom: '12px' }}>
-                📱 iPhoneの方（Safari）
-              </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                  <span style={{ background: 'linear-gradient(135deg, #9333ea, #ec4899)', borderRadius: '50%', width: '26px', height: '26px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold', color: 'white', flexShrink: 0 }}>1</span>
+              <p style={{ color: '#f7c948', fontSize: '14px', fontWeight: 'bold', marginBottom: '12px' }}>📱 iPhoneの方（Safari）</p>
+              {[
+                { title: 'ホームボタンを押す', desc: 'このTikTokを一度閉じてホーム画面に戻ります' },
+                { title: 'Safariアプリを探してタップ', desc: '青いコンパスマークのアプリです🧭' },
+                { title: '画面上のアドレスバーをタップ', desc: 'URLが入力できる細長い欄をタップします' },
+                { title: '「ペースト」をタップ', desc: 'アドレスバーの上に「ペースト」と出てくるのでタップします' },
+                { title: '「Go」または「開く」をタップ', desc: 'PayPalの決済ページが開きます🎉' },
+              ].map((step, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginBottom: '12px' }}>
+                  <span style={{ background: 'linear-gradient(135deg, #9333ea, #ec4899)', borderRadius: '50%', width: '26px', height: '26px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold', color: 'white', flexShrink: 0 }}>{i + 1}</span>
                   <div>
-                    <p style={{ color: 'white', fontSize: '13px', fontWeight: 'bold', margin: '0 0 2px' }}>ホームボタンを押す</p>
-                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', margin: 0 }}>このTikTokを一度閉じてホーム画面に戻ります</p>
+                    <p style={{ color: 'white', fontSize: '13px', fontWeight: 'bold', margin: '0 0 2px' }}>{step.title}</p>
+                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', margin: 0 }}>{step.desc}</p>
                   </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                  <span style={{ background: 'linear-gradient(135deg, #9333ea, #ec4899)', borderRadius: '50%', width: '26px', height: '26px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold', color: 'white', flexShrink: 0 }}>2</span>
-                  <div>
-                    <p style={{ color: 'white', fontSize: '13px', fontWeight: 'bold', margin: '0 0 2px' }}>Safariアプリを探してタップ</p>
-                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', margin: 0 }}>青いコンパスマークのアプリです🧭</p>
-                  </div>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                  <span style={{ background: 'linear-gradient(135deg, #9333ea, #ec4899)', borderRadius: '50%', width: '26px', height: '26px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold', color: 'white', flexShrink: 0 }}>3</span>
-                  <div>
-                    <p style={{ color: 'white', fontSize: '13px', fontWeight: 'bold', margin: '0 0 2px' }}>画面上のアドレスバーをタップ</p>
-                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', margin: 0 }}>URLが入力できる細長い欄をタップします</p>
-                  </div>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                  <span style={{ background: 'linear-gradient(135deg, #9333ea, #ec4899)', borderRadius: '50%', width: '26px', height: '26px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold', color: 'white', flexShrink: 0 }}>4</span>
-                  <div>
-                    <p style={{ color: 'white', fontSize: '13px', fontWeight: 'bold', margin: '0 0 2px' }}>「ペースト」をタップ</p>
-                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', margin: 0 }}>アドレスバーの上に「ペースト」と出てくるのでタップします</p>
-                  </div>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                  <span style={{ background: 'linear-gradient(135deg, #9333ea, #ec4899)', borderRadius: '50%', width: '26px', height: '26px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold', color: 'white', flexShrink: 0 }}>5</span>
-                  <div>
-                    <p style={{ color: 'white', fontSize: '13px', fontWeight: 'bold', margin: '0 0 2px' }}>「Go」または「開く」をタップ</p>
-                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', margin: 0 }}>PayPalの決済ページが開きます🎉</p>
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
 
             {/* Androidガイド */}
             <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '16px', marginBottom: '12px' }}>
-              <p style={{ color: '#f7c948', fontSize: '14px', fontWeight: 'bold', marginBottom: '12px' }}>
-                🤖 Androidの方（Chrome）
-              </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                  <span style={{ background: 'linear-gradient(135deg, #3b82f6, #06b6d4)', borderRadius: '50%', width: '26px', height: '26px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold', color: 'white', flexShrink: 0 }}>1</span>
+              <p style={{ color: '#f7c948', fontSize: '14px', fontWeight: 'bold', marginBottom: '12px' }}>🤖 Androidの方（Chrome）</p>
+              {[
+                { title: '戻るボタンでホーム画面に戻る', desc: 'TikTokを閉じてホーム画面に戻ります' },
+                { title: 'Chromeアプリを開く', desc: '赤・黄・緑・青の丸いアイコンです🌐' },
+                { title: 'アドレスバーをタップ', desc: '画面上部のURL入力欄をタップします' },
+                { title: '長押しして「貼り付け」をタップ', desc: 'アドレスバーを長押しすると「貼り付け」が出ます' },
+                { title: 'Enterをタップ', desc: 'PayPalの決済ページが開きます🎉' },
+              ].map((step, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginBottom: '12px' }}>
+                  <span style={{ background: 'linear-gradient(135deg, #3b82f6, #06b6d4)', borderRadius: '50%', width: '26px', height: '26px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold', color: 'white', flexShrink: 0 }}>{i + 1}</span>
                   <div>
-                    <p style={{ color: 'white', fontSize: '13px', fontWeight: 'bold', margin: '0 0 2px' }}>戻るボタンでホーム画面に戻る</p>
-                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', margin: 0 }}>TikTokを閉じてホーム画面に戻ります</p>
+                    <p style={{ color: 'white', fontSize: '13px', fontWeight: 'bold', margin: '0 0 2px' }}>{step.title}</p>
+                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', margin: 0 }}>{step.desc}</p>
                   </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                  <span style={{ background: 'linear-gradient(135deg, #3b82f6, #06b6d4)', borderRadius: '50%', width: '26px', height: '26px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold', color: 'white', flexShrink: 0 }}>2</span>
-                  <div>
-                    <p style={{ color: 'white', fontSize: '13px', fontWeight: 'bold', margin: '0 0 2px' }}>Chromeアプリを開く</p>
-                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', margin: 0 }}>赤・黄・緑・青の丸いアイコンです🌐</p>
-                  </div>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                  <span style={{ background: 'linear-gradient(135deg, #3b82f6, #06b6d4)', borderRadius: '50%', width: '26px', height: '26px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold', color: 'white', flexShrink: 0 }}>3</span>
-                  <div>
-                    <p style={{ color: 'white', fontSize: '13px', fontWeight: 'bold', margin: '0 0 2px' }}>アドレスバーをタップ</p>
-                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', margin: 0 }}>画面上部のURL入力欄をタップします</p>
-                  </div>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                  <span style={{ background: 'linear-gradient(135deg, #3b82f6, #06b6d4)', borderRadius: '50%', width: '26px', height: '26px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold', color: 'white', flexShrink: 0 }}>4</span>
-                  <div>
-                    <p style={{ color: 'white', fontSize: '13px', fontWeight: 'bold', margin: '0 0 2px' }}>長押しして「貼り付け」をタップ</p>
-                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', margin: 0 }}>アドレスバーを長押しすると「貼り付け」が出ます</p>
-                  </div>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                  <span style={{ background: 'linear-gradient(135deg, #3b82f6, #06b6d4)', borderRadius: '50%', width: '26px', height: '26px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold', color: 'white', flexShrink: 0 }}>5</span>
-                  <div>
-                    <p style={{ color: 'white', fontSize: '13px', fontWeight: 'bold', margin: '0 0 2px' }}>Enterをタップ</p>
-                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', margin: 0 }}>PayPalの決済ページが開きます🎉</p>
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
 
-            {/* もう一度コピーボタン */}
             <button
               onClick={handleCopy}
               style={{ width: '100%', padding: '14px', borderRadius: '50px', background: copied ? 'linear-gradient(90deg, #22c55e, #16a34a)' : 'linear-gradient(90deg, #9333ea, #ec4899)', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: 'bold', color: 'white', marginBottom: '12px' }}
