@@ -1,20 +1,8 @@
 import React, { useEffect, useState } from 'react';
 
 function isTikTokBrowser(): boolean {
-  const ua = navigator.userAgent || '';
-  // TikTok UA検知
-  if (/musical_ly|ByteLocale|ByteFederation|TikTok|Bytedance|ByteWebView|aweme/i.test(ua)) return true;
-  // URLパラメータ検知
-  if (new URLSearchParams(window.location.search).get('from') === 'tiktok') return true;
-  // iOS WebView検知：
-  // 通常のSafariは "Version/XX Mobile Safari/XXX" のパターンを持つ
-  // TikTok内蔵ブラウザは "Version/" がない or "Mobile/" のみ
-  const isIOS = /iPhone|iPod|iPad/.test(ua);
-  const isChromeiOS = /CriOS/.test(ua);   // Chrome on iOS
-  const isFirefoxiOS = /FxiOS/.test(ua);  // Firefox on iOS
-  const hasVersionToken = /Version\/[\d.]+.*Safari/.test(ua); // 本物のSafari
-  if (isIOS && !isChromeiOS && !isFirefoxiOS && !hasVersionToken) return true;
-  return false;
+  // URLパラメータ ?from=tiktok のみで判定（100%確実）
+  return new URLSearchParams(window.location.search).get('from') === 'tiktok';
 }
 
 const TikTokGuide: React.FC = () => {
