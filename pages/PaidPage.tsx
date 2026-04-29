@@ -19,10 +19,7 @@ const PaidPage: React.FC = () => {
       const orderConfig = {
         createOrder: (_: any, actions: any) =>
           actions.order.create({
-            purchase_units: [{ amount: { value: '780', currency_code: 'JPY' }, description: 'LoveLAB 運命鑑定' }],
-            application_context: {
-              shipping_preference: 'NO_SHIPPING'
-            }
+            purchase_units: [{ amount: { value: '780', currency_code: 'JPY' }, description: 'LoveLAB 運命鑑定' }]
           }),
         onApprove: (_: any, actions: any) =>
           actions.order.capture().then(() => {
