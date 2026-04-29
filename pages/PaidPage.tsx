@@ -78,11 +78,20 @@ const PaidPage: React.FC = () => {
           </span>
         </a>
 
-        <div style={{ marginTop: '16px', background: 'rgba(201,169,110,.08)', border: '1px solid rgba(201,169,110,.2)', borderRadius: '14px', padding: '14px 16px', textAlign: 'center' }}>
-          <p style={{ fontSize: '12px', color: 'rgba(201,169,110,.9)', lineHeight: 1.8 }}>
-            💡 決済ページで<strong style={{ color: '#c9a96e' }}>「☑ チェックボックス」</strong>に<br />
-            チェックを入れると支払いボタンが有効になります
-          </p>
+        <div style={{ marginTop: '16px', background: 'rgba(201,169,110,.08)', border: '1px solid rgba(201,169,110,.2)', borderRadius: '14px', padding: '16px', textAlign: 'left' }}>
+          <p style={{ fontSize: '12px', color: '#c9a96e', fontWeight: 700, marginBottom: '10px' }}>💡 決済ページでの手順</p>
+          <div style={{ display: 'flex', gap: '10px', marginBottom: '6px' }}>
+            <span style={{ background: '#c4637a', color: '#fff', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 900, flexShrink: 0 }}>1</span>
+            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,.8)', margin: 0, lineHeight: 1.7 }}>カード情報を入力</p>
+          </div>
+          <div style={{ display: 'flex', gap: '10px', marginBottom: '6px' }}>
+            <span style={{ background: '#c9a96e', color: '#fff', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 900, flexShrink: 0 }}>2</span>
+            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,.8)', margin: 0, lineHeight: 1.7 }}><strong style={{ color: '#c9a96e' }}>「☑ 利用規約に同意する」</strong>にチェックを入れる</p>
+          </div>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <span style={{ background: '#c4637a', color: '#fff', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 900, flexShrink: 0 }}>3</span>
+            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,.8)', margin: 0, lineHeight: 1.7 }}>「¥780を支払う」ボタンをタップ</p>
+          </div>
         </div>
 
         <p style={{ textAlign: 'center', marginTop: '20px', fontSize: '12px', color: 'rgba(255,255,255,.2)', letterSpacing: '.05em' }}>© NEXA | AI Fortune</p>
