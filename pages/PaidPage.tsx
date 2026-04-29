@@ -21,41 +21,23 @@ const PaidPage: React.FC = () => {
 
   useEffect(() => {
     if (rendered.current) return;
-
     const script = document.createElement('script');
     script.src = 'https://www.paypal.com/sdk/js?client-id=AfUn22zK4UsNWfThHlT_1sqvEi8gmtXHZ4jWMYafWPrX4bBorPFvMY8ZTuZAqTfVXygpK95YmdkZsj-N&currency=JPY&locale=ja_JP';
     script.async = true;
     script.onload = () => {
       if (rendered.current) return;
       rendered.current = true;
-
       (window as any).paypal.Buttons({
-        style: {
-          layout: 'vertical',
-          color: 'gold',
-          shape: 'pill',
-          label: 'pay',
-          height: 50
-        },
-        createOrder: function(_data: any, actions: any) {
-          return actions.order.create({
-            purchase_units: [{
-              amount: {
-                value: '780',
-                currency_code: 'JPY'
-              },
-              description: 'NEXA LoveLab 使い放題プラン'
-            }]
-          });
-        },
-        onApprove: function(_data: any, actions: any) {
-          return actions.order.capture().then(function() {
-            window.location.href = '/thanks';
-          });
-        },
-        onError: function(err: any) {
+        style: { layout: 'vertical', color: 'gold', shape: 'pill', label: 'pay', height: 50 },
+        createOrder: (_data: any, actions: any) =>
+          actions.order.create({
+            purchase_units: [{ amount: { value: '780', currency_code: 'JPY' }, description: 'LoveLAB 運命鑑定' }]
+          }),
+        onApprove: (_data: any, actions: any) =>
+          actions.order.capture().then(() => { window.location.href = '/thanks'; }),
+        onError: (err: any) => {
           console.error('PayPal Error:', err);
-          alert('決済中にエラーが発生しました。\nしばらくしてから再度お試しください。');
+          alert('決済中にエラーが発生しました。しばらくしてから再度お試しください。');
         }
       }).render(paypalRef.current);
     };
@@ -63,115 +45,118 @@ const PaidPage: React.FC = () => {
   }, []);
 
   return (
-    <div style={{ backgroundColor: '#0f021b', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'sans-serif', padding: '20px' }}>
-      <div style={{ maxWidth: '420px', width: '100%', border: '1px solid rgba(180,100,255,0.4)', borderRadius: '20px', padding: '32px 24px', backgroundColor: 'rgba(30,10,50,0.9)' }}>
+    <div style={{ background: '#0a0608', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Noto Sans JP', sans-serif", padding: '32px 20px', color: '#f0ece8' }}>
+      <div style={{ maxWidth: '420px', width: '100%' }}>
 
-        <img src="/app_concept.png" style={{ width: '100%', borderRadius: '12px', marginBottom: '24px', display: 'block' }} alt="concept" />
-
-        <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '8px', lineHeight: '1.6', color: '#ffffff', textAlign: 'center' }}>
-          二人の未来が具体的に見える！<br />今だけ開かれる特別価格の扉！
-        </h2>
-
-        <p style={{ fontWeight: 'bold', fontSize: '28px', color: '#ff4da6', margin: '16px 0', textAlign: 'center' }}>使い放題 780円</p>
-
-        {/* 鍵画像 */}
-        <div style={{ textAlign: 'center', marginBottom: '16px' }}>
-          <img src="/image_7.png" style={{ width: '100%', maxWidth: '360px', borderRadius: '12px' }} alt="button" />
+        {/* Brand */}
+        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+          <p style={{ fontSize: '11px', letterSpacing: '.5em', color: '#c9a96e', textTransform: 'uppercase', marginBottom: '8px' }}>NEXA | AI Fortune</p>
+          <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '52px', fontWeight: 700, color: '#f8f0e8', lineHeight: 1.1 }}>
+            Love<span style={{ color: '#c4637a' }}>LAB</span>
+          </h1>
+          <p style={{ fontSize: '13px', color: 'rgba(255,255,255,.45)', marginTop: '8px' }}>運命鑑定 — あなたの本質と愛の行方を読み解く</p>
         </div>
 
-        {/* PayPalボタン */}
+        {/* Features */}
+        <div style={{ background: 'rgba(255,255,255,.03)', border: '1px solid rgba(196,99,122,.2)', borderRadius: '18px', padding: '20px', marginBottom: '24px' }}>
+          {[
+            ['🔮', '本質鑑定', '生年月日・血液型・星座・干支から本質を分析'],
+            ['💫', '縁の深さ', 'なぜ惹かれるのか、二人の魂の接点を解読'],
+            ['📅', '運気の波', '今年の流れと、動くべきベストタイミング'],
+            ['💌', '成就の鍵', 'この恋を実らせるための具体的なアドバイス'],
+            ['♾️', '使い放題', '一度購入すればいつでも何度でも鑑定可能'],
+          ].map(([icon, strong, text]) => (
+            <div key={strong} style={{ display: 'flex', gap: '12px', padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,.06)', alignItems: 'flex-start' }}>
+              <span style={{ fontSize: '18px', minWidth: '28px', textAlign: 'center' }}>{icon}</span>
+              <p style={{ fontSize: '14px', color: 'rgba(255,255,255,.82)', lineHeight: 1.7 }}>
+                <strong style={{ color: '#c9a96e', fontWeight: 500 }}>{strong}</strong>：{text}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        {/* Price */}
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+          <p style={{ fontSize: '11px', letterSpacing: '.3em', color: 'rgba(255,255,255,.35)', marginBottom: '4px', fontFamily: "'Cormorant Garamond', serif", textTransform: 'uppercase' }}>Special Price</p>
+          <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '58px', fontWeight: 700, color: '#c4637a', lineHeight: 1 }}>
+            <span style={{ fontSize: '32px', verticalAlign: 'super' }}>¥</span>780
+          </p>
+          <p style={{ fontSize: '11px', color: 'rgba(255,255,255,.3)', marginTop: '4px' }}>買い切り | 使い放題 | 即日アクセス</p>
+        </div>
+
+        {/* PayPal Button */}
         <div ref={paypalRef} id="paypal-button-container" style={{ marginBottom: '16px' }}>
           <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '14px', textAlign: 'center', padding: '10px' }}>決済ボタンを読み込み中...</p>
         </div>
 
-        {/* 区切り */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-          <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.15)' }} />
-          <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px' }}>うまく開けない方はこちら</span>
-          <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.15)' }} />
-        </div>
+        {/* TikTok guide */}
+        <div style={{ borderTop: '1px solid rgba(255,255,255,.08)', paddingTop: '16px', marginTop: '8px' }}>
+          <p style={{ color: 'rgba(255,255,255,.35)', fontSize: '11px', textAlign: 'center', marginBottom: '12px', letterSpacing: '.05em' }}>「ブラウザで開いてください」と表示された方へ</p>
 
-        {/* コピー前 */}
-        {!showGuide && (
-          <div style={{ background: 'rgba(147,51,234,0.15)', border: '1px solid rgba(147,51,234,0.4)', borderRadius: '16px', padding: '16px', marginBottom: '20px' }}>
-            <p style={{ color: '#f7c948', fontSize: '14px', fontWeight: 'bold', textAlign: 'center', marginBottom: '8px' }}>
-              ⚠️ 「ブラウザで開いてください」と<br />表示された方へ
-            </p>
-            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '12px', textAlign: 'center', marginBottom: '12px', lineHeight: '1.8' }}>
-              下のボタンをタップすると<br />決済URLが自動でコピーされます
-            </p>
+          {!showGuide && (
             <button
               onClick={handleCopy}
-              style={{ width: '100%', padding: '14px', borderRadius: '50px', background: 'linear-gradient(90deg, #9333ea, #ec4899)', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: 'bold', color: 'white' }}
+              style={{ width: '100%', padding: '14px', borderRadius: '50px', background: 'linear-gradient(90deg,#9333ea,#ec4899)', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: 'bold', color: 'white', marginBottom: '16px' }}
             >
               📋 決済URLをコピーする
             </button>
-          </div>
-        )}
+          )}
 
-        {/* コピー後の詳細ガイド */}
-        {showGuide && (
-          <div style={{ marginBottom: '20px' }}>
-            <div style={{ background: 'rgba(34,197,94,0.1)', border: '2px solid #22c55e', borderRadius: '16px', padding: '16px', marginBottom: '16px', textAlign: 'center' }}>
-              <p style={{ fontSize: '36px', margin: '0 0 8px' }}>✅</p>
-              <p style={{ color: '#22c55e', fontSize: '16px', fontWeight: 'bold', margin: 0 }}>URLをコピーしました！</p>
-              <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', margin: '4px 0 0' }}>このページを閉じずに下の手順を見ながら進めてください</p>
-            </div>
+          {showGuide && (
+            <div style={{ marginBottom: '16px' }}>
+              <div style={{ background: 'rgba(34,197,94,.1)', border: '2px solid #22c55e', borderRadius: '14px', padding: '14px', textAlign: 'center', marginBottom: '14px' }}>
+                <p style={{ fontSize: '28px', margin: '0 0 6px' }}>✅</p>
+                <p style={{ color: '#22c55e', fontSize: '15px', fontWeight: 'bold', margin: 0 }}>URLをコピーしました！</p>
+              </div>
 
-            {/* iPhoneガイド */}
-            <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '16px', marginBottom: '12px' }}>
-              <p style={{ color: '#f7c948', fontSize: '14px', fontWeight: 'bold', marginBottom: '12px' }}>📱 iPhoneの方（Safari）</p>
               {[
-                { title: 'ホームボタンを押す', desc: 'このTikTokを一度閉じてホーム画面に戻ります' },
-                { title: 'Safariアプリを探してタップ', desc: '青いコンパスマークのアプリです🧭' },
-                { title: '画面上のアドレスバーをタップ', desc: 'URLが入力できる細長い欄をタップします' },
-                { title: '「ペースト」をタップ', desc: 'アドレスバーの上に「ペースト」と出てくるのでタップします' },
-                { title: '「Go」または「開く」をタップ', desc: 'PayPalの決済ページが開きます🎉' },
-              ].map((step, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginBottom: '12px' }}>
-                  <span style={{ background: 'linear-gradient(135deg, #9333ea, #ec4899)', borderRadius: '50%', width: '26px', height: '26px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold', color: 'white', flexShrink: 0 }}>{i + 1}</span>
-                  <div>
-                    <p style={{ color: 'white', fontSize: '13px', fontWeight: 'bold', margin: '0 0 2px' }}>{step.title}</p>
-                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', margin: 0 }}>{step.desc}</p>
-                  </div>
+                { os: '📱 iPhoneの方（Safari）', color: '#f7c948', steps: ['ホーム画面に戻る', 'Safariを開く', 'アドレスバーをタップ', '「ペースト」をタップ', '「Go」をタップ → 決済ページへ'] },
+                { os: '🤖 Androidの方（Chrome）', color: '#60a5fa', steps: ['ホーム画面に戻る', 'Chromeを開く', 'アドレスバーをタップ', '長押し→「貼り付け」をタップ', 'Enterをタップ → 決済ページへ'] },
+              ].map(({ os, color, steps }) => (
+                <div key={os} style={{ background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.1)', borderRadius: '14px', padding: '14px', marginBottom: '10px' }}>
+                  <p style={{ color, fontSize: '13px', fontWeight: 'bold', marginBottom: '10px' }}>{os}</p>
+                  {steps.map((step, i) => (
+                    <div key={i} style={{ display: 'flex', gap: '10px', marginBottom: '8px', alignItems: 'flex-start' }}>
+                      <span style={{ background: color, borderRadius: '50%', width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 'bold', color: '#000', flexShrink: 0 }}>{i + 1}</span>
+                      <p style={{ color: 'rgba(255,255,255,.75)', fontSize: '12px', margin: 0, lineHeight: 1.6 }}>{step}</p>
+                    </div>
+                  ))}
                 </div>
               ))}
+
+              <button
+                onClick={handleCopy}
+                style={{ width: '100%', padding: '12px', borderRadius: '50px', background: copied ? 'linear-gradient(90deg,#22c55e,#16a34a)' : 'linear-gradient(90deg,#9333ea,#ec4899)', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 'bold', color: 'white' }}
+              >
+                {copied ? '✅ コピー済み！' : '📋 もう一度URLをコピーする'}
+              </button>
             </div>
-
-            {/* Androidガイド */}
-            <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '16px', marginBottom: '12px' }}>
-              <p style={{ color: '#f7c948', fontSize: '14px', fontWeight: 'bold', marginBottom: '12px' }}>🤖 Androidの方（Chrome）</p>
-              {[
-                { title: '戻るボタンでホーム画面に戻る', desc: 'TikTokを閉じてホーム画面に戻ります' },
-                { title: 'Chromeアプリを開く', desc: '赤・黄・緑・青の丸いアイコンです🌐' },
-                { title: 'アドレスバーをタップ', desc: '画面上部のURL入力欄をタップします' },
-                { title: '長押しして「貼り付け」をタップ', desc: 'アドレスバーを長押しすると「貼り付け」が出ます' },
-                { title: 'Enterをタップ', desc: 'PayPalの決済ページが開きます🎉' },
-              ].map((step, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginBottom: '12px' }}>
-                  <span style={{ background: 'linear-gradient(135deg, #3b82f6, #06b6d4)', borderRadius: '50%', width: '26px', height: '26px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold', color: 'white', flexShrink: 0 }}>{i + 1}</span>
-                  <div>
-                    <p style={{ color: 'white', fontSize: '13px', fontWeight: 'bold', margin: '0 0 2px' }}>{step.title}</p>
-                    <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', margin: 0 }}>{step.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <button
-              onClick={handleCopy}
-              style={{ width: '100%', padding: '14px', borderRadius: '50px', background: copied ? 'linear-gradient(90deg, #22c55e, #16a34a)' : 'linear-gradient(90deg, #9333ea, #ec4899)', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: 'bold', color: 'white', marginBottom: '12px' }}
-            >
-              {copied ? '✅ コピー済み！' : '📋 もう一度URLをコピーする'}
-            </button>
-          </div>
-        )}
-
-        <div style={{ background: 'white', padding: '16px', borderRadius: '12px', textAlign: 'center' }}>
-          <p style={{ color: '#333', fontSize: '11px', marginBottom: '10px' }}>安心のPayPal決済に対応</p>
-          <img src="/cards.png" style={{ width: '100%', maxWidth: '280px' }} alt="cards" />
+          )}
         </div>
 
+        {/* Cards */}
+        <div style={{ background: 'rgba(255,255,255,.96)', borderRadius: '14px', padding: '14px', textAlign: 'center', marginTop: '16px', boxShadow: '0 4px 20px rgba(0,0,0,.25)' }}>
+          <p style={{ color: '#666', fontSize: '10px', marginBottom: '10px', letterSpacing: '.15em', fontWeight: 600 }}>安心のPayPal決済に対応</p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', justifyContent: 'center' }}>
+            {[
+              { label: 'VISA', bg: 'linear-gradient(135deg,#1a1f71,#2b3296)', color: '#fff' },
+              { label: 'JCB', bg: 'linear-gradient(135deg,#003087,#0070ba)', color: '#fff' },
+              { label: 'AMEX', bg: 'linear-gradient(135deg,#2557d6,#1a44c0)', color: '#fff' },
+              { label: 'PayPal', bg: 'linear-gradient(135deg,#003087,#009cde)', color: '#fff' },
+              { label: '🍎 Pay', bg: '#000', color: '#fff' },
+            ].map(({ label, bg, color }) => (
+              <span key={label} style={{ background: bg, color, fontSize: '11px', fontWeight: 900, padding: '4px 10px', borderRadius: '5px', boxShadow: '0 2px 6px rgba(0,0,0,.18)' }}>{label}</span>
+            ))}
+            <span style={{ background: '#fff', border: '1px solid #ddd', fontSize: '11px', fontWeight: 900, padding: '4px 6px', borderRadius: '5px', boxShadow: '0 2px 6px rgba(0,0,0,.1)', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+              <span style={{ width: 16, height: 11, background: 'linear-gradient(to right, #eb001b 50%, #f79e1b 50%)', borderRadius: '2px', display: 'inline-block' }}></span>
+              <span style={{ color: '#333' }}>Master</span>
+            </span>
+          </div>
+        </div>
+
+        <p style={{ textAlign: 'center', marginTop: '24px', fontSize: '11px', color: 'rgba(255,255,255,.15)', lineHeight: 1.9 }}>
+          © NEXA | AI Fortune
+        </p>
       </div>
     </div>
   );
