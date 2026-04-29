@@ -115,6 +115,20 @@ function SplashScreen({ onFinish }: { onFinish: () => void }) {
 function App() {
   const path = window.location.pathname;
   const params = new URLSearchParams(window.location.search);
+
+  // /tiktok をリアルブラウザで開いた場合：レンダー前に即リダイレクト
+  if (path === '/tiktok') {
+    const ua = navigator.userAgent;
+    const isReal = /Version\/[\d.]+.*Mobile.*Safari/i.test(ua)
+      || /CriOS\/[\d.]+/.test(ua)
+      || /Chrome\/[\d.]+ /.test(ua)
+      || /Firefox\/[\d.]+/.test(ua);
+    if (isReal) {
+      window.location.replace('/compatibility-free?skip_splash=1');
+      return null;
+    }
+  }
+
   const skipSplash = path === '/paid' || path === '/tiktok' || params.get('skip_splash') === '1';
   const [showSplash, setShowSplash] = useState(!skipSplash);
   const [isTikTok] = useState(() => isTikTokBrowser());
