@@ -11,17 +11,12 @@ function isRealBrowser(): boolean {
 }
 
 export function isTikTokBrowser(): boolean {
-  const hasParam = new URLSearchParams(window.location.search).get('from') === 'tiktok';
-  if (!hasParam) return false;
-  // 本物のブラウザならアプリへ即リダイレクト
-  if (isRealBrowser()) {
-    window.location.replace('/compatibility-free');
-    return false;
-  }
-  return true;
+  return new URLSearchParams(window.location.search).get('from') === 'tiktok';
 }
 
 const TikTokGuide: React.FC = () => {
+  const goToApp = () => { window.location.href = '/compatibility-free'; };
+
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 9999,
@@ -104,6 +99,21 @@ const TikTokGuide: React.FC = () => {
           background: 'linear-gradient(90deg,transparent,rgba(196,99,122,.4),transparent)',
           marginBottom: '24px',
         }} />
+
+        {/* Safariで開いた後用ボタン */}
+        <button
+          onClick={goToApp}
+          style={{
+            width: '100%', maxWidth: '300px', padding: '16px',
+            borderRadius: '60px', border: 'none', cursor: 'pointer',
+            background: 'linear-gradient(135deg,#c4637a,#c9a96e)',
+            color: '#fff', fontSize: '15px', fontWeight: 700,
+            boxShadow: '0 0 24px rgba(196,99,122,.4)',
+            marginBottom: '20px',
+          }}
+        >
+          ✨ Safariで開いたらここをタップ
+        </button>
 
         <p style={{ color: 'rgba(255,255,255,.18)', fontSize: '11px', letterSpacing: '.05em' }}>
           © NEXA | LoveLAB 運命鑑定
