@@ -107,20 +107,6 @@ const TikTokGuide: React.FC = () => {
           ))}
         </div>
 
-        {/* Safariで開いた後用 */}
-        <button
-          onClick={goToApp}
-          style={{
-            padding: '14px 32px', borderRadius: '60px', border: 'none',
-            cursor: 'pointer', background: 'linear-gradient(135deg,#c4637a,#c9a96e)',
-            color: '#fff', fontSize: '14px', fontWeight: 700,
-            boxShadow: '0 0 20px rgba(196,99,122,.35)',
-            marginBottom: '24px',
-          }}
-        >
-          ✨ Safariで開いたらここをタップ
-        </button>
-
         <p style={{ color: 'rgba(255,255,255,.18)', fontSize: '11px', letterSpacing: '.05em' }}>
           © NEXA | LoveLAB 運命鑑定
         </p>
