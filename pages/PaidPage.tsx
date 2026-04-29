@@ -40,10 +40,6 @@ const PaidPage: React.FC = () => {
         if (appleBtn.isEligible() && appleRef.current) {
           appleBtn.render(appleRef.current).catch(() => {});
         }
-        const cardBtn = pp.Buttons({ ...orderConfig, fundingSource: pp.FUNDING.CARD, style: { shape: 'pill', height: 52 } });
-        if (cardBtn.isEligible() && cardRef.current) {
-          cardBtn.render(cardRef.current).catch(() => { setSdkError(true); });
-        }
       } catch(e) { setSdkError(true); }
       setSdkLoaded(true);
     };
@@ -129,8 +125,13 @@ const PaidPage: React.FC = () => {
         {/* ① Apple Pay */}
         <div ref={appleRef} id="apple-container" style={{ marginBottom: '12px' }} />
 
-        {/* ② クレジット/デビットカード */}
-        <div ref={cardRef} id="card-container" style={{ marginBottom: '12px' }} />
+        {/* ② クレジット/デビットカード（NCP直接リンク） */}
+        <a
+          href={PAYPAL_NCP}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%', padding: '16px', borderRadius: '50px', background: '#1c1c1e', border: '1px solid rgba(255,255,255,.2)', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: '15px', marginBottom: '12px', boxSizing: 'border-box' as const }}
+        >
+          💳 クレジットカードまたはデビットカード
+        </a>
 
         {/* エラー時のみフォールバック表示 */}
         {sdkError && (
