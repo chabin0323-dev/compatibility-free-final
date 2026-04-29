@@ -1,51 +1,10 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 
 const PAYPAL_NCP = 'https://www.paypal.com/ncp/payment/AMEJ4V5C564UN?country.x=JP&locale.x=ja_JP';
 
 const PaidPage: React.FC = () => {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const appleRef = useRef<HTMLDivElement>(null);
-  const rendered = useRef(false);
-  const [sdkError, setSdkError] = React.useState(false);
-  const [sdkLoaded, setSdkLoaded] = React.useState(false);
-
-  useEffect(() => {
-    if (rendered.current) return;
-    const script = document.createElement('script');
-    script.src = 'https://www.paypal.com/sdk/js?client-id=AfUn22zK4UsNWfThHlT_1sqvEi8gmtXHZ4jWMYafWPrX4bBorPFvMY8ZTuZAqTfVXygpK95YmdkZsj-N&currency=JPY&locale=ja_JP&enable-funding=applepay,card&components=buttons';
-    script.async = true;
-    script.onerror = () => { setSdkError(true); setSdkLoaded(true); };
-    script.onload = () => {
-      if (rendered.current) return;
-      rendered.current = true;
-      const pp = (window as any).paypal;
-      const orderConfig = {
-        createOrder: (_: any, actions: any) =>
-          actions.order.create({
-            purchase_units: [{ amount: { value: '780', currency_code: 'JPY' }, description: 'LoveLAB 運命鑑定' }]
-          }),
-        onApprove: (_: any, actions: any) =>
-          actions.order.capture().then(() => {
-            window.location.href = 'https://lovelab-thankyou.vercel.app';
-          }),
-        onError: (err: any) => {
-          console.error('PayPal Error:', err);
-          setSdkError(true);
-        }
-      };
-      try {
-        const appleBtn = pp.Buttons({ ...orderConfig, fundingSource: pp.FUNDING.APPLEPAY, style: { shape: 'pill', height: 52 } });
-        if (appleBtn.isEligible() && appleRef.current) {
-          appleBtn.render(appleRef.current).catch(() => {});
-        }
-      } catch(e) { setSdkError(true); }
-      setSdkLoaded(true);
-    };
-    document.body.appendChild(script);
-  }, []);
-
   return (
     <div style={{
       background: '#0a0608', minHeight: '100vh',
@@ -99,49 +58,27 @@ const PaidPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Price - 目立つデザイン */}
+        {/* Price */}
         <div style={{ textAlign: 'center', marginBottom: '32px', background: 'rgba(201,169,110,.06)', border: '1px solid rgba(201,169,110,.2)', borderRadius: '20px', padding: '24px 20px' }}>
-          <p style={{ fontSize: '10px', letterSpacing: '.5em', color: '#c9a96e', textTransform: 'uppercase', marginBottom: '4px', fontFamily: "'Cormorant Garamond', serif' " }}>
-            ✦ Special Price ✦
-          </p>
-          <p style={{
-            fontFamily: "'Cormorant Garamond', serif", fontSize: '72px', fontWeight: 700, lineHeight: 1,
-            background: 'linear-gradient(135deg, #f5e6a3 0%, #c9a96e 35%, #f0d080 65%, #c4637a 100%)',
-            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
-            margin: '8px 0',
-          }}>
+          <p style={{ fontSize: '10px', letterSpacing: '.5em', color: '#c9a96e', textTransform: 'uppercase', marginBottom: '4px', fontFamily: "'Cormorant Garamond', serif" }}>✦ Special Price ✦</p>
+          <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '72px', fontWeight: 700, lineHeight: 1, background: 'linear-gradient(135deg,#f5e6a3 0%,#c9a96e 35%,#f0d080 65%,#c4637a 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', margin: '8px 0' }}>
             <span style={{ fontSize: '38px', verticalAlign: 'super' }}>¥</span>780
           </p>
-          <p style={{ fontSize: '13px', color: 'rgba(255,255,255,.6)', letterSpacing: '.08em' }}>
-            買い切り &nbsp;|&nbsp; 使い放題 &nbsp;|&nbsp; 即日アクセス
-          </p>
+          <p style={{ fontSize: '13px', color: 'rgba(255,255,255,.6)', letterSpacing: '.08em' }}>買い切り &nbsp;|&nbsp; 使い放題 &nbsp;|&nbsp; 即日アクセス</p>
         </div>
 
-        {/* ① Apple Pay */}
-        <div ref={appleRef} id="apple-container" style={{ marginBottom: '12px' }} />
-
-        {/* ② 決済ページへ */}
+        {/* CTA Button */}
         <a
           href={PAYPAL_NCP}
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%', padding: '18px', borderRadius: '50px', background: 'linear-gradient(135deg,#c4637a,#c9a96e)', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: '16px', marginBottom: '12px', boxSizing: 'border-box' as const, boxShadow: '0 0 32px rgba(196,99,122,.4)' }}
+          style={{ display: 'block', width: '100%', padding: '20px', borderRadius: '60px', background: 'linear-gradient(135deg,#c4637a 0%,#c9a96e 50%,#c4637a 100%)', backgroundSize: '200% 100%', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: '17px', textAlign: 'center', boxShadow: '0 0 40px rgba(196,99,122,.5),0 0 80px rgba(196,99,122,.2)', fontFamily: "'Noto Serif JP', serif", letterSpacing: '.05em', boxSizing: 'border-box' as const }}
         >
           ✨ 今すぐ運命鑑定を受ける
+          <span style={{ display: 'block', fontSize: '11px', opacity: .8, marginTop: '4px', fontFamily: "'Noto Sans JP', sans-serif", fontWeight: 300, letterSpacing: '.1em' }}>
+            PayPal / クレジットカード 対応
+          </span>
         </a>
 
-        {/* エラー時のみフォールバック表示 */}
-        {sdkError && (
-          <div style={{ marginTop: '8px' }}>
-            <div style={{ background: 'rgba(255,80,80,.1)', border: '1px solid rgba(255,80,80,.3)', borderRadius: '12px', padding: '12px', marginBottom: '12px', textAlign: 'center' }}>
-              <p style={{ fontSize: '12px', color: '#fca5a5', marginBottom: '4px' }}>決済ボタンでエラーが発生しました</p>
-              <p style={{ fontSize: '11px', color: 'rgba(255,255,255,.4)' }}>下のボタンからお支払いください</p>
-            </div>
-            <a href={PAYPAL_NCP} style={{ display: 'block', padding: '15px', borderRadius: '50px', background: 'linear-gradient(135deg,#c4637a,#c9a96e)', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: '14px', textAlign: 'center', boxShadow: '0 0 24px rgba(196,99,122,.4)' }}>
-              💳 PayPalページで支払う（780円）
-            </a>
-          </div>
-        )}
-
-        <p style={{ textAlign: 'center', marginTop: '20px', fontSize: '12px', color: 'rgba(255,255,255,.2)', letterSpacing: '.05em' }}>© NEXA | AI Fortune</p>
+        <p style={{ textAlign: 'center', marginTop: '28px', fontSize: '12px', color: 'rgba(255,255,255,.2)', letterSpacing: '.05em' }}>© NEXA | AI Fortune</p>
       </div>
     </div>
   );
