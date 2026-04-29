@@ -33,13 +33,11 @@ const PaidPage: React.FC = () => {
       // isEligible()チェックなしで強制レンダー
       pp.Buttons({
         ...orderConfig,
-        fundingSource: pp.FUNDING.CARD,
-        style: { shape: 'pill', height: 55, label: 'pay' }
+        style: { layout: 'vertical', shape: 'pill', height: 52 }
       }).render(cardRef.current).then(() => {
         setCardReady(true);
       }).catch((err: any) => {
-        console.error('Card render failed:', err);
-        setCardReady(false);
+        console.error('Buttons render failed:', err);
       });
     };
     document.body.appendChild(script);
