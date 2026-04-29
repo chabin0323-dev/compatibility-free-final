@@ -2,14 +2,10 @@ import React, { useEffect, useState } from 'react';
 
 function isTikTokBrowser(): boolean {
   const ua = navigator.userAgent || '';
-  // TikTok UA検知
+  // TikTok UA検知のみ
   if (/musical_ly|ByteLocale|ByteFederation|TikTok|Bytedance|ByteWebView|aweme/i.test(ua)) return true;
-  // URLパラメータ検知（lit.linkから?from=tiktokで飛んできた場合）
+  // URLパラメータ検知（?from=tiktokの場合のみ）
   if (new URLSearchParams(window.location.search).get('from') === 'tiktok') return true;
-  // iOS in-appブラウザ（Safariヘッダーなし）
-  if (/iPhone|iPod|iPad/.test(ua) && !/Safari/.test(ua) && /AppleWebKit/.test(ua)) return true;
-  // Android WebView
-  if (/Android/.test(ua) && /wv/.test(ua)) return true;
   return false;
 }
 
