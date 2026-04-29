@@ -84,21 +84,32 @@ const PaidPage: React.FC = () => {
           <p style={{ fontSize: '11px', color: 'rgba(255,255,255,.3)', marginTop: '4px' }}>買い切り | 使い放題 | 即日アクセス</p>
         </div>
 
-        {/* PayPal Button */}
-        <div ref={paypalRef} id="paypal-button-container" style={{ marginBottom: '16px' }}>
+        {/* PayPal SDK Button */}
+        <div ref={paypalRef} id="paypal-button-container" style={{ marginBottom: '12px' }}>
           <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '14px', textAlign: 'center', padding: '10px' }}>決済ボタンを読み込み中...</p>
         </div>
 
+        {/* Direct PayPal fallback */}
+        <div style={{ marginBottom: '20px', textAlign: 'center' }}>
+          <p style={{ fontSize: '10px', color: 'rgba(255,255,255,.25)', marginBottom: '8px' }}>ボタンが表示されない場合はこちら</p>
+          <a
+            href="https://www.paypal.com/ncp/payment/AMEJ4V5C564UN?country.x=JP&locale.x=ja_JP"
+            style={{ display: 'block', padding: '14px', borderRadius: '50px', background: 'linear-gradient(135deg,#c4637a,#c9a96e)', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: '15px', textAlign: 'center', boxShadow: '0 0 30px rgba(196,99,122,.4)' }}
+          >
+            ✨ 今すぐ運命鑑定を受ける（780円）
+          </a>
+        </div>
+
         {/* TikTok guide */}
-        <div style={{ borderTop: '1px solid rgba(255,255,255,.08)', paddingTop: '16px', marginTop: '8px' }}>
-          <p style={{ color: 'rgba(255,255,255,.35)', fontSize: '11px', textAlign: 'center', marginBottom: '12px', letterSpacing: '.05em' }}>「ブラウザで開いてください」と表示された方へ</p>
+        <div style={{ borderTop: '1px solid rgba(255,255,255,.08)', paddingTop: '16px' }}>
+          <p style={{ color: 'rgba(255,255,255,.35)', fontSize: '11px', textAlign: 'center', marginBottom: '12px', letterSpacing: '.05em' }}>決済が完了しない場合はこちら</p>
 
           {!showGuide && (
             <button
               onClick={handleCopy}
               style={{ width: '100%', padding: '14px', borderRadius: '50px', background: 'linear-gradient(90deg,#9333ea,#ec4899)', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: 'bold', color: 'white', marginBottom: '16px' }}
             >
-              📋 決済URLをコピーする
+              📋 決済URLをコピーしてブラウザで開く
             </button>
           )}
 
