@@ -126,6 +126,7 @@ function App() {
       <div className="min-h-screen bg-[#0a0612]">
         <Routes>
           <Route path="/" element={<Navigate to="/compatibility-free" replace />} />
+          <Route path="/tiktok" element={<TikTokGuide />} />
           <Route path="/compatibility-free" element={<FreePage />} />
           <Route path="/result/:sessionId" element={<ResultPage />} />
           <Route path="/paid" element={<PaidPage />} />
