@@ -117,20 +117,15 @@ const PaidPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Payment label */}
-        <p style={{ textAlign: 'center', fontSize: '12px', color: 'rgba(255,255,255,.5)', letterSpacing: '.1em', marginBottom: '16px' }}>
-          ── お支払い方法を選択 ──
-        </p>
-
         {/* ① Apple Pay */}
         <div ref={appleRef} id="apple-container" style={{ marginBottom: '12px' }} />
 
-        {/* ② クレジット/デビットカード（NCP直接リンク） */}
+        {/* ② 決済ページへ */}
         <a
           href={PAYPAL_NCP}
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%', padding: '16px', borderRadius: '50px', background: '#1c1c1e', border: '1px solid rgba(255,255,255,.2)', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: '15px', marginBottom: '12px', boxSizing: 'border-box' as const }}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%', padding: '18px', borderRadius: '50px', background: 'linear-gradient(135deg,#c4637a,#c9a96e)', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: '16px', marginBottom: '12px', boxSizing: 'border-box' as const, boxShadow: '0 0 32px rgba(196,99,122,.4)' }}
         >
-          💳 クレジットカードまたはデビットカード
+          ✨ 今すぐ運命鑑定を受ける
         </a>
 
         {/* エラー時のみフォールバック表示 */}
