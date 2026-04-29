@@ -2,10 +2,18 @@ import React, { useEffect, useState } from 'react';
 
 function isTikTokBrowser(): boolean {
   const ua = navigator.userAgent || '';
-  // TikTok UA検知のみ
+  // TikTok UA検知
   if (/musical_ly|ByteLocale|ByteFederation|TikTok|Bytedance|ByteWebView|aweme/i.test(ua)) return true;
-  // URLパラメータ検知（?from=tiktokの場合のみ）
+  // URLパラメータ検知
   if (new URLSearchParams(window.location.search).get('from') === 'tiktok') return true;
+  // iOS WebView検知：
+  // 通常のSafariは "Version/XX Mobile Safari/XXX" のパターンを持つ
+  // TikTok内蔵ブラウザは "Version/" がない or "Mobile/" のみ
+  const isIOS = /iPhone|iPod|iPad/.test(ua);
+  const isChromeiOS = /CriOS/.test(ua);   // Chrome on iOS
+  const isFirefoxiOS = /FxiOS/.test(ua);  // Firefox on iOS
+  const hasVersionToken = /Version\/[\d.]+.*Safari/.test(ua); // 本物のSafari
+  if (isIOS && !isChromeiOS && !isFirefoxiOS && !hasVersionToken) return true;
   return false;
 }
 
@@ -70,10 +78,10 @@ const TikTokGuide: React.FC = () => {
           padding: '20px', marginBottom: '24px', textAlign: 'left'
         }}>
           {[
-            { step: '1', text: '下の「URLをコピー」をタップ', color: '#c4637a' },
-            { step: '2', text: 'ホーム画面に戻る', color: '#c9a96e' },
-            { step: '3', text: 'Safari（iPhone）またはChrome（Android）を開く', color: '#c4637a' },
-            { step: '4', text: 'アドレスバーに貼り付けてアクセス', color: '#c9a96e' },
+            { step: '1', text: '画面下の「URLをコピー」をタップ', color: '#c4637a' },
+            { step: '2', text: 'TikTokアプリを閉じてホーム画面へ', color: '#c9a96e' },
+            { step: '3', text: 'iPhoneはSafari🧭 / AndroidはChrome🌐 を開く', color: '#c4637a' },
+            { step: '4', text: 'アドレスバーを長押し→「貼り付け」→アクセス', color: '#c9a96e' },
           ].map(({ step, text, color }) => (
             <div key={step} style={{ display: 'flex', gap: '12px', marginBottom: '12px', alignItems: 'flex-start' }}>
               <span style={{
