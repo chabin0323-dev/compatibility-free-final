@@ -78,7 +78,14 @@ const PaidPage: React.FC = () => {
           </span>
         </a>
 
-        <p style={{ textAlign: 'center', marginTop: '28px', fontSize: '12px', color: 'rgba(255,255,255,.2)', letterSpacing: '.05em' }}>© NEXA | AI Fortune</p>
+        <div style={{ marginTop: '16px', background: 'rgba(201,169,110,.08)', border: '1px solid rgba(201,169,110,.2)', borderRadius: '14px', padding: '14px 16px', textAlign: 'center' }}>
+          <p style={{ fontSize: '12px', color: 'rgba(201,169,110,.9)', lineHeight: 1.8 }}>
+            💡 決済ページで<strong style={{ color: '#c9a96e' }}>「☑ チェックボックス」</strong>に<br />
+            チェックを入れると支払いボタンが有効になります
+          </p>
+        </div>
+
+        <p style={{ textAlign: 'center', marginTop: '20px', fontSize: '12px', color: 'rgba(255,255,255,.2)', letterSpacing: '.05em' }}>© NEXA | AI Fortune</p>
       </div>
     </div>
   );
