@@ -19,7 +19,10 @@ const PaidPage: React.FC = () => {
       const orderConfig = {
         createOrder: (_: any, actions: any) =>
           actions.order.create({
-            purchase_units: [{ amount: { value: '780', currency_code: 'JPY' }, description: 'LoveLAB 運命鑑定' }]
+            purchase_units: [{ amount: { value: '780', currency_code: 'JPY' }, description: 'LoveLAB 運命鑑定' }],
+            application_context: {
+              shipping_preference: 'NO_SHIPPING'
+            }
           }),
         onApprove: (_: any, actions: any) =>
           actions.order.capture().then(() => {
@@ -107,15 +110,6 @@ const PaidPage: React.FC = () => {
         {/* PayPal SDKカードボタン（インライン入力） */}
         <div ref={cardRef} style={{ marginBottom: '16px' }} />
 
-        {/* SDKが動かない場合のフォールバックのみ */}
-        {!cardReady && (
-          <a
-            href="https://www.paypal.com/ncp/payment/AMEJ4V5C564UN?country.x=JP&locale.x=ja_JP"
-            style={{ display: 'block', width: '100%', padding: '20px', borderRadius: '60px', background: 'linear-gradient(135deg,#c4637a,#c9a96e)', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: '20px', textAlign: 'center', boxShadow: '0 0 40px rgba(196,99,122,.5)', fontFamily: "'Noto Serif JP', serif", letterSpacing: '.05em', boxSizing: 'border-box' as const, marginBottom: '16px' }}
-          >
-            ✨ 今すぐ運命鑑定を受ける
-          </a>
-        )}
 
         {/* 手順案内 */}
         <div style={{ marginTop: '8px', background: 'rgba(201,169,110,.08)', border: '1px solid rgba(201,169,110,.2)', borderRadius: '14px', padding: '16px', textAlign: 'left' }}>
