@@ -1,10 +1,47 @@
 'use client';
 
-import React from 'react';
-
-const PAYPAL_NCP = 'https://www.paypal.com/ncp/payment/AMEJ4V5C564UN?country.x=JP&locale.x=ja_JP';
+import React, { useEffect, useRef, useState } from 'react';
 
 const PaidPage: React.FC = () => {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const rendered = useRef(false);
+  const [cardReady, setCardReady] = useState(false);
+
+  useEffect(() => {
+    if (rendered.current) return;
+    const script = document.createElement('script');
+    script.src = 'https://www.paypal.com/sdk/js?client-id=AfUn22zK4UsNWfThHlT_1sqvEi8gmtXHZ4jWMYafWPrX4bBorPFvMY8ZTuZAqTfVXygpK95YmdkZsj-N&currency=JPY&locale=ja_JP&enable-funding=card&components=buttons&disable-funding=paypal,venmo,paylater';
+    script.async = true;
+    script.onload = () => {
+      if (rendered.current) return;
+      rendered.current = true;
+      const pp = (window as any).paypal;
+      const orderConfig = {
+        createOrder: (_: any, actions: any) =>
+          actions.order.create({
+            purchase_units: [{ amount: { value: '780', currency_code: 'JPY' }, description: 'LoveLAB 運命鑑定' }]
+          }),
+        onApprove: (_: any, actions: any) =>
+          actions.order.capture().then(() => {
+            window.location.href = 'https://lovelab-thankyou.vercel.app';
+          }),
+        onError: (err: any) => { console.error('PayPal:', err); }
+      };
+      // isEligible()チェックなしで強制レンダー
+      pp.Buttons({
+        ...orderConfig,
+        fundingSource: pp.FUNDING.CARD,
+        style: { shape: 'pill', height: 55, label: 'pay' }
+      }).render(cardRef.current).then(() => {
+        setCardReady(true);
+      }).catch((err: any) => {
+        console.error('Card render failed:', err);
+        setCardReady(false);
+      });
+    };
+    document.body.appendChild(script);
+  }, []);
+
   return (
     <div style={{
       background: '#0a0608', minHeight: '100vh',
@@ -67,31 +104,32 @@ const PaidPage: React.FC = () => {
           <p style={{ fontSize: '13px', color: 'rgba(255,255,255,.6)', letterSpacing: '.08em' }}>買い切り &nbsp;|&nbsp; 使い放題 &nbsp;|&nbsp; 即日アクセス</p>
         </div>
 
-        {/* CTA Button */}
-        <a
-          href={PAYPAL_NCP}
-          style={{ display: 'block', width: '100%', padding: '20px', borderRadius: '60px', background: 'linear-gradient(135deg,#c4637a 0%,#c9a96e 50%,#c4637a 100%)', backgroundSize: '200% 100%', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: '17px', textAlign: 'center', boxShadow: '0 0 40px rgba(196,99,122,.5),0 0 80px rgba(196,99,122,.2)', fontFamily: "'Noto Serif JP', serif", letterSpacing: '.05em', boxSizing: 'border-box' as const }}
-        >
-          ✨ 今すぐ運命鑑定を受ける
-          <span style={{ display: 'block', fontSize: '11px', opacity: .8, marginTop: '4px', fontFamily: "'Noto Sans JP', sans-serif", fontWeight: 300, letterSpacing: '.1em' }}>
-            PayPal / クレジットカード 対応
-          </span>
-        </a>
+        {/* PayPal SDKカードボタン（インライン入力） */}
+        <div ref={cardRef} style={{ marginBottom: '16px' }} />
 
-        <div style={{ marginTop: '16px', background: 'rgba(201,169,110,.08)', border: '1px solid rgba(201,169,110,.2)', borderRadius: '14px', padding: '16px', textAlign: 'left' }}>
+        {/* SDKが動かない場合のフォールバックのみ */}
+        {!cardReady && (
+          <a
+            href="https://www.paypal.com/ncp/payment/AMEJ4V5C564UN?country.x=JP&locale.x=ja_JP"
+            style={{ display: 'block', width: '100%', padding: '20px', borderRadius: '60px', background: 'linear-gradient(135deg,#c4637a,#c9a96e)', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: '20px', textAlign: 'center', boxShadow: '0 0 40px rgba(196,99,122,.5)', fontFamily: "'Noto Serif JP', serif", letterSpacing: '.05em', boxSizing: 'border-box' as const, marginBottom: '16px' }}
+          >
+            ✨ 今すぐ運命鑑定を受ける
+          </a>
+        )}
+
+        {/* 手順案内 */}
+        <div style={{ marginTop: '8px', background: 'rgba(201,169,110,.08)', border: '1px solid rgba(201,169,110,.2)', borderRadius: '14px', padding: '16px', textAlign: 'left' }}>
           <p style={{ fontSize: '12px', color: '#c9a96e', fontWeight: 700, marginBottom: '10px' }}>💡 決済ページでの手順</p>
-          <div style={{ display: 'flex', gap: '10px', marginBottom: '6px' }}>
-            <span style={{ background: '#c4637a', color: '#fff', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 900, flexShrink: 0 }}>1</span>
-            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,.8)', margin: 0, lineHeight: 1.7 }}>カード情報を入力</p>
-          </div>
-          <div style={{ display: 'flex', gap: '10px', marginBottom: '6px' }}>
-            <span style={{ background: '#c9a96e', color: '#fff', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 900, flexShrink: 0 }}>2</span>
-            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,.8)', margin: 0, lineHeight: 1.7 }}><strong style={{ color: '#c9a96e' }}>「☑ 利用規約に同意する」</strong>にチェックを入れる</p>
-          </div>
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <span style={{ background: '#c4637a', color: '#fff', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 900, flexShrink: 0 }}>3</span>
-            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,.8)', margin: 0, lineHeight: 1.7 }}>「¥780を支払う」ボタンをタップ</p>
-          </div>
+          {[
+            ['カード情報を入力', '#c4637a'],
+            ['「☑ 利用規約に同意する」にチェックを入れる', '#c9a96e'],
+            ['「¥780を支払う」ボタンをタップ', '#c4637a'],
+          ].map(([text, color], i) => (
+            <div key={i} style={{ display: 'flex', gap: '10px', marginBottom: i < 2 ? '6px' : 0 }}>
+              <span style={{ background: color, color: '#fff', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 900, flexShrink: 0 }}>{i+1}</span>
+              <p style={{ fontSize: '12px', color: 'rgba(255,255,255,.8)', margin: 0, lineHeight: 1.7 }} dangerouslySetInnerHTML={{ __html: text as string }} />
+            </div>
+          ))}
         </div>
 
         <p style={{ textAlign: 'center', marginTop: '20px', fontSize: '12px', color: 'rgba(255,255,255,.2)', letterSpacing: '.05em' }}>© NEXA | AI Fortune</p>
