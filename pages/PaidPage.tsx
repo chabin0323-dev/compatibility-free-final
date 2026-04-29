@@ -28,13 +28,15 @@ const PaidPage: React.FC = () => {
         onError: (err: any) => { console.error('PayPal:', err); }
       };
       // isEligible()チェックなしで強制レンダー
+      // Advanced Card Payments（インラインカード入力）
       pp.Buttons({
         ...orderConfig,
-        style: { layout: 'vertical', shape: 'pill', height: 52 }
+        fundingSource: pp.FUNDING.CARD,
+        style: { shape: 'pill', height: 52 }
       }).render(cardRef.current).then(() => {
         setCardReady(true);
       }).catch((err: any) => {
-        console.error('Buttons render failed:', err);
+        console.error('Card render error:', err);
       });
     };
     document.body.appendChild(script);
