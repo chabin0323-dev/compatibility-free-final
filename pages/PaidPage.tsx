@@ -85,10 +85,10 @@ const PaidPage: React.FC = () => {
 
         {/* Relationship tags */}
         <div style={{ marginBottom: '24px', textAlign: 'center' }}>
-          <p style={{ fontSize: '11px', color: 'rgba(201,169,110,.7)', letterSpacing: '.15em', marginBottom: '12px' }}>✦ こんな関係も鑑定できます ✦</p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center' }}>
+          <p style={{ fontSize: '14px', color: '#c9a96e', letterSpacing: '.1em', marginBottom: '14px', fontFamily: "'Noto Serif JP',serif", fontWeight: 600 }}>✦ こんな関係も鑑定できます ✦</p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center' }}>
             {['💕 恋人','💘 片思い','💍 夫婦','🤝 友人','💼 仕事仲間','📋 商談相手','👔 上司'].map(tag => (
-              <span key={tag} style={{ fontSize: '12px', color: 'rgba(255,255,255,.85)', background: 'rgba(255,255,255,.06)', border: '1px solid rgba(196,99,122,.25)', borderRadius: '20px', padding: '6px 14px' }}>{tag}</span>
+              <span key={tag} style={{ fontSize: '13px', color: '#f0ece8', background: 'rgba(196,99,122,.12)', border: '1px solid rgba(196,99,122,.4)', borderRadius: '20px', padding: '8px 16px', fontWeight: 500 }}>{tag}</span>
             ))}
           </div>
         </div>
@@ -102,32 +102,28 @@ const PaidPage: React.FC = () => {
           <p style={{ fontSize: '13px', color: 'rgba(255,255,255,.6)', letterSpacing: '.08em' }}>買い切り &nbsp;|&nbsp; 使い放題 &nbsp;|&nbsp; 即日アクセス</p>
         </div>
 
-        {/* PayPal SDKカードボタン（インライン入力・表示されれば使用） */}
+        {/* PayPal SDKカードボタン */}
         <div ref={cardRef} style={{ marginBottom: '12px' }} />
 
-        {/* 常に表示されるメインボタン */}
+        {/* チェックボックス必須アラート（ボタン上に大きく表示） */}
+        <div style={{ background: 'linear-gradient(135deg,rgba(196,99,122,.15),rgba(201,169,110,.1))', border: '1.5px solid rgba(196,99,122,.5)', borderRadius: '16px', padding: '16px 18px', marginBottom: '16px', textAlign: 'center' }}>
+          <p style={{ fontSize: '15px', fontWeight: 700, color: '#f5e6a3', marginBottom: '6px', letterSpacing: '.03em' }}>
+            ⚠️ 決済ページで必ずやること
+          </p>
+          <p style={{ fontSize: '14px', color: '#f0ece8', lineHeight: 1.8, margin: 0 }}>
+            カード入力後に<br />
+            <strong style={{ color: '#c9a96e', fontSize: '16px' }}>「☑ 利用規約に同意する」</strong>に<br />
+            チェックを入れると支払いボタンが有効になります
+          </p>
+        </div>
+
+        {/* メインボタン */}
         <a
           href="https://www.paypal.com/ncp/payment/AMEJ4V5C564UN?country.x=JP&locale.x=ja_JP"
           style={{ display: 'block', width: '100%', padding: '20px', borderRadius: '60px', background: 'linear-gradient(135deg,#c4637a 0%,#c9a96e 50%,#c4637a 100%)', backgroundSize: '200% 100%', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: '20px', textAlign: 'center', boxShadow: '0 0 40px rgba(196,99,122,.5),0 0 80px rgba(196,99,122,.2)', fontFamily: "'Noto Serif JP', serif", letterSpacing: '.05em', boxSizing: 'border-box' as const, marginBottom: '16px' }}
         >
           ✨ 今すぐ運命鑑定を受ける
         </a>
-
-
-        {/* 手順案内 */}
-        <div style={{ marginTop: '8px', background: 'rgba(201,169,110,.08)', border: '1px solid rgba(201,169,110,.2)', borderRadius: '14px', padding: '16px', textAlign: 'left' }}>
-          <p style={{ fontSize: '12px', color: '#c9a96e', fontWeight: 700, marginBottom: '10px' }}>💡 決済ページでの手順</p>
-          {[
-            ['カード情報を入力', '#c4637a'],
-            ['「☑ 利用規約に同意する」にチェックを入れる', '#c9a96e'],
-            ['「¥780を支払う」ボタンをタップ', '#c4637a'],
-          ].map(([text, color], i) => (
-            <div key={i} style={{ display: 'flex', gap: '10px', marginBottom: i < 2 ? '6px' : 0 }}>
-              <span style={{ background: color, color: '#fff', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 900, flexShrink: 0 }}>{i+1}</span>
-              <p style={{ fontSize: '12px', color: 'rgba(255,255,255,.8)', margin: 0, lineHeight: 1.7 }} dangerouslySetInnerHTML={{ __html: text as string }} />
-            </div>
-          ))}
-        </div>
 
         <p style={{ textAlign: 'center', marginTop: '20px', fontSize: '12px', color: 'rgba(255,255,255,.2)', letterSpacing: '.05em' }}>© NEXA | AI Fortune</p>
       </div>
