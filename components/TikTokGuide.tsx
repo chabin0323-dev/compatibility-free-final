@@ -11,7 +11,12 @@ function isRealBrowser(): boolean {
 }
 
 export function isTikTokBrowser(): boolean {
-  return new URLSearchParams(window.location.search).get('from') === 'tiktok';
+  // 1. URLパラメータ検知
+  if (new URLSearchParams(window.location.search).get('from') === 'tiktok') return true;
+  // 2. TikTok専用UA検知（TikTokのin-appブラウザのみ）
+  const ua = navigator.userAgent || '';
+  if (/musical_ly|ByteLocale|ByteFederation|TikTok|Bytedance|ByteWebView|aweme/i.test(ua)) return true;
+  return false;
 }
 
 const TikTokGuide: React.FC = () => {
