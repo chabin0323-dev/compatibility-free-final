@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import FreePage from './pages/FreePage';
 import ResultPage from './pages/ResultPage';
 import PaidPage from './pages/PaidPage';
+import TikTokGuide, { isTikTokBrowser } from './components/TikTokGuide';
 
 function SplashScreen({ onFinish }: { onFinish: () => void }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -113,6 +114,10 @@ function SplashScreen({ onFinish }: { onFinish: () => void }) {
 
 function App() {
   const [showSplash, setShowSplash] = useState(true);
+  const [isTikTok] = useState(() => isTikTokBrowser());
+
+  if (isTikTok) return <TikTokGuide />;
+
   return showSplash ? (
     <SplashScreen onFinish={() => setShowSplash(false)} />
   ) : (
