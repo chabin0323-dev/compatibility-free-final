@@ -18,6 +18,18 @@ export function isTikTokBrowser(): boolean {
 const TikTokGuide: React.FC = () => {
   const goToApp = () => { window.location.href = '/compatibility-free'; };
 
+  // Safari/Chromeで開かれた場合は即座にアプリへリダイレクト
+  React.useEffect(() => {
+    const ua = navigator.userAgent;
+    const isRealSafari = /Version\/[\d.]+.*Mobile.*Safari/i.test(ua);
+    const isChromeIOS = /CriOS\/[\d.]+/.test(ua);
+    const isChromeDesktop = /Chrome\/[\d.]+ /.test(ua) && !/Chromium/.test(ua);
+    const isFirefox = /Firefox\/[\d.]+/.test(ua);
+    if (isRealSafari || isChromeIOS || isChromeDesktop || isFirefox) {
+      window.location.replace('/compatibility-free');
+    }
+  }, []);
+
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 9999,
