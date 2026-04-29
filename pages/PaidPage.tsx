@@ -123,29 +123,9 @@ const PaidPage: React.FC = () => {
         </a>
 
         {/* ② Apple Pay（iOS Safariのみ表示） */}
-        <div ref={appleRef} id="apple-container" style={{ marginBottom: '24px' }} />
+        <div ref={appleRef} id="apple-container" style={{ marginBottom: '16px' }} />
 
-        {/* Cards */}
-        <div style={{ background: 'rgba(255,255,255,.97)', borderRadius: '16px', padding: '16px 20px', textAlign: 'center', boxShadow: '0 4px 24px rgba(0,0,0,.3)' }}>
-          <p style={{ color: '#777', fontSize: '11px', marginBottom: '12px', letterSpacing: '.15em', fontWeight: 600 }}>安心のPayPal決済に対応</p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '7px', justifyContent: 'center', alignItems: 'center' }}>
-            {[
-              { label: 'VISA', bg: 'linear-gradient(135deg,#1a1f71,#2b3296)', color: '#fff' },
-              { label: 'JCB', bg: 'linear-gradient(135deg,#003087,#0070ba)', color: '#fff' },
-              { label: 'AMEX', bg: 'linear-gradient(135deg,#2557d6,#1a44c0)', color: '#fff' },
-              { label: 'PayPal', bg: 'linear-gradient(135deg,#003087,#009cde)', color: '#fff' },
-              { label: '🍎 Pay', bg: '#000', color: '#fff' },
-            ].map(({ label, bg, color }) => (
-              <span key={label} style={{ background: bg, color, fontSize: '11px', fontWeight: 900, padding: '5px 11px', borderRadius: '6px', boxShadow: '0 2px 6px rgba(0,0,0,.2)' }}>{label}</span>
-            ))}
-            <span style={{ background: '#fff', border: '1px solid #e0e0e0', fontSize: '11px', fontWeight: 900, padding: '5px 8px', borderRadius: '6px', boxShadow: '0 2px 6px rgba(0,0,0,.08)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-              <span style={{ width: 18, height: 12, background: 'linear-gradient(to right,#eb001b 50%,#f79e1b 50%)', borderRadius: '2px', display: 'inline-block' }} />
-              <span style={{ color: '#333' }}>Master</span>
-            </span>
-          </div>
-        </div>
-
-        <p style={{ textAlign: 'center', marginTop: '28px', fontSize: '12px', color: 'rgba(255,255,255,.2)', letterSpacing: '.05em' }}>© NEXA | AI Fortune</p>
+        <p style={{ textAlign: 'center', marginTop: '16px', fontSize: '12px', color: 'rgba(255,255,255,.2)', letterSpacing: '.05em' }}>© NEXA | AI Fortune</p>
       </div>
     </div>
   );
