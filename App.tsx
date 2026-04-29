@@ -113,8 +113,10 @@ function SplashScreen({ onFinish }: { onFinish: () => void }) {
 }
 
 function App() {
-  const isPaidPage = window.location.pathname === '/paid';
-  const [showSplash, setShowSplash] = useState(!isPaidPage);
+  const path = window.location.pathname;
+  const params = new URLSearchParams(window.location.search);
+  const skipSplash = path === '/paid' || path === '/tiktok' || params.get('skip_splash') === '1';
+  const [showSplash, setShowSplash] = useState(!skipSplash);
   const [isTikTok] = useState(() => isTikTokBrowser());
 
   if (isTikTok) return <TikTokGuide />;

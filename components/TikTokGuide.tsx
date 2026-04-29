@@ -26,7 +26,7 @@ const TikTokGuide: React.FC = () => {
     const isChromeDesktop = /Chrome\/[\d.]+ /.test(ua) && !/Chromium/.test(ua);
     const isFirefox = /Firefox\/[\d.]+/.test(ua);
     if (isRealSafari || isChromeIOS || isChromeDesktop || isFirefox) {
-      window.location.replace('/compatibility-free');
+      window.location.replace('/compatibility-free?skip_splash=1');
     }
   }, []);
 
