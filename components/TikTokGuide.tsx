@@ -1,21 +1,17 @@
 import React from 'react';
 
-function isRealBrowser(): boolean {
-  const ua = navigator.userAgent;
-  if (/Version\/[\d.]+.*Mobile.*Safari/i.test(ua)) return true; // 本物のiOS Safari
-  if (/CriOS\/[\d.]+/i.test(ua)) return true;  // Chrome on iOS
-  if (/FxiOS\/[\d.]+/i.test(ua)) return true;  // Firefox on iOS
-  if (/Chrome\/[\d.]+ /.test(ua) && !/Chromium/.test(ua) && !/Android.*wv/.test(ua)) return true; // Desktop/Android Chrome
-  if (/Firefox\/[\d.]+/.test(ua)) return true;
-  return false;
-}
-
 export function isTikTokBrowser(): boolean {
-  // 1. URLパラメータ検知
-  if (new URLSearchParams(window.location.search).get('from') === 'tiktok') return true;
-  // 2. TikTok専用UA検知（TikTokのin-appブラウザのみ）
   const ua = navigator.userAgent || '';
+  // TikTok UA検知
   if (/musical_ly|ByteLocale|ByteFederation|TikTok|Bytedance|ByteWebView|aweme/i.test(ua)) return true;
+  // URLパラメータ検知
+  if (new URLSearchParams(window.location.search).get('from') === 'tiktok') return true;
+  // iOS WebView検知（Safariは "Version/XX.X Mobile Safari" を持つ、TikTok内蔵ブラウザは持たない）
+  const isIOS = /iPhone|iPod|iPad/.test(ua);
+  const isChromeiOS = /CriOS/.test(ua);
+  const isFirefoxiOS = /FxiOS/.test(ua);
+  const hasVersionToken = /Version\/[\d.]+.*Safari/.test(ua);
+  if (isIOS && !isChromeiOS && !isFirefoxiOS && !hasVersionToken) return true;
   return false;
 }
 
@@ -64,7 +60,7 @@ const TikTokGuide: React.FC = () => {
         <h1 style={{ fontFamily: 'serif', fontSize: '36px', fontWeight: 700, color: '#f8f0e8', marginBottom: '4px', letterSpacing: '.04em' }}>
           Love<span style={{ color: '#c4637a' }}>LAB</span>
         </h1>
-        <p style={{ color: '#c9a96e', fontSize: '11px', letterSpacing: '.3em', marginBottom: '48px', textTransform: 'uppercase' }}>
+        <p style={{ color: '#c9a96e', fontSize: '11px', letterSpacing: '.3em', marginBottom: '40px', textTransform: 'uppercase' }}>
           運命鑑定
         </p>
 
@@ -76,7 +72,7 @@ const TikTokGuide: React.FC = () => {
           padding: '32px 24px',
           maxWidth: '300px',
           width: '100%',
-          marginBottom: '48px',
+          marginBottom: '24px',
         }}>
           <p style={{ fontSize: '13px', color: '#c9a96e', letterSpacing: '.1em', marginBottom: '20px' }}>
             ✦ TikTokから開いた方へ ✦
@@ -99,22 +95,15 @@ const TikTokGuide: React.FC = () => {
           ))}
         </div>
 
-        <div style={{
-          width: '48px', height: '1px',
-          background: 'linear-gradient(90deg,transparent,rgba(196,99,122,.4),transparent)',
-          marginBottom: '24px',
-        }} />
-
-        {/* Safariで開いた後用ボタン */}
+        {/* Safariで開いた後用 */}
         <button
           onClick={goToApp}
           style={{
-            width: '100%', maxWidth: '300px', padding: '16px',
-            borderRadius: '60px', border: 'none', cursor: 'pointer',
-            background: 'linear-gradient(135deg,#c4637a,#c9a96e)',
-            color: '#fff', fontSize: '15px', fontWeight: 700,
-            boxShadow: '0 0 24px rgba(196,99,122,.4)',
-            marginBottom: '20px',
+            padding: '14px 32px', borderRadius: '60px', border: 'none',
+            cursor: 'pointer', background: 'linear-gradient(135deg,#c4637a,#c9a96e)',
+            color: '#fff', fontSize: '14px', fontWeight: 700,
+            boxShadow: '0 0 20px rgba(196,99,122,.35)',
+            marginBottom: '24px',
           }}
         >
           ✨ Safariで開いたらここをタップ
