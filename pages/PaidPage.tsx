@@ -107,8 +107,16 @@ const PaidPage: React.FC = () => {
           <p style={{ fontSize: '13px', color: 'rgba(255,255,255,.6)', letterSpacing: '.08em' }}>買い切り &nbsp;|&nbsp; 使い放題 &nbsp;|&nbsp; 即日アクセス</p>
         </div>
 
-        {/* PayPal SDKカードボタン（インライン入力） */}
-        <div ref={cardRef} style={{ marginBottom: '16px' }} />
+        {/* PayPal SDKカードボタン（インライン入力・表示されれば使用） */}
+        <div ref={cardRef} style={{ marginBottom: '12px' }} />
+
+        {/* 常に表示されるメインボタン */}
+        <a
+          href="https://www.paypal.com/ncp/payment/AMEJ4V5C564UN?country.x=JP&locale.x=ja_JP"
+          style={{ display: 'block', width: '100%', padding: '20px', borderRadius: '60px', background: 'linear-gradient(135deg,#c4637a 0%,#c9a96e 50%,#c4637a 100%)', backgroundSize: '200% 100%', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: '20px', textAlign: 'center', boxShadow: '0 0 40px rgba(196,99,122,.5),0 0 80px rgba(196,99,122,.2)', fontFamily: "'Noto Serif JP', serif", letterSpacing: '.05em', boxSizing: 'border-box' as const, marginBottom: '16px' }}
+        >
+          ✨ 今すぐ運命鑑定を受ける
+        </a>
 
 
         {/* 手順案内 */}
