@@ -2,16 +2,21 @@
 
 import React, { useEffect, useRef } from 'react';
 
+const PAYPAL_NCP = 'https://www.paypal.com/ncp/payment/AMEJ4V5C564UN?country.x=JP&locale.x=ja_JP';
+
 const PaidPage: React.FC = () => {
   const cardRef = useRef<HTMLDivElement>(null);
   const appleRef = useRef<HTMLDivElement>(null);
   const rendered = useRef(false);
+  const [sdkError, setSdkError] = React.useState(false);
+  const [sdkLoaded, setSdkLoaded] = React.useState(false);
 
   useEffect(() => {
     if (rendered.current) return;
     const script = document.createElement('script');
     script.src = 'https://www.paypal.com/sdk/js?client-id=AfUn22zK4UsNWfThHlT_1sqvEi8gmtXHZ4jWMYafWPrX4bBorPFvMY8ZTuZAqTfVXygpK95YmdkZsj-N&currency=JPY&locale=ja_JP&enable-funding=applepay,card&components=buttons';
     script.async = true;
+    script.onerror = () => { setSdkError(true); setSdkLoaded(true); };
     script.onload = () => {
       if (rendered.current) return;
       rendered.current = true;
@@ -23,20 +28,22 @@ const PaidPage: React.FC = () => {
           }),
         onApprove: (_: any, actions: any) =>
           actions.order.capture().then(() => { window.location.href = '/thanks'; }),
-        onError: (err: any) => { console.error(err); }
+        onError: (err: any) => {
+          console.error('PayPal Error:', err);
+          setSdkError(true);
+        }
       };
-
-      // Apple Pay（対応デバイスのみ表示）
-      const appleBtn = pp.Buttons({ ...orderConfig, fundingSource: pp.FUNDING.APPLEPAY, style: { shape: 'pill', height: 52 } });
-      if (appleBtn.isEligible() && appleRef.current) {
-        appleBtn.render(appleRef.current).catch(() => {});
-      }
-
-      // クレジット/デビットカード
-      const cardBtn = pp.Buttons({ ...orderConfig, fundingSource: pp.FUNDING.CARD, style: { shape: 'pill', height: 52 } });
-      if (cardBtn.isEligible() && cardRef.current) {
-        cardBtn.render(cardRef.current).catch(() => {});
-      }
+      try {
+        const appleBtn = pp.Buttons({ ...orderConfig, fundingSource: pp.FUNDING.APPLEPAY, style: { shape: 'pill', height: 52 } });
+        if (appleBtn.isEligible() && appleRef.current) {
+          appleBtn.render(appleRef.current).catch(() => {});
+        }
+        const cardBtn = pp.Buttons({ ...orderConfig, fundingSource: pp.FUNDING.CARD, style: { shape: 'pill', height: 52 } });
+        if (cardBtn.isEligible() && cardRef.current) {
+          cardBtn.render(cardRef.current).catch(() => { setSdkError(true); });
+        }
+      } catch(e) { setSdkError(true); }
+      setSdkLoaded(true);
     };
     document.body.appendChild(script);
   }, []);
@@ -117,13 +124,32 @@ const PaidPage: React.FC = () => {
           ── お支払い方法を選択 ──
         </p>
 
-        {/* ① Apple Pay（対応デバイスのみ自動表示） */}
+        {/* ① Apple Pay */}
         <div ref={appleRef} id="apple-container" style={{ marginBottom: '12px' }} />
 
         {/* ② クレジット/デビットカード */}
-        <div ref={cardRef} id="card-container" style={{ marginBottom: '16px' }} />
+        <div ref={cardRef} id="card-container" style={{ marginBottom: '12px' }} />
 
-        <p style={{ textAlign: 'center', marginTop: '16px', fontSize: '12px', color: 'rgba(255,255,255,.2)', letterSpacing: '.05em' }}>© NEXA | AI Fortune</p>
+        {/* エラー時・SDK未対応時のフォールバック */}
+        {(sdkError || sdkLoaded) && (
+          <div style={{ marginTop: '8px' }}>
+            {sdkError && (
+              <div style={{ background: 'rgba(255,80,80,.1)', border: '1px solid rgba(255,80,80,.3)', borderRadius: '12px', padding: '12px', marginBottom: '12px', textAlign: 'center' }}>
+                <p style={{ fontSize: '12px', color: '#fca5a5', marginBottom: '8px' }}>決済ボタンでエラーが発生しました</p>
+                <p style={{ fontSize: '11px', color: 'rgba(255,255,255,.5)' }}>下のボタンからPayPalページで決済してください</p>
+              </div>
+            )}
+            <a
+              href={PAYPAL_NCP}
+              style={{ display: 'block', padding: '15px', borderRadius: '50px', background: 'linear-gradient(135deg,#c4637a,#c9a96e)', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: '14px', textAlign: 'center', boxShadow: '0 0 24px rgba(196,99,122,.4)', marginBottom: '8px' }}
+            >
+              💳 PayPalページで支払う（780円）
+            </a>
+            <p style={{ textAlign: 'center', fontSize: '10px', color: 'rgba(255,255,255,.25)' }}>カード・PayPal・Apple Pay 対応</p>
+          </div>
+        )}
+
+        <p style={{ textAlign: 'center', marginTop: '20px', fontSize: '12px', color: 'rgba(255,255,255,.2)', letterSpacing: '.05em' }}>© NEXA | AI Fortune</p>
       </div>
     </div>
   );
