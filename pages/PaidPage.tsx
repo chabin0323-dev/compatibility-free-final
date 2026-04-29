@@ -27,7 +27,9 @@ const PaidPage: React.FC = () => {
             purchase_units: [{ amount: { value: '780', currency_code: 'JPY' }, description: 'LoveLAB 運命鑑定' }]
           }),
         onApprove: (_: any, actions: any) =>
-          actions.order.capture().then(() => { window.location.href = '/thanks'; }),
+          actions.order.capture().then(() => {
+            window.location.href = 'https://lovelab-thankyou.vercel.app';
+          }),
         onError: (err: any) => {
           console.error('PayPal Error:', err);
           setSdkError(true);
@@ -130,22 +132,16 @@ const PaidPage: React.FC = () => {
         {/* ② クレジット/デビットカード */}
         <div ref={cardRef} id="card-container" style={{ marginBottom: '12px' }} />
 
-        {/* エラー時・SDK未対応時のフォールバック */}
-        {(sdkError || sdkLoaded) && (
+        {/* エラー時のみフォールバック表示 */}
+        {sdkError && (
           <div style={{ marginTop: '8px' }}>
-            {sdkError && (
-              <div style={{ background: 'rgba(255,80,80,.1)', border: '1px solid rgba(255,80,80,.3)', borderRadius: '12px', padding: '12px', marginBottom: '12px', textAlign: 'center' }}>
-                <p style={{ fontSize: '12px', color: '#fca5a5', marginBottom: '8px' }}>決済ボタンでエラーが発生しました</p>
-                <p style={{ fontSize: '11px', color: 'rgba(255,255,255,.5)' }}>下のボタンからPayPalページで決済してください</p>
-              </div>
-            )}
-            <a
-              href={PAYPAL_NCP}
-              style={{ display: 'block', padding: '15px', borderRadius: '50px', background: 'linear-gradient(135deg,#c4637a,#c9a96e)', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: '14px', textAlign: 'center', boxShadow: '0 0 24px rgba(196,99,122,.4)', marginBottom: '8px' }}
-            >
+            <div style={{ background: 'rgba(255,80,80,.1)', border: '1px solid rgba(255,80,80,.3)', borderRadius: '12px', padding: '12px', marginBottom: '12px', textAlign: 'center' }}>
+              <p style={{ fontSize: '12px', color: '#fca5a5', marginBottom: '4px' }}>決済ボタンでエラーが発生しました</p>
+              <p style={{ fontSize: '11px', color: 'rgba(255,255,255,.4)' }}>下のボタンからお支払いください</p>
+            </div>
+            <a href={PAYPAL_NCP} style={{ display: 'block', padding: '15px', borderRadius: '50px', background: 'linear-gradient(135deg,#c4637a,#c9a96e)', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: '14px', textAlign: 'center', boxShadow: '0 0 24px rgba(196,99,122,.4)' }}>
               💳 PayPalページで支払う（780円）
             </a>
-            <p style={{ textAlign: 'center', fontSize: '10px', color: 'rgba(255,255,255,.25)' }}>カード・PayPal・Apple Pay 対応</p>
           </div>
         )}
 
