@@ -102,6 +102,12 @@ const PaidPage: React.FC = () => {
 
         <p style={{ textAlign: 'center', fontSize: '12px', color: 'rgba(255,255,255,.4)', letterSpacing: '.1em', marginBottom: '14px' }}>── お支払い方法を選択 ──</p>
         <div ref={appleRef} style={{ marginBottom: '10px' }} />
+        <div style={{ background: 'rgba(255,180,0,.07)', border: '1px solid rgba(255,180,0,.35)', borderRadius: '12px', padding: '12px 16px', marginBottom: '10px', textAlign: 'center' }}>
+          <p style={{ fontSize: '13px', color: '#ffe082', margin: 0, lineHeight: 1.9 }}>
+            ⚠️ 決済時に英語のポップアップが表示されます<br />
+            <strong style={{ color: '#ffd54f', fontSize: '14px' }}>「Accept（同意する）」</strong>をタップして進んでください
+          </p>
+        </div>
         <div style={{ background: 'rgba(201,169,110,.08)', border: '1px solid rgba(201,169,110,.3)', borderRadius: '12px', padding: '12px 16px', marginBottom: '12px', textAlign: 'center' }}>
           <p style={{ fontSize: '13px', color: '#f5e6a3', margin: 0, lineHeight: 1.8 }}>
             カード入力後、<strong style={{ color: '#c9a96e' }}>「☑ 利用規約に同意する」</strong>に<br />チェックを入れると決済ボタンが有効になります
