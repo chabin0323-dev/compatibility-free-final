@@ -1,25 +1,26 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 const PaidPage: React.FC = () => {
+  const appleRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const rendered = useRef(false);
-  const [cardReady, setCardReady] = useState(false);
 
   useEffect(() => {
     if (rendered.current) return;
+    rendered.current = true;
+
     const script = document.createElement('script');
-    script.src = 'https://www.paypal.com/sdk/js?client-id=AfUn22zK4UsNWfThHlT_1sqvEi8gmtXHZ4jWMYafWPrX4bBorPFvMY8ZTuZAqTfVXygpK95YmdkZsj-N&currency=JPY&locale=ja_JP&enable-funding=card&components=buttons&disable-funding=paypal,venmo,paylater';
+    script.src = 'https://www.paypal.com/sdk/js?client-id=AfUn22zK4UsNWfThHlT_1sqvEi8gmtXHZ4jWMYafWPrX4bBorPFvMY8ZTuZAqTfVXygpK95YmdkZsj-N&currency=JPY&locale=ja_JP&enable-funding=applepay,card&components=buttons';
     script.async = true;
     script.onload = () => {
-      if (rendered.current) return;
-      rendered.current = true;
       const pp = (window as any).paypal;
       const orderConfig = {
         createOrder: (_: any, actions: any) =>
           actions.order.create({
-            purchase_units: [{ amount: { value: '780', currency_code: 'JPY' }, description: 'LoveLAB 運命鑑定' }]
+            purchase_units: [{ amount: { value: '780', currency_code: 'JPY' }, description: 'LoveLAB 運命鑑定' }],
+            application_context: { shipping_preference: 'NO_SHIPPING' }
           }),
         onApprove: (_: any, actions: any) =>
           actions.order.capture().then(() => {
@@ -27,17 +28,12 @@ const PaidPage: React.FC = () => {
           }),
         onError: (err: any) => { console.error('PayPal:', err); }
       };
-      // isEligible()チェックなしで強制レンダー
-      // Advanced Card Payments（インラインカード入力）
-      pp.Buttons({
-        ...orderConfig,
-        fundingSource: pp.FUNDING.CARD,
-        style: { shape: 'pill', height: 52 }
-      }).render(cardRef.current).then(() => {
-        setCardReady(true);
-      }).catch((err: any) => {
-        console.error('Card render error:', err);
-      });
+
+      const appleBtn = pp.Buttons({ ...orderConfig, fundingSource: pp.FUNDING.APPLEPAY, style: { shape: 'pill', height: 52 } });
+      if (appleBtn.isEligible()) appleBtn.render(appleRef.current);
+
+      const cardBtn = pp.Buttons({ ...orderConfig, fundingSource: pp.FUNDING.CARD, style: { shape: 'pill', height: 52 } });
+      if (cardBtn.isEligible()) cardBtn.render(cardRef.current);
     };
     document.body.appendChild(script);
   }, []);
@@ -104,28 +100,9 @@ const PaidPage: React.FC = () => {
           <p style={{ fontSize: '13px', color: 'rgba(255,255,255,.6)', letterSpacing: '.08em' }}>買い切り &nbsp;|&nbsp; 使い放題 &nbsp;|&nbsp; 即日アクセス</p>
         </div>
 
-        {/* PayPal SDKカードボタン */}
-        <div ref={cardRef} style={{ marginBottom: '12px' }} />
-
-        {/* チェックボックス必須アラート（ボタン上に大きく表示） */}
-        <div style={{ background: 'linear-gradient(135deg,rgba(196,99,122,.15),rgba(201,169,110,.1))', border: '1.5px solid rgba(196,99,122,.5)', borderRadius: '16px', padding: '16px 18px', marginBottom: '16px', textAlign: 'center' }}>
-          <p style={{ fontSize: '15px', fontWeight: 700, color: '#f5e6a3', marginBottom: '6px', letterSpacing: '.03em' }}>
-            ⚠️ 決済ページで必ずやること
-          </p>
-          <p style={{ fontSize: '14px', color: '#f0ece8', lineHeight: 1.8, margin: 0 }}>
-            カード入力後に<br />
-            <strong style={{ color: '#c9a96e', fontSize: '16px' }}>「☑ 利用規約に同意する」</strong>に<br />
-            チェックを入れると支払いボタンが有効になります
-          </p>
-        </div>
-
-        {/* メインボタン */}
-        <a
-          href="https://www.paypal.com/ncp/payment/AMEJ4V5C564UN?country.x=JP&locale.x=ja_JP"
-          style={{ display: 'block', width: '100%', padding: '20px', borderRadius: '60px', background: 'linear-gradient(135deg,#c4637a 0%,#c9a96e 50%,#c4637a 100%)', backgroundSize: '200% 100%', color: '#fff', textDecoration: 'none', fontWeight: 700, fontSize: '20px', textAlign: 'center', boxShadow: '0 0 40px rgba(196,99,122,.5),0 0 80px rgba(196,99,122,.2)', fontFamily: "'Noto Serif JP', serif", letterSpacing: '.05em', boxSizing: 'border-box' as const, marginBottom: '16px' }}
-        >
-          ✨ 今すぐ運命鑑定を受ける
-        </a>
+        <p style={{ textAlign: 'center', fontSize: '12px', color: 'rgba(255,255,255,.4)', letterSpacing: '.1em', marginBottom: '14px' }}>── お支払い方法を選択 ──</p>
+        <div ref={appleRef} style={{ marginBottom: '10px' }} />
+        <div ref={cardRef} style={{ marginBottom: '20px' }} />
 
         <p style={{ textAlign: 'center', marginTop: '20px', fontSize: '12px', color: 'rgba(255,255,255,.2)', letterSpacing: '.05em' }}>© NEXA | AI Fortune</p>
       </div>
