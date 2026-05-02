@@ -96,24 +96,27 @@ def _find_font_path() -> str | None:
 def _get_font(size: int) -> ImageFont.FreeTypeFont:
     if size in _font_cache:
         return _font_cache[size]
-    # まず静的パスを試す
     for path in _FONT_PATHS:
-        if os.path.exists(path):
+        exists = os.path.exists(path)
+        _p(f"  [FONT] {path}: {'OK' if exists else 'not found'}")
+        if exists:
             try:
                 font = ImageFont.truetype(path, size)
+                _p(f"  [FONT] Loaded: {path}")
                 _font_cache[size] = font
                 return font
-            except Exception:
-                continue
-    # fc-list でシステムフォントを動的検索（Linux/Render対応）
+            except Exception as e:
+                _p(f"  [FONT] Load failed: {e}")
     dyn = _find_font_path()
     if dyn:
+        _p(f"  [FONT] fc-list: {dyn}")
         try:
             font = ImageFont.truetype(dyn, size)
             _font_cache[size] = font
             return font
-        except Exception:
-            pass
+        except Exception as e:
+            _p(f"  [FONT] fc-list failed: {e}")
+    _p("  [FONT] WARNING: using default font, Japanese will NOT render!")
     font = ImageFont.load_default(size=size)
     _font_cache[size] = font
     return font
