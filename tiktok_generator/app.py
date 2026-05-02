@@ -1,4 +1,4 @@
-"""TikTok占い動画生成 Web アプリ (NEXA Tools)"""
+"""TikTok占い動画生成 Web アプリ (NEXA Tools) - APIキー不要"""
 import os
 import sys
 import uuid
@@ -23,9 +23,9 @@ def _update(job_id: str, **kwargs):
 
 def _process(job_id: str, article: str, theme: str):
     try:
-        _update(job_id, progress="AIがコンテンツを生成中...")
-        from gemini_client import generate_content
-        content = generate_content(article)
+        _update(job_id, progress="テキストを解析中...")
+        from text_parser import parse
+        content = parse(article)
 
         _update(job_id, content=content, progress="動画を生成中...")
         from video_maker import create_video
