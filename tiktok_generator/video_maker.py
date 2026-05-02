@@ -262,32 +262,28 @@ def create_video(content: dict, output_path: str = "output/video.mp4",
     if ret != 0:
         raise RuntimeError("FFmpegでの動画書き出しに失敗しました")
 
-    # BGM：Aマイナー和音をFFmpegで生成（外部ファイル不要）
+    # BGMミックス（失敗時は音声なしでフォールバック）
     _p("  [BGM] BGMをミックス中...")
     fade_out_st = max(1.0, total_dur - 2.0)
+    mixed = False
+
     if bgm_path and Path(bgm_path).exists():
         cmd_mix = [
-            _FFMPEG, "-y",
-            "-i", tmp_path,
+            _FFMPEG, "-y", "-i", tmp_path,
             "-stream_loop", "-1", "-i", bgm_path,
             "-map", "0:v", "-map", "1:a",
             "-af", f"volume=0.45,afade=t=in:st=0:d=1,afade=t=out:st={fade_out_st:.1f}:d=2",
             "-shortest", "-c:v", "copy", "-c:a", "aac", str(out),
         ]
-    else:
-        # シンプルなAマイナー和音（クリッピングなし）
-        bgm_expr = "0.12*sin(2*PI*220*t)+0.09*sin(2*PI*261*t)+0.07*sin(2*PI*329*t)"
-        cmd_mix = [
-            _FFMPEG, "-y",
-            "-i", tmp_path,
-            "-f", "lavfi",
-            "-i", f"aevalsrc='{bgm_expr}':s=44100:d={int(total_dur)+2}",
-            "-map", "0:v", "-map", "1:a",
-            "-af", f"volume=0.6,afade=t=in:st=0:d=1,afade=t=out:st={fade_out_st:.1f}:d=2",
-            "-c:v", "copy", "-c:a", "aac", "-t", str(total_dur),
-            str(out),
-        ]
-    subprocess.run(cmd_mix, check=True, stderr=subprocess.DEVNULL)
+        r = subprocess.run(cmd_mix, stderr=subprocess.DEVNULL)
+        if r.returncode == 0 and Path(str(out)).exists() and Path(str(out)).stat().st_size > 0:
+            mixed = True
+
+    if not mixed:
+        # 音声なしでそのままコピー（最も安全）
+        cmd_copy = [_FFMPEG, "-y", "-i", tmp_path, "-c", "copy", str(out)]
+        subprocess.run(cmd_copy, check=True, stderr=subprocess.DEVNULL)
+
     Path(tmp_path).unlink(missing_ok=True)
 
     return str(out)
