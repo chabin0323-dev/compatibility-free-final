@@ -51,6 +51,13 @@ THEMES = {
 }
 
 _FONT_PATHS = [
+    # Linux (Render)
+    "/usr/share/fonts/opentype/noto/NotoSansCJKjp-Regular.otf",
+    "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+    "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
+    "/usr/share/fonts/noto/NotoSansCJK-Regular.ttc",
+    "/usr/share/fonts/noto-cjk/NotoSansCJKjp-Regular.otf",
+    # Windows
     "C:/Windows/Fonts/meiryo.ttc",
     "C:/Windows/Fonts/YuGothB.ttc",
     "C:/Windows/Fonts/YuGothM.ttc",
@@ -229,20 +236,29 @@ def create_video(content: dict, output_path: str = "output/video.mp4",
     if ret != 0:
         raise RuntimeError("FFmpegでの動画書き出しに失敗しました")
 
+    # BGM：外部ファイルがあれば使用、なければFFmpeg内蔵音源で神秘的なアンビエント音を生成
+    _p("  [BGM] BGMをミックス中...")
+    bgm_expr = "0.25*sin(220*2*PI*t)+0.18*sin(261*2*PI*t)+0.12*sin(329*2*PI*t)+0.08*sin(110*2*PI*t)"
     if bgm_path and Path(bgm_path).exists():
-        _p("  [BGM] BGMをミックス中...")
         cmd_mix = [
             _FFMPEG, "-y",
             "-i", tmp_path,
             "-stream_loop", "-1", "-i", bgm_path,
             "-map", "0:v", "-map", "1:a",
             "-af", f"afade=t=in:st=0:d=1,afade=t=out:st={total_dur - 2:.1f}:d=2,volume=0.45",
-            "-shortest", "-c:v", "copy",
+            "-shortest", "-c:v", "copy", str(out),
+        ]
+    else:
+        cmd_mix = [
+            _FFMPEG, "-y",
+            "-i", tmp_path,
+            "-f", "lavfi", "-i", f"aevalsrc={bgm_expr}:s=44100:d={total_dur}",
+            "-map", "0:v", "-map", "1:a",
+            "-af", f"aecho=0.7:0.85:60:0.4,volume=0.35,afade=t=in:st=0:d=1,afade=t=out:st={total_dur - 2:.1f}:d=2",
+            "-c:v", "copy", "-c:a", "aac", "-shortest",
             str(out),
         ]
-        subprocess.run(cmd_mix, check=True, stderr=subprocess.DEVNULL)
-        Path(tmp_path).unlink(missing_ok=True)
-    else:
-        Path(tmp_path).rename(out)
+    subprocess.run(cmd_mix, check=True, stderr=subprocess.DEVNULL)
+    Path(tmp_path).unlink(missing_ok=True)
 
     return str(out)
