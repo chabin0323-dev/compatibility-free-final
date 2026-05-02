@@ -15,7 +15,6 @@
       padding: 24px 16px 60px;
     }
 
-    /* Stars */
     body::before {
       content: '';
       position: fixed; inset: 0;
@@ -34,53 +33,75 @@
 
     .wrap { position: relative; z-index: 1; max-width: 680px; margin: 0 auto; }
 
-    header { text-align: center; margin-bottom: 32px; }
-    header h1 { font-size: 26px; color: #d4aaff; letter-spacing: 2px; }
-    header p { color: #8060b0; font-size: 13px; margin-top: 6px; }
+    header { text-align: center; margin-bottom: 28px; }
+    header h1 { font-size: 24px; color: #d4aaff; letter-spacing: 2px; }
+    header p { color: #8060b0; font-size: 12px; margin-top: 6px; }
+
+    .hint {
+      background: rgba(100,60,200,.15);
+      border: 1px solid rgba(180,100,255,.2);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 12px;
+      color: #a080d0;
+      margin-bottom: 18px;
+      line-height: 1.6;
+    }
+    .hint a { color: #c090ff; }
 
     .card {
       background: rgba(255,255,255,.045);
       border: 1px solid rgba(180,100,255,.18);
       border-radius: 18px;
-      padding: 24px;
-      margin-bottom: 18px;
+      padding: 22px;
+      margin-bottom: 16px;
       backdrop-filter: blur(6px);
     }
 
     .field-label {
       display: block;
-      font-size: 12px;
+      font-size: 11px;
       color: #9b7ec8;
       letter-spacing: 1px;
       text-transform: uppercase;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
-    textarea {
+    input[type=text], textarea {
       width: 100%;
-      height: 180px;
       background: rgba(255,255,255,.04);
       border: 1px solid rgba(180,100,255,.25);
-      border-radius: 10px;
+      border-radius: 8px;
       color: #e8e0ff;
       font-size: 14px;
-      line-height: 1.7;
-      padding: 12px 14px;
-      resize: vertical;
+      padding: 10px 12px;
       outline: none;
       transition: border-color .2s;
+      font-family: inherit;
     }
-    textarea:focus { border-color: rgba(200,120,255,.55); }
-    textarea::placeholder { color: #604880; }
+    input[type=text]:focus, textarea:focus { border-color: rgba(200,120,255,.55); }
+    input[type=text]::placeholder, textarea::placeholder { color: #604880; }
 
-    .theme-row { display: flex; gap: 10px; margin-top: 16px; }
+    .script-grid { display: flex; flex-direction: column; gap: 8px; }
+    .script-row { display: flex; align-items: center; gap: 8px; }
+    .script-num {
+      width: 24px; height: 24px;
+      background: rgba(180,100,255,.2);
+      border-radius: 50%;
+      font-size: 12px;
+      color: #b080e0;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .row { margin-bottom: 16px; }
+
+    .theme-row { display: flex; gap: 10px; }
     .theme-btn {
-      flex: 1;
-      padding: 10px 6px;
+      flex: 1; padding: 10px 6px;
       border-radius: 10px;
       border: 2px solid transparent;
-      font-size: 13px;
-      font-weight: 700;
+      font-size: 13px; font-weight: 700;
       cursor: pointer;
       transition: border-color .2s, box-shadow .2s;
     }
@@ -89,47 +110,15 @@
     .theme-btn.pink   { background: #380a28; color: #ffb0d0; border-color: #781848; }
     .theme-btn.active { border-color: #c890ff; box-shadow: 0 0 14px rgba(180,100,255,.35); }
 
-    .bgm-row { display: flex; align-items: center; gap: 12px; margin-top: 18px; }
-    .toggle-wrap { display: flex; align-items: center; gap: 10px; cursor: pointer; }
-    .toggle {
-      width: 46px; height: 26px;
-      background: #2a1050;
-      border-radius: 13px;
-      position: relative;
-      transition: background .2s;
-      flex-shrink: 0;
-    }
-    .toggle.on { background: #7030c0; }
-    .toggle::after {
-      content: '';
-      position: absolute;
-      width: 20px; height: 20px;
-      background: #fff;
-      border-radius: 50%;
-      top: 3px; left: 3px;
-      transition: left .2s;
-    }
-    .toggle.on::after { left: 23px; }
-    .bgm-label { font-size: 13px; color: #b89de0; }
-
     .gen-btn {
-      width: 100%;
-      margin-top: 22px;
-      padding: 15px;
+      width: 100%; margin-top: 6px; padding: 15px;
       background: linear-gradient(135deg, #6520b0, #a040d0);
-      color: #fff;
-      border: none;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-      letter-spacing: 1px;
-      transition: opacity .2s, transform .1s;
+      color: #fff; border: none; border-radius: 12px;
+      font-size: 16px; font-weight: 700; cursor: pointer;
+      letter-spacing: 1px; transition: opacity .2s;
     }
-    .gen-btn:active { transform: scale(.98); }
     .gen-btn:disabled { opacity: .45; cursor: not-allowed; }
 
-    /* Progress */
     #progress-card { display: none; text-align: center; padding: 36px; }
     .spinner {
       width: 44px; height: 44px;
@@ -142,54 +131,21 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     #progress-text { color: #b89de0; font-size: 14px; }
 
-    /* Result */
     #result-card { display: none; }
-    .res-block { margin-bottom: 18px; }
-    .res-label { font-size: 11px; color: #8060a8; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px; }
-    .res-value {
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(180,100,255,.12);
-      border-radius: 10px;
-      padding: 12px 14px;
-      font-size: 14px;
-      line-height: 1.75;
-    }
-    .res-hook { font-size: 20px; color: #e0aaff; font-weight: 700; }
-    .res-hashtags { color: #9858d0; word-break: break-word; }
-
     .dl-btn {
-      display: block;
-      width: 100%;
-      margin-top: 20px;
-      padding: 14px;
+      display: block; width: 100%; margin-top: 20px; padding: 14px;
       background: linear-gradient(135deg, #1060a8, #2080cc);
-      color: #fff;
-      border: none;
-      border-radius: 12px;
-      font-size: 15px;
-      font-weight: 700;
-      text-align: center;
-      text-decoration: none;
-      cursor: pointer;
-      transition: opacity .2s;
+      color: #fff; border: none; border-radius: 12px;
+      font-size: 15px; font-weight: 700; text-align: center;
+      text-decoration: none; cursor: pointer;
     }
-    .dl-btn:hover { opacity: .88; }
-
     .reset-btn {
-      width: 100%;
-      margin-top: 10px;
-      padding: 12px;
-      background: rgba(255,255,255,.07);
-      color: #c0a8e0;
+      width: 100%; margin-top: 10px; padding: 12px;
+      background: rgba(255,255,255,.07); color: #c0a8e0;
       border: 1px solid rgba(180,100,255,.2);
-      border-radius: 12px;
-      font-size: 14px;
-      cursor: pointer;
-      transition: background .2s;
+      border-radius: 12px; font-size: 14px; cursor: pointer;
     }
-    .reset-btn:hover { background: rgba(255,255,255,.12); }
 
-    /* Error */
     #error-card { display: none; text-align: center; padding: 28px; }
     .error-msg { color: #ff8888; font-size: 14px; margin-bottom: 18px; }
   </style>
@@ -198,25 +154,42 @@
 <div class="wrap">
   <header>
     <h1>🔮 TikTok動画生成</h1>
-    <p>NEXA Tools &nbsp;|&nbsp; 占い記事 → 縦型TikTok動画</p>
+    <p>NEXA Tools &nbsp;|&nbsp; テキスト入力 → 縦型TikTok動画</p>
   </header>
+
+  <div class="hint">
+    💡 <a href="https://sns-post-beta.vercel.app/" target="_blank">SNSポストツール</a> でフック文・スクリプト・ハッシュタグを生成してからここに貼り付けてください。
+  </div>
 
   <!-- Form -->
   <div class="card" id="form-card">
-    <label class="field-label">占い記事テキスト</label>
-    <textarea id="article" placeholder="ここに占い記事テキストを貼り付けてください...&#10;&#10;例）片思いの彼が実はあなたのことが気になっているサイン..."></textarea>
-
-    <label class="field-label" style="margin-top:18px;">テーマ</label>
-    <div class="theme-row">
-      <button class="theme-btn mystic active" data-theme="mystic" onclick="selectTheme(this)">🌙 Mystic</button>
-      <button class="theme-btn dark"   data-theme="dark"   onclick="selectTheme(this)">🌌 Dark</button>
-      <button class="theme-btn pink"   data-theme="pink"   onclick="selectTheme(this)">🌸 Pink</button>
+    <div class="row">
+      <label class="field-label">フック文（最初の4秒）</label>
+      <input type="text" id="hook" placeholder="例）好き避けしてる人だけ見て" maxlength="30">
     </div>
 
-    <div class="bgm-row">
-      <div class="toggle-wrap" onclick="toggleBgm()">
-        <div class="toggle on" id="bgm-toggle"></div>
-        <span class="bgm-label" id="bgm-label">BGMあり</span>
+    <div class="row">
+      <label class="field-label">スクリプト（1行20文字以内・5行）</label>
+      <div class="script-grid">
+        <div class="script-row"><div class="script-num">1</div><input type="text" class="script-line" placeholder="彼が目を合わせない理由" maxlength="20"></div>
+        <div class="script-row"><div class="script-num">2</div><input type="text" class="script-line" placeholder="実は好意を隠してるから" maxlength="20"></div>
+        <div class="script-row"><div class="script-num">3</div><input type="text" class="script-line" placeholder="他の子より言葉が少ない" maxlength="20"></div>
+        <div class="script-row"><div class="script-num">4</div><input type="text" class="script-line" placeholder="SNSを必ずチェックしてる" maxlength="20"></div>
+        <div class="script-row"><div class="script-num">5</div><input type="text" class="script-line" placeholder="本音は鑑定でわかる" maxlength="20"></div>
+      </div>
+    </div>
+
+    <div class="row">
+      <label class="field-label">CTA（最後の5秒）</label>
+      <input type="text" id="cta" value="プロフィールから無料で占えます" maxlength="25">
+    </div>
+
+    <div class="row">
+      <label class="field-label">テーマ</label>
+      <div class="theme-row">
+        <button class="theme-btn mystic active" data-theme="mystic" onclick="selectTheme(this)">🌙 Mystic</button>
+        <button class="theme-btn dark"   data-theme="dark"   onclick="selectTheme(this)">🌌 Dark</button>
+        <button class="theme-btn pink"   data-theme="pink"   onclick="selectTheme(this)">🌸 Pink</button>
       </div>
     </div>
 
@@ -226,26 +199,13 @@
   <!-- Progress -->
   <div class="card" id="progress-card">
     <div class="spinner"></div>
-    <div id="progress-text">処理中...</div>
+    <div id="progress-text">動画を生成中...</div>
   </div>
 
   <!-- Result -->
   <div class="card" id="result-card">
-    <div class="res-block">
-      <div class="res-label">フック文</div>
-      <div class="res-value res-hook" id="r-hook"></div>
-    </div>
-    <div class="res-block">
-      <div class="res-label">スクリプト</div>
-      <div class="res-value" id="r-script"></div>
-    </div>
-    <div class="res-block">
-      <div class="res-label">投稿キャプション</div>
-      <div class="res-value" id="r-caption"></div>
-    </div>
-    <div class="res-block">
-      <div class="res-label">ハッシュタグ</div>
-      <div class="res-value res-hashtags" id="r-hashtags"></div>
+    <div style="text-align:center; color:#c890ff; font-size:18px; font-weight:700; margin-bottom:16px;">
+      動画が完成しました！
     </div>
     <a id="dl-link" class="dl-btn" href="#" download>⬇ 動画をダウンロード (.mp4)</a>
     <button class="reset-btn" onclick="resetForm()">もう一度生成する</button>
@@ -260,19 +220,12 @@
 
 <script>
   let theme = 'mystic';
-  let bgm = true;
   let pollTimer = null;
 
   function selectTheme(btn) {
     document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     theme = btn.dataset.theme;
-  }
-
-  function toggleBgm() {
-    bgm = !bgm;
-    document.getElementById('bgm-toggle').classList.toggle('on', bgm);
-    document.getElementById('bgm-label').textContent = bgm ? 'BGMあり' : 'BGMなし';
   }
 
   function show(id) {
@@ -282,8 +235,12 @@
   }
 
   async function startGenerate() {
-    const article = document.getElementById('article').value.trim();
-    if (!article) { alert('記事テキストを入力してください'); return; }
+    const hook = document.getElementById('hook').value.trim();
+    const lines = [...document.querySelectorAll('.script-line')].map(i => i.value.trim()).filter(v => v);
+    const cta = document.getElementById('cta').value.trim();
+
+    if (!hook) { alert('フック文を入力してください'); return; }
+    if (lines.length === 0) { alert('スクリプトを1行以上入力してください'); return; }
 
     document.getElementById('gen-btn').disabled = true;
     show('progress-card');
@@ -292,7 +249,7 @@
       const res = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ article, theme, bgm }),
+        body: JSON.stringify({ hook, script_lines: lines, cta, theme }),
       });
       const { job_id, error } = await res.json();
       if (error) { showError(error); return; }
@@ -307,20 +264,14 @@
       try {
         const res = await fetch('/api/status/' + job_id);
         const d = await res.json();
-        document.getElementById('progress-text').textContent = d.progress || '処理中...';
-        if (d.status === 'done') { clearInterval(pollTimer); showResult(d.content, job_id); }
+        document.getElementById('progress-text').textContent = d.progress || '動画を生成中...';
+        if (d.status === 'done') { clearInterval(pollTimer); showResult(job_id); }
         if (d.status === 'error') { clearInterval(pollTimer); showError(d.error || 'エラー'); }
       } catch (_) {}
     }, 2500);
   }
 
-  function showResult(c, job_id) {
-    document.getElementById('r-hook').textContent = c.hook || '';
-    document.getElementById('r-script').innerHTML =
-      (c.script_lines || []).map((l, i) => `${i+1}. ${l}`).join('<br>');
-    document.getElementById('r-caption').textContent = c.caption || '';
-    document.getElementById('r-hashtags').textContent =
-      (c.hashtags || []).map(t => '#' + t.replace(/^#/, '')).join(' ');
+  function showResult(job_id) {
     document.getElementById('dl-link').href = '/api/download/' + job_id;
     show('result-card');
   }
