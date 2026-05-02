@@ -5,103 +5,43 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TikTok動画生成 | NEXA Tools</title>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Hiragino Kaku Gothic Pro', 'Meiryo', 'Yu Gothic', sans-serif;
-      background: linear-gradient(160deg, #0a0518 0%, #150830 50%, #0a0518 100%);
-      min-height: 100vh;
-      color: #e8e0ff;
-      padding: 24px 16px 60px;
-    }
-    body::before {
-      content: '';
-      position: fixed; inset: 0;
-      background-image:
-        radial-gradient(1px 1px at 20% 15%, rgba(255,255,255,.6) 0%, transparent 100%),
-        radial-gradient(1px 1px at 70% 30%, rgba(255,255,255,.5) 0%, transparent 100%),
-        radial-gradient(1px 1px at 45% 60%, rgba(255,255,255,.4) 0%, transparent 100%),
-        radial-gradient(1px 1px at 85% 70%, rgba(255,255,255,.6) 0%, transparent 100%),
-        radial-gradient(1px 1px at 10% 80%, rgba(255,255,255,.4) 0%, transparent 100%);
-      pointer-events: none; z-index: 0;
-    }
-    .wrap { position: relative; z-index: 1; max-width: 680px; margin: 0 auto; }
-    header { text-align: center; margin-bottom: 28px; }
-    header h1 { font-size: 26px; color: #d4aaff; letter-spacing: 2px; }
-    header p { color: #8060b0; font-size: 12px; margin-top: 6px; }
-    .card {
-      background: rgba(255,255,255,.045);
-      border: 1px solid rgba(180,100,255,.18);
-      border-radius: 18px;
-      padding: 22px;
-      margin-bottom: 16px;
-      backdrop-filter: blur(6px);
-    }
-    .field-label {
-      display: block; font-size: 11px; color: #9b7ec8;
-      letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px;
-    }
-    textarea {
-      width: 100%; height: 200px;
-      background: rgba(255,255,255,.04);
-      border: 1px solid rgba(180,100,255,.25);
-      border-radius: 10px;
-      color: #e8e0ff; font-size: 14px; line-height: 1.7;
-      padding: 12px 14px; resize: vertical; outline: none;
-      transition: border-color .2s; font-family: inherit;
-    }
-    textarea:focus { border-color: rgba(200,120,255,.55); }
-    textarea::placeholder { color: #604880; }
-    .theme-row { display: flex; gap: 10px; margin-top: 16px; }
-    .theme-btn {
-      flex: 1; padding: 10px 6px; border-radius: 10px;
-      border: 2px solid transparent; font-size: 13px; font-weight: 700;
-      cursor: pointer; transition: border-color .2s, box-shadow .2s;
-    }
-    .theme-btn.mystic { background: #1e0a4a; color: #c890ff; border-color: #5a28a0; }
-    .theme-btn.dark   { background: #0a0a1e; color: #a878f0; border-color: #3a1878; }
-    .theme-btn.pink   { background: #380a28; color: #ffb0d0; border-color: #781848; }
-    .theme-btn.active { border-color: #c890ff; box-shadow: 0 0 14px rgba(180,100,255,.35); }
-    .gen-btn {
-      width: 100%; margin-top: 18px; padding: 15px;
-      background: linear-gradient(135deg, #6520b0, #a040d0);
-      color: #fff; border: none; border-radius: 12px;
-      font-size: 16px; font-weight: 700; cursor: pointer; letter-spacing: 1px;
-    }
-    .gen-btn:disabled { opacity: .45; cursor: not-allowed; }
-    #progress-card { display: none; text-align: center; padding: 36px; }
-    .spinner {
-      width: 44px; height: 44px;
-      border: 3px solid rgba(180,100,255,.25);
-      border-top-color: #c890ff; border-radius: 50%;
-      animation: spin 1s linear infinite; margin: 0 auto 18px;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    #progress-text { color: #b89de0; font-size: 14px; }
-    #result-card { display: none; }
-    .res-block { margin-bottom: 16px; }
-    .res-label { font-size: 11px; color: #8060a8; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px; }
-    .res-value {
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(180,100,255,.12);
-      border-radius: 10px; padding: 12px 14px;
-      font-size: 14px; line-height: 1.75;
-    }
-    .res-hook { font-size: 20px; color: #e0aaff; font-weight: 700; }
-    .res-hashtags { color: #9858d0; word-break: break-word; }
-    .dl-btn {
-      display: block; width: 100%; margin-top: 20px; padding: 14px;
-      background: linear-gradient(135deg, #1060a8, #2080cc);
-      color: #fff; border: none; border-radius: 12px;
-      font-size: 15px; font-weight: 700; text-align: center; text-decoration: none;
-    }
-    .reset-btn {
-      width: 100%; margin-top: 10px; padding: 12px;
-      background: rgba(255,255,255,.07); color: #c0a8e0;
-      border: 1px solid rgba(180,100,255,.2); border-radius: 12px;
-      font-size: 14px; cursor: pointer;
-    }
-    #error-card { display: none; text-align: center; padding: 28px; }
-    .error-msg { color: #ff8888; font-size: 14px; margin-bottom: 18px; word-break: break-all; }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Hiragino Kaku Gothic Pro','Meiryo',sans-serif;background:linear-gradient(160deg,#0a0518,#150830,#0a0518);min-height:100vh;color:#e8e0ff;padding:20px 14px 60px}
+    body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(1px 1px at 20% 15%,rgba(255,255,255,.6) 0%,transparent 100%),radial-gradient(1px 1px at 70% 30%,rgba(255,255,255,.5) 0%,transparent 100%),radial-gradient(1px 1px at 45% 60%,rgba(255,255,255,.4) 0%,transparent 100%),radial-gradient(1px 1px at 85% 70%,rgba(255,255,255,.6) 0%,transparent 100%);pointer-events:none;z-index:0}
+    .wrap{position:relative;z-index:1;max-width:680px;margin:0 auto}
+    header{text-align:center;margin-bottom:24px}
+    header h1{font-size:24px;color:#d4aaff;letter-spacing:2px}
+    header p{color:#8060b0;font-size:12px;margin-top:5px}
+    .card{background:rgba(255,255,255,.045);border:1px solid rgba(180,100,255,.18);border-radius:16px;padding:20px;margin-bottom:14px;backdrop-filter:blur(6px)}
+    .lbl{display:block;font-size:11px;color:#9b7ec8;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;margin-top:14px}
+    .lbl:first-child{margin-top:0}
+    textarea,input[type=text],select{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(180,100,255,.25);border-radius:8px;color:#e8e0ff;font-size:14px;padding:10px 12px;outline:none;font-family:inherit;transition:border-color .2s}
+    textarea{height:180px;resize:vertical}
+    textarea:focus,input[type=text]:focus,select:focus{border-color:rgba(200,120,255,.55)}
+    textarea::placeholder{color:#604880}
+    select option{background:#1a0a3a;color:#e8e0ff}
+    .theme-row{display:flex;gap:8px;margin-top:2px}
+    .tbtn{flex:1;padding:9px 4px;border-radius:8px;border:2px solid transparent;font-size:12px;font-weight:700;cursor:pointer;transition:.2s}
+    .tbtn.mystic{background:#1e0a4a;color:#c890ff;border-color:#5a28a0}
+    .tbtn.dark{background:#0a0a1e;color:#a878f0;border-color:#3a1878}
+    .tbtn.pink{background:#380a28;color:#ffb0d0;border-color:#781848}
+    .tbtn.active{border-color:#c890ff;box-shadow:0 0 12px rgba(180,100,255,.35)}
+    .upload-area{border:2px dashed rgba(180,100,255,.3);border-radius:8px;padding:16px;text-align:center;cursor:pointer;color:#8060b0;font-size:13px;transition:.2s;margin-top:2px}
+    .upload-area:hover{border-color:rgba(180,100,255,.6);color:#b89de0}
+    .upload-area input{display:none}
+    .file-list{margin-top:8px;font-size:12px;color:#a080c8}
+    .gen-btn{width:100%;margin-top:16px;padding:14px;background:linear-gradient(135deg,#6520b0,#a040d0);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:1px}
+    .gen-btn:disabled{opacity:.45;cursor:not-allowed}
+    #progress-card{display:none;text-align:center;padding:32px}
+    .spinner{width:44px;height:44px;border:3px solid rgba(180,100,255,.25);border-top-color:#c890ff;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    #progress-text{color:#b89de0;font-size:14px}
+    #result-card{display:none}
+    .preview-video{width:100%;border-radius:10px;margin-bottom:14px;max-height:400px;background:#000}
+    .dl-btn{display:block;width:100%;padding:13px;background:linear-gradient(135deg,#1060a8,#2080cc);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;text-align:center;text-decoration:none;cursor:pointer;margin-bottom:10px}
+    .reset-btn{width:100%;padding:11px;background:rgba(255,255,255,.07);color:#c0a8e0;border:1px solid rgba(180,100,255,.2);border-radius:12px;font-size:14px;cursor:pointer}
+    #error-card{display:none;text-align:center;padding:24px}
+    .err{color:#ff8888;font-size:13px;margin-bottom:16px;word-break:break-all}
   </style>
 </head>
 <body>
@@ -111,89 +51,111 @@
     <p>NEXA Tools &nbsp;|&nbsp; 占い記事 → 縦型TikTok動画</p>
   </header>
 
-  <!-- Form -->
   <div class="card" id="form-card">
-    <label class="field-label">占い記事テキスト</label>
-    <textarea id="article" placeholder="ここに占い記事を貼り付けてください...&#10;&#10;AIが自動でフック文・スクリプト・ハッシュタグを生成します。"></textarea>
+    <label class="lbl">占い記事テキスト</label>
+    <textarea id="article" placeholder="ここに占い記事を貼り付けてください..."></textarea>
 
-    <label class="field-label" style="margin-top:18px;">テーマ</label>
+    <label class="lbl">テーマ</label>
     <div class="theme-row">
-      <button class="theme-btn mystic active" data-theme="mystic" onclick="selectTheme(this)">🌙 Mystic</button>
-      <button class="theme-btn dark"   data-theme="dark"   onclick="selectTheme(this)">🌌 Dark</button>
-      <button class="theme-btn pink"   data-theme="pink"   onclick="selectTheme(this)">🌸 Pink</button>
+      <button class="tbtn mystic active" data-theme="mystic" onclick="selTheme(this)">🌙 Mystic</button>
+      <button class="tbtn dark" data-theme="dark" onclick="selTheme(this)">🌌 Dark</button>
+      <button class="tbtn pink" data-theme="pink" onclick="selTheme(this)">🌸 Pink</button>
     </div>
-    <button class="gen-btn" id="gen-btn" onclick="startGenerate()">✨ 動画を生成する</button>
+
+    <label class="lbl">読み上げ音声</label>
+    <select id="voice">
+      <option value="nanami">七海（女性・自然）</option>
+      <option value="aoi">葵（女性・明るい）</option>
+      <option value="shiori">詩織（女性・優しい）</option>
+      <option value="mayu">真夕（女性・落ち着き）</option>
+      <option value="keita">慶太（男性・自然）</option>
+      <option value="daichi">大地（男性・低め）</option>
+    </select>
+
+    <label class="lbl">背景写真（任意・複数可）</label>
+    <div class="upload-area" onclick="document.getElementById('photo-input').click()">
+      <input type="file" id="photo-input" accept="image/*" multiple onchange="onPhotos(this)">
+      📷 写真をクリックで選択（jpg/png/webp）<br>
+      <span style="font-size:11px">写真を選ぶと各シーンの背景に使用されます</span>
+    </div>
+    <div class="file-list" id="file-list"></div>
+
+    <button class="gen-btn" id="gen-btn" onclick="startGen()">✨ 動画を生成する</button>
   </div>
 
-  <!-- Progress -->
   <div class="card" id="progress-card">
     <div class="spinner"></div>
-    <div id="progress-text">処理中...</div>
+    <div id="progress-text">動画を生成中... (1〜2分かかります)</div>
   </div>
 
-  <!-- Result -->
   <div class="card" id="result-card">
-    <div style="text-align:center; color:#c890ff; font-size:20px; font-weight:700; margin-bottom:20px;">
-      動画が完成しました！
-    </div>
-    <a id="dl-btn" href="#" class="gen-btn" style="display:block; text-align:center; text-decoration:none; margin-bottom:12px;">
-      ⬇ 動画をダウンロード
-    </a>
+    <div style="text-align:center;color:#c890ff;font-size:18px;font-weight:700;margin-bottom:14px">動画が完成しました！</div>
+    <video class="preview-video" id="preview-video" controls playsinline></video>
+    <a id="dl-btn" href="#" class="dl-btn">⬇ 動画をダウンロード (.mp4)</a>
     <button class="reset-btn" onclick="resetForm()">もう一度生成する</button>
   </div>
 
-  <!-- Error -->
   <div class="card" id="error-card">
-    <div class="error-msg" id="error-msg">エラーが発生しました</div>
+    <div class="err" id="err-msg">エラーが発生しました</div>
     <button class="reset-btn" onclick="resetForm()">もう一度試す</button>
   </div>
 </div>
 
 <script>
   let theme = 'mystic';
-  let pollTimer = null;
+  let photoFiles = [];
 
-  function selectTheme(btn) {
-    document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  function selTheme(btn) {
+    document.querySelectorAll('.tbtn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     theme = btn.dataset.theme;
   }
 
-  function show(id) {
-    ['form-card','progress-card','result-card','error-card'].forEach(c => {
-      document.getElementById(c).style.display = c === id ? 'block' : 'none';
-    });
+  function onPhotos(input) {
+    photoFiles = Array.from(input.files);
+    document.getElementById('file-list').textContent =
+      photoFiles.length ? `${photoFiles.length}枚の写真を選択` : '';
   }
 
-  async function startGenerate() {
+  function show(id) {
+    ['form-card','progress-card','result-card','error-card'].forEach(c =>
+      document.getElementById(c).style.display = c === id ? 'block' : 'none');
+  }
+
+  async function startGen() {
     const article = document.getElementById('article').value.trim();
     if (!article) { alert('記事テキストを入力してください'); return; }
     document.getElementById('gen-btn').disabled = true;
     show('progress-card');
-    document.getElementById('progress-text').textContent = '動画を生成中... (1〜2分かかります)';
+
     try {
-      const res = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ article, theme }),
-      });
+      const fd = new FormData();
+      fd.append('article', article);
+      fd.append('theme', theme);
+      fd.append('voice', document.getElementById('voice').value);
+      photoFiles.forEach(f => fd.append('photos', f));
+
+      const res = await fetch('/api/generate', { method: 'POST', body: fd });
       const data = await res.json();
-      if (!res.ok || data.error) { showError(data.error || 'エラーが発生しました'); return; }
-      document.getElementById('dl-btn').href = '/api/download/' + data.job_id;
+      if (!res.ok || data.error) { showErr(data.error || 'エラー'); return; }
+
+      const jobId = data.job_id;
+      document.getElementById('dl-btn').href = '/api/download/' + jobId;
+      document.getElementById('preview-video').src = '/api/preview/' + jobId;
       show('result-card');
     } catch (e) {
-      showError('通信エラーが発生しました: ' + e.message);
+      showErr('通信エラー: ' + e.message);
     }
   }
 
-  function showError(msg) {
-    document.getElementById('error-msg').textContent = msg;
+  function showErr(msg) {
+    document.getElementById('err-msg').textContent = msg;
     show('error-card');
   }
 
   function resetForm() {
-    clearInterval(pollTimer);
     document.getElementById('gen-btn').disabled = false;
+    document.getElementById('preview-video').src = '';
     show('form-card');
   }
 </script>
