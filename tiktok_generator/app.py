@@ -1,4 +1,4 @@
-"""TikTok占い動画生成 Web アプリ (NEXA Tools) - APIキー不要版"""
+"""TikTok占い動画生成 Web アプリ (NEXA Tools)"""
 import os
 import sys
 import uuid
@@ -21,13 +21,18 @@ def _update(job_id: str, **kwargs):
             _jobs[job_id].update(kwargs)
 
 
-def _process(job_id: str, content: dict, theme: str):
+def _process(job_id: str, article: str, theme: str):
     try:
-        _update(job_id, progress="動画を生成中...")
+        _update(job_id, progress="AIがコンテンツを生成中...")
+        from gemini_client import generate_content
+        content = generate_content(article)
+
+        _update(job_id, content=content, progress="動画を生成中...")
         from video_maker import create_video
         Path("output").mkdir(exist_ok=True)
         out = f"output/video_{job_id}.mp4"
         create_video(content, output_path=out, bgm_path=None, theme=theme, fps=24)
+
         _update(job_id, status="done", video_path=out)
     except Exception as e:
         _update(job_id, status="error", error=str(e))
@@ -41,31 +46,19 @@ def index():
 @app.route("/api/generate", methods=["POST"])
 def generate():
     data = request.get_json(silent=True) or {}
+    article = (data.get("article") or "").strip()
+    if not article:
+        return jsonify({"error": "記事テキストが必要です"}), 400
 
-    hook = (data.get("hook") or "").strip()
-    if not hook:
-        return jsonify({"error": "フック文が必要です"}), 400
-
-    script_lines = [l.strip() for l in (data.get("script_lines") or []) if str(l).strip()]
-    if not script_lines:
-        return jsonify({"error": "スクリプトを1行以上入力してください"}), 400
-
-    cta = (data.get("cta") or "プロフィールから\n無料で占えます").strip()
     theme = data.get("theme", "mystic")
     if theme not in ("mystic", "dark", "pink"):
         theme = "mystic"
 
-    content = {
-        "hook": hook,
-        "script_lines": script_lines,
-        "cta": cta,
-    }
-
     job_id = uuid.uuid4().hex[:10]
     with _lock:
-        _jobs[job_id] = {"status": "processing", "progress": "動画を生成中..."}
+        _jobs[job_id] = {"status": "processing", "progress": "開始中..."}
 
-    threading.Thread(target=_process, args=(job_id, content, theme), daemon=True).start()
+    threading.Thread(target=_process, args=(job_id, article, theme), daemon=True).start()
     return jsonify({"job_id": job_id})
 
 
@@ -76,6 +69,7 @@ def status(job_id):
     return jsonify({
         "status": job.get("status"),
         "progress": job.get("progress", ""),
+        "content": job.get("content") if job.get("status") == "done" else None,
         "error": job.get("error") if job.get("status") == "error" else None,
     })
 
