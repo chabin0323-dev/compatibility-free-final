@@ -57,13 +57,17 @@ def generate():
     if not out_path.exists() or out_path.stat().st_size == 0:
         return jsonify({"error": "動画ファイルの生成に失敗しました"}), 500
 
-    # 動画ファイルを直接返す（ダウンロードURLは不要）
-    return send_file(
-        out,
-        mimetype="video/mp4",
-        as_attachment=True,
-        download_name=f"tiktok_{job_id}.mp4",
-    )
+    # send_file の代わりに直接バイトを返す
+    file_size = out_path.stat().st_size
+    print(f"[SEND] Sending video: {file_size:,} bytes")
+    with open(out, "rb") as f:
+        video_data = f.read()
+    from flask import make_response
+    resp = make_response(video_data)
+    resp.headers["Content-Type"] = "video/mp4"
+    resp.headers["Content-Disposition"] = f'attachment; filename="tiktok_{job_id}.mp4"'
+    resp.headers["Content-Length"] = str(file_size)
+    return resp
 
 
 if __name__ == "__main__":
