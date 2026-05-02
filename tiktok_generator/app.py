@@ -1,8 +1,7 @@
-"""TikTok占い動画生成 Web アプリ (NEXA Tools) - APIキー不要"""
+"""TikTok占い動画生成 Web アプリ (NEXA Tools) - 同期1リクエスト方式"""
 import os
 import sys
 import uuid
-import threading
 from pathlib import Path
 from flask import Flask, request, jsonify, send_file, render_template
 
@@ -11,31 +10,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024
 
-_jobs: dict = {}
-_lock = threading.Lock()
-
-
-def _update(job_id: str, **kwargs):
-    with _lock:
-        if job_id in _jobs:
-            _jobs[job_id].update(kwargs)
-
-
-def _process(job_id: str, article: str, theme: str):
-    try:
-        _update(job_id, progress="テキストを解析中...")
-        from text_parser import parse
-        content = parse(article)
-
-        _update(job_id, content=content, progress="動画を生成中...")
-        from video_maker import create_video
-        Path("output").mkdir(exist_ok=True)
-        out = f"output/video_{job_id}.mp4"
-        create_video(content, output_path=out, bgm_path=None, theme=theme, fps=15)
-
-        _update(job_id, status="done", video_path=out)
-    except Exception as e:
-        _update(job_id, status="error", error=str(e))
+_TMP = Path("/tmp/tiktok")
 
 
 @app.route("/")
@@ -54,34 +29,27 @@ def generate():
     if theme not in ("mystic", "dark", "pink"):
         theme = "mystic"
 
-    job_id = uuid.uuid4().hex[:10]
-    with _lock:
-        _jobs[job_id] = {"status": "processing", "progress": "開始中..."}
+    _TMP.mkdir(parents=True, exist_ok=True)
 
-    threading.Thread(target=_process, args=(job_id, article, theme), daemon=True).start()
-    return jsonify({"job_id": job_id})
+    from text_parser import parse
+    content = parse(article)
 
+    from video_maker import create_video
+    job_id = uuid.uuid4().hex[:8]
+    out = str(_TMP / f"video_{job_id}.mp4")
 
-@app.route("/api/status/<job_id>")
-def status(job_id):
-    with _lock:
-        job = dict(_jobs.get(job_id, {"status": "not_found"}))
-    return jsonify({
-        "status": job.get("status"),
-        "progress": job.get("progress", ""),
-        "content": job.get("content") if job.get("status") == "done" else None,
-        "error": job.get("error") if job.get("status") == "error" else None,
-    })
+    try:
+        create_video(content, output_path=out, bgm_path=None, theme=theme, fps=15)
+    except Exception as e:
+        return jsonify({"error": f"動画生成エラー: {e}"}), 500
 
+    out_path = Path(out)
+    if not out_path.exists() or out_path.stat().st_size == 0:
+        return jsonify({"error": "動画ファイルの生成に失敗しました"}), 500
 
-@app.route("/api/download/<job_id>")
-def download(job_id):
-    with _lock:
-        job = _jobs.get(job_id, {})
-    if job.get("status") != "done":
-        return jsonify({"error": "まだ準備できていません"}), 404
+    # 動画ファイルを直接返す（ダウンロードURLは不要）
     return send_file(
-        job["video_path"],
+        out,
         mimetype="video/mp4",
         as_attachment=True,
         download_name=f"tiktok_{job_id}.mp4",
@@ -89,6 +57,6 @@ def download(job_id):
 
 
 if __name__ == "__main__":
-    Path("output").mkdir(exist_ok=True)
+    _TMP.mkdir(parents=True, exist_ok=True)
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)

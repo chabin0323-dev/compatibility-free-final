@@ -133,23 +133,12 @@
 
   <!-- Result -->
   <div class="card" id="result-card">
-    <div class="res-block">
-      <div class="res-label">フック文</div>
-      <div class="res-value res-hook" id="r-hook"></div>
+    <div style="text-align:center; color:#c890ff; font-size:20px; font-weight:700; margin-bottom:16px;">
+      ✅ 動画のダウンロードが始まりました！
     </div>
-    <div class="res-block">
-      <div class="res-label">スクリプト</div>
-      <div class="res-value" id="r-script"></div>
+    <div style="text-align:center; color:#9b7ec8; font-size:13px; margin-bottom:20px;">
+      ダウンロードフォルダに保存されます
     </div>
-    <div class="res-block">
-      <div class="res-label">投稿キャプション</div>
-      <div class="res-value" id="r-caption"></div>
-    </div>
-    <div class="res-block">
-      <div class="res-label">ハッシュタグ</div>
-      <div class="res-value res-hashtags" id="r-hashtags"></div>
-    </div>
-    <a id="dl-link" class="dl-btn" href="#" download>⬇ 動画をダウンロード (.mp4)</a>
     <button class="reset-btn" onclick="resetForm()">もう一度生成する</button>
   </div>
 
@@ -181,41 +170,32 @@
     if (!article) { alert('記事テキストを入力してください'); return; }
     document.getElementById('gen-btn').disabled = true;
     show('progress-card');
+    document.getElementById('progress-text').textContent = '動画を生成中... (1〜2分かかります)';
     try {
       const res = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ article, theme }),
       });
-      const { job_id, error } = await res.json();
-      if (error) { showError(error); return; }
-      poll(job_id);
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        showError(err.error || 'エラーが発生しました');
+        return;
+      }
+      // 動画ファイルを直接受け取りダウンロード
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'tiktok_video.mp4';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      show('result-card');
     } catch (e) {
-      showError('通信エラーが発生しました');
+      showError('通信エラーが発生しました: ' + e.message);
     }
-  }
-
-  function poll(job_id) {
-    pollTimer = setInterval(async () => {
-      try {
-        const res = await fetch('/api/status/' + job_id);
-        const d = await res.json();
-        document.getElementById('progress-text').textContent = d.progress || '処理中...';
-        if (d.status === 'done') { clearInterval(pollTimer); showResult(d.content, job_id); }
-        if (d.status === 'error') { clearInterval(pollTimer); showError(d.error || 'エラー'); }
-      } catch (_) {}
-    }, 2500);
-  }
-
-  function showResult(c, job_id) {
-    document.getElementById('r-hook').textContent = c.hook || '';
-    document.getElementById('r-script').innerHTML =
-      (c.script_lines || []).map((l, i) => `${i+1}. ${l}`).join('<br>');
-    document.getElementById('r-caption').textContent = c.caption || '';
-    document.getElementById('r-hashtags').textContent =
-      (c.hashtags || []).map(t => '#' + t.replace(/^#/, '')).join(' ');
-    document.getElementById('dl-link').href = '/api/download/' + job_id;
-    show('result-card');
   }
 
   function showError(msg) {
