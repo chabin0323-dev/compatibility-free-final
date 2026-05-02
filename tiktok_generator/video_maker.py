@@ -51,6 +51,8 @@ THEMES = {
 }
 
 _FONT_PATHS = [
+    # リポジトリ同梱フォント（最優先）
+    os.path.join(os.path.dirname(__file__), "font.otf"),
     # Linux (Render)
     "/usr/share/fonts/opentype/noto/NotoSansCJKjp-Regular.otf",
     "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
@@ -280,9 +282,23 @@ def create_video(content: dict, output_path: str = "output/video.mp4",
             mixed = True
 
     if not mixed:
-        # 音声なしでそのままコピー（最も安全）
-        cmd_copy = [_FFMPEG, "-y", "-i", tmp_path, "-c", "copy", str(out)]
-        subprocess.run(cmd_copy, check=True, stderr=subprocess.DEVNULL)
+        # sine波で音声を追加（シンプルで確実）
+        fade_out_st2 = max(1.0, total_dur - 2.0)
+        cmd_sine = [
+            _FFMPEG, "-y",
+            "-i", tmp_path,
+            "-f", "lavfi",
+            "-i", f"sine=frequency=220:sample_rate=44100:duration={int(total_dur)+2}",
+            "-map", "0:v", "-map", "1:a",
+            "-af", f"volume=0.18,afade=t=in:st=0:d=1,afade=t=out:st={fade_out_st2:.1f}:d=2",
+            "-c:v", "copy", "-c:a", "aac", "-t", str(total_dur),
+            str(out),
+        ]
+        r2 = subprocess.run(cmd_sine, stderr=subprocess.DEVNULL)
+        if r2.returncode != 0 or not Path(str(out)).exists() or Path(str(out)).stat().st_size == 0:
+            # 最終フォールバック：無音コピー
+            subprocess.run([_FFMPEG, "-y", "-i", tmp_path, "-c", "copy", str(out)],
+                           check=True, stderr=subprocess.DEVNULL)
 
     Path(tmp_path).unlink(missing_ok=True)
 
