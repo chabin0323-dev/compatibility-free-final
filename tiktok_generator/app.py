@@ -5,7 +5,17 @@ import uuid
 from pathlib import Path
 from flask import Flask, request, jsonify, send_file, render_template
 
-sys.path.insert(0, os.path.dirname(__file__))
+_HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, _HERE)
+
+# 起動時フォント確認
+_font_path = os.path.join(_HERE, "font.otf")
+print(f"[STARTUP] font path: {_font_path}")
+print(f"[STARTUP] font exists: {os.path.exists(_font_path)}")
+if os.path.exists(_font_path):
+    print(f"[STARTUP] font size: {os.path.getsize(_font_path):,} bytes")
+else:
+    print("[STARTUP] WARNING: font.otf not found!")
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024

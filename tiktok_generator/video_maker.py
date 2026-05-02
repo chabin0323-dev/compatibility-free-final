@@ -51,8 +51,8 @@ THEMES = {
 }
 
 _FONT_PATHS = [
-    # リポジトリ同梱フォント（最優先）
-    os.path.join(os.path.dirname(__file__), "font.otf"),
+    # リポジトリ同梱フォント（最優先・絶対パス）
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "font.otf"),
     # Linux (Render)
     "/usr/share/fonts/opentype/noto/NotoSansCJKjp-Regular.otf",
     "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
