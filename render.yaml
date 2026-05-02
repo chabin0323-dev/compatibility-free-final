@@ -3,5 +3,5 @@ services:
     name: nexa-tiktok-generator
     env: python
     rootDir: tiktok_generator
-    buildCommand: apt-get install -y fonts-noto-cjk && pip install -r requirements.txt
+    buildCommand: DEBIAN_FRONTEND=noninteractive apt-get install -y fonts-noto-cjk && fc-cache -fv && pip install -r requirements.txt
     startCommand: gunicorn app:app --timeout 300 --workers 1 --bind 0.0.0.0:$PORT

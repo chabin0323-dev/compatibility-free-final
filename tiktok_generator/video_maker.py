@@ -75,9 +75,26 @@ _EMOJI_RE = re.compile(
 )
 
 
+def _find_font_path() -> str | None:
+    """fc-list でシステムの日本語フォントを動的に検索"""
+    try:
+        result = subprocess.run(
+            ["fc-list", ":lang=ja", "--format=%{file}\n"],
+            capture_output=True, text=True, timeout=5
+        )
+        for f in result.stdout.split("\n"):
+            f = f.strip()
+            if f and os.path.exists(f):
+                return f
+    except Exception:
+        pass
+    return None
+
+
 def _get_font(size: int) -> ImageFont.FreeTypeFont:
     if size in _font_cache:
         return _font_cache[size]
+    # まず静的パスを試す
     for path in _FONT_PATHS:
         if os.path.exists(path):
             try:
@@ -86,6 +103,15 @@ def _get_font(size: int) -> ImageFont.FreeTypeFont:
                 return font
             except Exception:
                 continue
+    # fc-list でシステムフォントを動的検索（Linux/Render対応）
+    dyn = _find_font_path()
+    if dyn:
+        try:
+            font = ImageFont.truetype(dyn, size)
+            _font_cache[size] = font
+            return font
+        except Exception:
+            pass
     font = ImageFont.load_default(size=size)
     _font_cache[size] = font
     return font
@@ -236,26 +262,29 @@ def create_video(content: dict, output_path: str = "output/video.mp4",
     if ret != 0:
         raise RuntimeError("FFmpegでの動画書き出しに失敗しました")
 
-    # BGM：外部ファイルがあれば使用、なければFFmpeg内蔵音源で神秘的なアンビエント音を生成
+    # BGM：Aマイナー和音をFFmpegで生成（外部ファイル不要）
     _p("  [BGM] BGMをミックス中...")
-    bgm_expr = "0.25*sin(220*2*PI*t)+0.18*sin(261*2*PI*t)+0.12*sin(329*2*PI*t)+0.08*sin(110*2*PI*t)"
+    fade_out_st = max(1.0, total_dur - 2.0)
     if bgm_path and Path(bgm_path).exists():
         cmd_mix = [
             _FFMPEG, "-y",
             "-i", tmp_path,
             "-stream_loop", "-1", "-i", bgm_path,
             "-map", "0:v", "-map", "1:a",
-            "-af", f"afade=t=in:st=0:d=1,afade=t=out:st={total_dur - 2:.1f}:d=2,volume=0.45",
-            "-shortest", "-c:v", "copy", str(out),
+            "-af", f"volume=0.45,afade=t=in:st=0:d=1,afade=t=out:st={fade_out_st:.1f}:d=2",
+            "-shortest", "-c:v", "copy", "-c:a", "aac", str(out),
         ]
     else:
+        # シンプルなAマイナー和音（クリッピングなし）
+        bgm_expr = "0.12*sin(2*PI*220*t)+0.09*sin(2*PI*261*t)+0.07*sin(2*PI*329*t)"
         cmd_mix = [
             _FFMPEG, "-y",
             "-i", tmp_path,
-            "-f", "lavfi", "-i", f"aevalsrc={bgm_expr}:s=44100:d={total_dur}",
+            "-f", "lavfi",
+            "-i", f"aevalsrc='{bgm_expr}':s=44100:d={int(total_dur)+2}",
             "-map", "0:v", "-map", "1:a",
-            "-af", f"aecho=0.7:0.85:60:0.4,volume=0.35,afade=t=in:st=0:d=1,afade=t=out:st={total_dur - 2:.1f}:d=2",
-            "-c:v", "copy", "-c:a", "aac", "-shortest",
+            "-af", f"volume=0.6,afade=t=in:st=0:d=1,afade=t=out:st={fade_out_st:.1f}:d=2",
+            "-c:v", "copy", "-c:a", "aac", "-t", str(total_dur),
             str(out),
         ]
     subprocess.run(cmd_mix, check=True, stderr=subprocess.DEVNULL)
