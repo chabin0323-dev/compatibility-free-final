@@ -271,17 +271,37 @@ def create_video(content: dict, output_path: str = "output/video.mp4",
     if ret != 0:
         raise RuntimeError("FFmpegでの動画書き出しに失敗しました")
 
-    # BGMミックス（失敗時は音声なしでフォールバック）
-    _p("  [BGM] BGMをミックス中...")
-    fade_out_st = max(1.0, total_dur - 2.0)
+    # 音声生成：TTS → BGMファイル → サイン波（フォールバック順）
     mixed = False
+    tts_path = str(out.with_stem(out.stem + "_tts")) + ".mp3"
 
-    if bgm_path and Path(bgm_path).exists():
+    # 1) TTS（edge-tts）
+    try:
+        _p("  [TTS] 音声を生成中...")
+        from tts_generator import generate as gen_tts
+        if gen_tts(content, tts_path):
+            cmd_mix = [
+                _FFMPEG, "-y", "-i", tmp_path, "-i", tts_path,
+                "-map", "0:v", "-map", "1:a",
+                "-af", "volume=1.3",
+                "-c:v", "copy", "-c:a", "aac", "-shortest", str(out),
+            ]
+            r = subprocess.run(cmd_mix, stderr=subprocess.DEVNULL)
+            if r.returncode == 0 and Path(str(out)).exists() and Path(str(out)).stat().st_size > 0:
+                mixed = True
+                _p("  [TTS] 音声ミックス完了")
+            Path(tts_path).unlink(missing_ok=True)
+    except Exception as e:
+        _p(f"  [TTS] スキップ: {e}")
+
+    # 2) BGMファイル
+    if not mixed and bgm_path and Path(bgm_path).exists():
+        fade_out_st = max(1.0, total_dur - 2.0)
         cmd_mix = [
             _FFMPEG, "-y", "-i", tmp_path,
             "-stream_loop", "-1", "-i", bgm_path,
             "-map", "0:v", "-map", "1:a",
-            "-af", f"volume=0.45,afade=t=in:st=0:d=1,afade=t=out:st={fade_out_st:.1f}:d=2",
+            "-af", f"volume=0.45,afade=t=out:st={fade_out_st:.1f}:d=2",
             "-shortest", "-c:v", "copy", "-c:a", "aac", str(out),
         ]
         r = subprocess.run(cmd_mix, stderr=subprocess.DEVNULL)
@@ -289,15 +309,15 @@ def create_video(content: dict, output_path: str = "output/video.mp4",
             mixed = True
 
     if not mixed:
-        # sine波で音声を追加（シンプルで確実）
-        fade_out_st2 = max(1.0, total_dur - 2.0)
+        # 3) 無音コピー（最終フォールバック）
+        _p("  [BGM] 無音コピー")
         cmd_sine = [
             _FFMPEG, "-y",
             "-i", tmp_path,
             "-f", "lavfi",
             "-i", f"sine=frequency=220:sample_rate=44100:duration={int(total_dur)+2}",
             "-map", "0:v", "-map", "1:a",
-            "-af", f"volume=0.18,afade=t=in:st=0:d=1,afade=t=out:st={fade_out_st2:.1f}:d=2",
+            "-af", "volume=0.15",
             "-c:v", "copy", "-c:a", "aac", "-t", str(total_dur),
             str(out),
         ]
