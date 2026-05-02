@@ -235,25 +235,67 @@ def _scene_frames(scene: str, text: str, duration: float,
         yield _make_frame(scene, text, max(0.0, min(1.0, alpha)), theme, base_bg)
 
 
+def _audio_duration(path: str) -> float:
+    """FFmpegでMP3の長さを取得"""
+    try:
+        r = subprocess.run(
+            [_FFMPEG, "-i", path, "-hide_banner"],
+            capture_output=True, text=True
+        )
+        for line in r.stderr.split("\n"):
+            if "Duration:" in line:
+                ds = line.split("Duration:")[1].split(",")[0].strip()
+                h, m, s = ds.split(":")
+                return int(h) * 3600 + int(m) * 60 + float(s)
+    except Exception:
+        pass
+    return 0.0
+
+
 # ---- メイン ----
 def create_video(content: dict, output_path: str = "output/video.mp4",
                  bgm_path: str = None, theme: str = "mystic",
                  fps: int = 15, img_paths: list = None) -> str:
     cfg = THEMES.get(theme, THEMES["mystic"])
-
-    scenes = [("hook", content["hook"], 4.0)]
-    for line in content["script_lines"]:
-        scenes.append(("content", line, 3.0))
-    scenes.append(("cta", content.get("cta", "プロフィールから\n無料で占えます"), 5.0))
-    total_dur = sum(d for _, _, d in scenes)
-
-    _p(f"  [動画] {total_dur:.0f}秒 / {len(scenes)}シーン / {theme}")
+    voice_key = content.get("voice_key", "nanami")
 
     out = Path(output_path).with_suffix(".mp4")
     out.parent.mkdir(parents=True, exist_ok=True)
+    tts_path = str(out.with_stem(out.stem + "_tts")) + ".mp3"
     tmp_path = str(out.with_stem(out.stem + "_tmp"))
 
-    # フレームをFFmpegにパイプ
+    # ---- Step1: TTS先生成 ----
+    tts_ok = False
+    tts_dur = 0.0
+    try:
+        _p("  [TTS] 音声を生成中...")
+        from tts_generator import generate as gen_tts
+        if gen_tts(content, tts_path, voice_key):
+            tts_dur = _audio_duration(tts_path)
+            tts_ok = tts_dur > 0.5
+            _p(f"  [TTS] {tts_dur:.1f}秒")
+    except Exception as e:
+        _p(f"  [TTS] 失敗: {e}")
+
+    # ---- Step2: シーン時間をTTS長さに合わせて伸縮 ----
+    base_scenes = [("hook", content["hook"], 4.0)]
+    for line in content["script_lines"]:
+        base_scenes.append(("content", line, 3.0))
+    base_scenes.append(("cta", content.get("cta", "プロフィールから\n無料で占えます"), 5.0))
+    base_dur = sum(d for _, _, d in base_scenes)
+
+    if tts_ok and tts_dur > base_dur:
+        scale = tts_dur / base_dur
+        scenes = [(t, text, dur * scale) for t, text, dur in base_scenes]
+        total_dur = tts_dur
+        _p(f"  [動画] TTS長さに合わせて{total_dur:.0f}秒に延長")
+    else:
+        scenes = base_scenes
+        total_dur = base_dur
+
+    _p(f"  [動画] {total_dur:.0f}秒 / {len(scenes)}シーン / {theme}")
+
+    # ---- Step3: 動画フレーム生成 ----
     cmd_video = [
         _FFMPEG, "-y",
         "-f", "rawvideo", "-vcodec", "rawvideo",
@@ -275,42 +317,38 @@ def create_video(content: dict, output_path: str = "output/video.mp4",
     if proc.wait() != 0:
         raise RuntimeError("FFmpegでの動画書き出しに失敗しました")
 
-    # 音声合成（TTS → BGMファイル → サイン波）
+    # ---- Step4: 音声ミックス ----
     mixed = False
-    tts_path = str(out.with_stem(out.stem + "_tts")) + ".mp3"
-    voice_key = content.get("voice_key", "nanami")
 
-    # 1) TTS
-    try:
-        _p("  [TTS] 音声を生成中...")
-        from tts_generator import generate as gen_tts
-        if gen_tts(content, tts_path, voice_key):
-            cmd_tts = [
-                _FFMPEG, "-y", "-i", tmp_path, "-i", tts_path,
-                "-map", "0:v", "-map", "1:a",
-                "-af", "volume=1.3,afade=t=out:st=" + f"{max(1.0, total_dur - 1.5):.1f}:d=1.5",
-                "-c:v", "copy", "-c:a", "aac", "-shortest", str(out),
-            ]
-            r = subprocess.run(cmd_tts, stderr=subprocess.DEVNULL)
-            if r.returncode == 0 and Path(str(out)).exists() and Path(str(out)).stat().st_size > 0:
-                mixed = True
-                _p("  [TTS] 完了")
-            Path(tts_path).unlink(missing_ok=True)
-    except Exception as e:
-        _p(f"  [TTS] スキップ: {e}")
+    # TTS音声
+    if tts_ok and Path(tts_path).exists():
+        fade_st = max(1.0, total_dur - 1.5)
+        cmd_tts = [
+            _FFMPEG, "-y", "-i", tmp_path, "-i", tts_path,
+            "-map", "0:v", "-map", "1:a",
+            "-af", f"volume=1.3,afade=t=out:st={fade_st:.1f}:d=1.5",
+            "-c:v", "copy", "-c:a", "aac",
+            "-t", str(total_dur),
+            str(out),
+        ]
+        r = subprocess.run(cmd_tts, stderr=subprocess.DEVNULL)
+        if r.returncode == 0 and Path(str(out)).exists() and Path(str(out)).stat().st_size > 0:
+            mixed = True
+            _p("  [TTS] ミックス完了")
+        Path(tts_path).unlink(missing_ok=True)
 
-    # 2) BGMファイル
+    # BGMファイル（フォールバック）
     if not mixed and bgm_path and Path(bgm_path).exists():
         cmd_bgm = [
             _FFMPEG, "-y", "-i", tmp_path, "-stream_loop", "-1", "-i", bgm_path,
-            "-map", "0:v", "-map", "1:a",
-            "-af", "volume=0.4", "-shortest", "-c:v", "copy", "-c:a", "aac", str(out),
+            "-map", "0:v", "-map", "1:a", "-af", "volume=0.4",
+            "-shortest", "-c:v", "copy", "-c:a", "aac", str(out),
         ]
         r = subprocess.run(cmd_bgm, stderr=subprocess.DEVNULL)
         if r.returncode == 0 and Path(str(out)).exists() and Path(str(out)).stat().st_size > 0:
             mixed = True
 
-    # 3) 無音コピー
+    # 無音コピー（最終フォールバック）
     if not mixed:
         subprocess.run([_FFMPEG, "-y", "-i", tmp_path, "-c", "copy", str(out)],
                        check=True, stderr=subprocess.DEVNULL)
