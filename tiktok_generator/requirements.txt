@@ -1,0 +1,9 @@
+# TikTok動画生成ツール 依存パッケージ
+# インストール: py -3 -m pip install -r requirements.txt
+anthropic>=0.45.0
+pillow>=10.0.0
+numpy>=1.24.0
+moviepy>=2.0.0          # imageio_ffmpeg (bundled FFmpeg) を含む
+python-dotenv>=1.0.0
+flask>=3.0.0
+gunicorn>=21.0.0

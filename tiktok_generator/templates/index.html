@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TikTok動画生成 | NEXA Tools</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Hiragino Kaku Gothic Pro', 'Meiryo', 'Yu Gothic', sans-serif;
+      background: linear-gradient(160deg, #0a0518 0%, #150830 50%, #0a0518 100%);
+      min-height: 100vh;
+      color: #e8e0ff;
+      padding: 24px 16px 60px;
+    }
+
+    /* Stars */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 20% 15%, rgba(255,255,255,.6) 0%, transparent 100%),
+        radial-gradient(1px 1px at 70% 30%, rgba(255,255,255,.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 45% 60%, rgba(255,255,255,.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 85% 70%, rgba(255,255,255,.6) 0%, transparent 100%),
+        radial-gradient(1px 1px at 10% 80%, rgba(255,255,255,.4) 0%, transparent 100%),
+        radial-gradient(2px 2px at 55% 10%, rgba(255,255,255,.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 30% 45%, rgba(255,255,255,.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 90% 50%, rgba(255,255,255,.3) 0%, transparent 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wrap { position: relative; z-index: 1; max-width: 680px; margin: 0 auto; }
+
+    header { text-align: center; margin-bottom: 32px; }
+    header h1 { font-size: 26px; color: #d4aaff; letter-spacing: 2px; }
+    header p { color: #8060b0; font-size: 13px; margin-top: 6px; }
+
+    .card {
+      background: rgba(255,255,255,.045);
+      border: 1px solid rgba(180,100,255,.18);
+      border-radius: 18px;
+      padding: 24px;
+      margin-bottom: 18px;
+      backdrop-filter: blur(6px);
+    }
+
+    .field-label {
+      display: block;
+      font-size: 12px;
+      color: #9b7ec8;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 180px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(180,100,255,.25);
+      border-radius: 10px;
+      color: #e8e0ff;
+      font-size: 14px;
+      line-height: 1.7;
+      padding: 12px 14px;
+      resize: vertical;
+      outline: none;
+      transition: border-color .2s;
+    }
+    textarea:focus { border-color: rgba(200,120,255,.55); }
+    textarea::placeholder { color: #604880; }
+
+    .theme-row { display: flex; gap: 10px; margin-top: 16px; }
+    .theme-btn {
+      flex: 1;
+      padding: 10px 6px;
+      border-radius: 10px;
+      border: 2px solid transparent;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .theme-btn.mystic { background: #1e0a4a; color: #c890ff; border-color: #5a28a0; }
+    .theme-btn.dark   { background: #0a0a1e; color: #a878f0; border-color: #3a1878; }
+    .theme-btn.pink   { background: #380a28; color: #ffb0d0; border-color: #781848; }
+    .theme-btn.active { border-color: #c890ff; box-shadow: 0 0 14px rgba(180,100,255,.35); }
+
+    .bgm-row { display: flex; align-items: center; gap: 12px; margin-top: 18px; }
+    .toggle-wrap { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+    .toggle {
+      width: 46px; height: 26px;
+      background: #2a1050;
+      border-radius: 13px;
+      position: relative;
+      transition: background .2s;
+      flex-shrink: 0;
+    }
+    .toggle.on { background: #7030c0; }
+    .toggle::after {
+      content: '';
+      position: absolute;
+      width: 20px; height: 20px;
+      background: #fff;
+      border-radius: 50%;
+      top: 3px; left: 3px;
+      transition: left .2s;
+    }
+    .toggle.on::after { left: 23px; }
+    .bgm-label { font-size: 13px; color: #b89de0; }
+
+    .gen-btn {
+      width: 100%;
+      margin-top: 22px;
+      padding: 15px;
+      background: linear-gradient(135deg, #6520b0, #a040d0);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 1px;
+      transition: opacity .2s, transform .1s;
+    }
+    .gen-btn:active { transform: scale(.98); }
+    .gen-btn:disabled { opacity: .45; cursor: not-allowed; }
+
+    /* Progress */
+    #progress-card { display: none; text-align: center; padding: 36px; }
+    .spinner {
+      width: 44px; height: 44px;
+      border: 3px solid rgba(180,100,255,.25);
+      border-top-color: #c890ff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 18px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #progress-text { color: #b89de0; font-size: 14px; }
+
+    /* Result */
+    #result-card { display: none; }
+    .res-block { margin-bottom: 18px; }
+    .res-label { font-size: 11px; color: #8060a8; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px; }
+    .res-value {
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(180,100,255,.12);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 14px;
+      line-height: 1.75;
+    }
+    .res-hook { font-size: 20px; color: #e0aaff; font-weight: 700; }
+    .res-hashtags { color: #9858d0; word-break: break-word; }
+
+    .dl-btn {
+      display: block;
+      width: 100%;
+      margin-top: 20px;
+      padding: 14px;
+      background: linear-gradient(135deg, #1060a8, #2080cc);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      text-align: center;
+      text-decoration: none;
+      cursor: pointer;
+      transition: opacity .2s;
+    }
+    .dl-btn:hover { opacity: .88; }
+
+    .reset-btn {
+      width: 100%;
+      margin-top: 10px;
+      padding: 12px;
+      background: rgba(255,255,255,.07);
+      color: #c0a8e0;
+      border: 1px solid rgba(180,100,255,.2);
+      border-radius: 12px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .reset-btn:hover { background: rgba(255,255,255,.12); }
+
+    /* Error */
+    #error-card { display: none; text-align: center; padding: 28px; }
+    .error-msg { color: #ff8888; font-size: 14px; margin-bottom: 18px; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🔮 TikTok動画生成</h1>
+    <p>NEXA Tools &nbsp;|&nbsp; 占い記事 → 縦型TikTok動画</p>
+  </header>
+
+  <!-- Form -->
+  <div class="card" id="form-card">
+    <label class="field-label">占い記事テキスト</label>
+    <textarea id="article" placeholder="ここに占い記事テキストを貼り付けてください...&#10;&#10;例）片思いの彼が実はあなたのことが気になっているサイン..."></textarea>
+
+    <label class="field-label" style="margin-top:18px;">テーマ</label>
+    <div class="theme-row">
+      <button class="theme-btn mystic active" data-theme="mystic" onclick="selectTheme(this)">🌙 Mystic</button>
+      <button class="theme-btn dark"   data-theme="dark"   onclick="selectTheme(this)">🌌 Dark</button>
+      <button class="theme-btn pink"   data-theme="pink"   onclick="selectTheme(this)">🌸 Pink</button>
+    </div>
+
+    <div class="bgm-row">
+      <div class="toggle-wrap" onclick="toggleBgm()">
+        <div class="toggle on" id="bgm-toggle"></div>
+        <span class="bgm-label" id="bgm-label">BGMあり</span>
+      </div>
+    </div>
+
+    <button class="gen-btn" id="gen-btn" onclick="startGenerate()">✨ 動画を生成する</button>
+  </div>
+
+  <!-- Progress -->
+  <div class="card" id="progress-card">
+    <div class="spinner"></div>
+    <div id="progress-text">処理中...</div>
+  </div>
+
+  <!-- Result -->
+  <div class="card" id="result-card">
+    <div class="res-block">
+      <div class="res-label">フック文</div>
+      <div class="res-value res-hook" id="r-hook"></div>
+    </div>
+    <div class="res-block">
+      <div class="res-label">スクリプト</div>
+      <div class="res-value" id="r-script"></div>
+    </div>
+    <div class="res-block">
+      <div class="res-label">投稿キャプション</div>
+      <div class="res-value" id="r-caption"></div>
+    </div>
+    <div class="res-block">
+      <div class="res-label">ハッシュタグ</div>
+      <div class="res-value res-hashtags" id="r-hashtags"></div>
+    </div>
+    <a id="dl-link" class="dl-btn" href="#" download>⬇ 動画をダウンロード (.mp4)</a>
+    <button class="reset-btn" onclick="resetForm()">もう一度生成する</button>
+  </div>
+
+  <!-- Error -->
+  <div class="card" id="error-card">
+    <div class="error-msg" id="error-msg">エラーが発生しました</div>
+    <button class="reset-btn" onclick="resetForm()">もう一度試す</button>
+  </div>
+</div>
+
+<script>
+  let theme = 'mystic';
+  let bgm = true;
+  let pollTimer = null;
+
+  function selectTheme(btn) {
+    document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    theme = btn.dataset.theme;
+  }
+
+  function toggleBgm() {
+    bgm = !bgm;
+    document.getElementById('bgm-toggle').classList.toggle('on', bgm);
+    document.getElementById('bgm-label').textContent = bgm ? 'BGMあり' : 'BGMなし';
+  }
+
+  function show(id) {
+    ['form-card','progress-card','result-card','error-card'].forEach(c => {
+      document.getElementById(c).style.display = c === id ? 'block' : 'none';
+    });
+  }
+
+  async function startGenerate() {
+    const article = document.getElementById('article').value.trim();
+    if (!article) { alert('記事テキストを入力してください'); return; }
+
+    document.getElementById('gen-btn').disabled = true;
+    show('progress-card');
+
+    try {
+      const res = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ article, theme, bgm }),
+      });
+      const { job_id, error } = await res.json();
+      if (error) { showError(error); return; }
+      poll(job_id);
+    } catch (e) {
+      showError('通信エラーが発生しました');
+    }
+  }
+
+  function poll(job_id) {
+    pollTimer = setInterval(async () => {
+      try {
+        const res = await fetch('/api/status/' + job_id);
+        const d = await res.json();
+        document.getElementById('progress-text').textContent = d.progress || '処理中...';
+        if (d.status === 'done') { clearInterval(pollTimer); showResult(d.content, job_id); }
+        if (d.status === 'error') { clearInterval(pollTimer); showError(d.error || 'エラー'); }
+      } catch (_) {}
+    }, 2500);
+  }
+
+  function showResult(c, job_id) {
+    document.getElementById('r-hook').textContent = c.hook || '';
+    document.getElementById('r-script').innerHTML =
+      (c.script_lines || []).map((l, i) => `${i+1}. ${l}`).join('<br>');
+    document.getElementById('r-caption').textContent = c.caption || '';
+    document.getElementById('r-hashtags').textContent =
+      (c.hashtags || []).map(t => '#' + t.replace(/^#/, '')).join(' ');
+    document.getElementById('dl-link').href = '/api/download/' + job_id;
+    show('result-card');
+  }
+
+  function showError(msg) {
+    document.getElementById('error-msg').textContent = msg;
+    show('error-card');
+  }
+
+  function resetForm() {
+    clearInterval(pollTimer);
+    document.getElementById('gen-btn').disabled = false;
+    show('form-card');
+  }
+</script>
+</body>
+</html>
