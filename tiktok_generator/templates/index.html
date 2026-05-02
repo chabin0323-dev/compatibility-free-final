@@ -133,12 +133,12 @@
 
   <!-- Result -->
   <div class="card" id="result-card">
-    <div style="text-align:center; color:#c890ff; font-size:20px; font-weight:700; margin-bottom:16px;">
-      ✅ 動画のダウンロードが始まりました！
+    <div style="text-align:center; color:#c890ff; font-size:20px; font-weight:700; margin-bottom:20px;">
+      動画が完成しました！
     </div>
-    <div style="text-align:center; color:#9b7ec8; font-size:13px; margin-bottom:20px;">
-      ダウンロードフォルダに保存されます
-    </div>
+    <a id="dl-btn" href="#" class="gen-btn" style="display:block; text-align:center; text-decoration:none; margin-bottom:12px;">
+      ⬇ 動画をダウンロード
+    </a>
     <button class="reset-btn" onclick="resetForm()">もう一度生成する</button>
   </div>
 
@@ -177,21 +177,9 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ article, theme }),
       });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        showError(err.error || 'エラーが発生しました');
-        return;
-      }
-      // 動画ファイルを直接受け取りダウンロード
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'tiktok_video.mp4';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      const data = await res.json();
+      if (!res.ok || data.error) { showError(data.error || 'エラーが発生しました'); return; }
+      document.getElementById('dl-btn').href = '/api/download/' + data.job_id;
       show('result-card');
     } catch (e) {
       showError('通信エラーが発生しました: ' + e.message);
