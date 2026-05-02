@@ -31,7 +31,7 @@ def _process(job_id: str, article: str, theme: str):
         from video_maker import create_video
         Path("output").mkdir(exist_ok=True)
         out = f"output/video_{job_id}.mp4"
-        create_video(content, output_path=out, bgm_path=None, theme=theme, fps=24)
+        create_video(content, output_path=out, bgm_path=None, theme=theme, fps=15)
 
         _update(job_id, status="done", video_path=out)
     except Exception as e:

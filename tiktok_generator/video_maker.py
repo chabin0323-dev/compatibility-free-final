@@ -20,7 +20,8 @@ try:
 except Exception:
     _FFMPEG = "ffmpeg"
 
-WIDTH, HEIGHT = 1080, 1920
+# Render無料プランのCPU制限に合わせて低解像度で生成（TikTokは540x960でも十分）
+WIDTH, HEIGHT = 540, 960
 
 THEMES = {
     "dark": {
@@ -146,26 +147,26 @@ def _make_frame(scene: str, text: str, alpha: float,
     slide = int(28 * (1 - alpha))
 
     if scene == "hook":
-        font = _get_font(72)
+        font = _get_font(36)
         acc = _blend(theme["accent"], alpha * 0.7, bg_mid)
-        y_line = HEIGHT // 2 - 130
-        draw.line([(110, y_line), (WIDTH - 110, y_line)], fill=acc, width=2)
+        y_line = HEIGHT // 2 - 65
+        draw.line([(55, y_line), (WIDTH - 55, y_line)], fill=acc, width=2)
         _draw_text_block(draw, text, font, HEIGHT // 2, theme["hook_color"], alpha, bg_mid, slide)
-        draw.line([(110, HEIGHT // 2 + 130), (WIDTH - 110, HEIGHT // 2 + 130)], fill=acc, width=2)
+        draw.line([(55, HEIGHT // 2 + 65), (WIDTH - 55, HEIGHT // 2 + 65)], fill=acc, width=2)
 
     elif scene == "content":
-        font = _get_font(52)
+        font = _get_font(26)
         acc = _blend(theme["accent"], alpha, bg_mid)
-        cx, cy = 88, HEIGHT // 2 + slide
-        draw.polygon([(cx, cy - 12), (cx + 13, cy), (cx, cy + 12), (cx - 13, cy)], fill=acc)
+        cx, cy = 44, HEIGHT // 2 + slide
+        draw.polygon([(cx, cy - 6), (cx + 7, cy), (cx, cy + 6), (cx - 7, cy)], fill=acc)
         _draw_text_block(draw, text, font, HEIGHT // 2, theme["text_color"], alpha, bg_mid, slide)
 
     elif scene == "cta":
-        font = _get_font(60)
-        _draw_text_block(draw, text, font, HEIGHT // 2 - 30, theme["hook_color"], alpha, bg_mid, slide)
+        font = _get_font(30)
+        _draw_text_block(draw, text, font, HEIGHT // 2 - 15, theme["hook_color"], alpha, bg_mid, slide)
         acc = _blend(theme["accent"], alpha, bg_mid)
-        ay = HEIGHT // 2 + 100 + slide
-        draw.polygon([(WIDTH // 2, ay + 32), (WIDTH // 2 - 26, ay), (WIDTH // 2 + 26, ay)], fill=acc)
+        ay = HEIGHT // 2 + 50 + slide
+        draw.polygon([(WIDTH // 2, ay + 16), (WIDTH // 2 - 13, ay), (WIDTH // 2 + 13, ay)], fill=acc)
 
     return img
 
