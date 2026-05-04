@@ -767,6 +767,14 @@ const FreeApp: React.FC = () => {
         .animate-fade-in-up {
           animation: fade-in-up 0.8s ease-out forwards;
         }
+        @keyframes gold-shimmer {
+          0% { background-position: 0% center; }
+          100% { background-position: 200% center; }
+        }
+        @keyframes sparkle-star {
+          0%, 100% { opacity: 0; transform: scale(0.5) rotate(0deg); }
+          50% { opacity: 1; transform: scale(1.1) rotate(180deg); }
+        }
         select {
           -webkit-appearance: none;
           -moz-appearance: none;
@@ -786,9 +794,30 @@ const FreeApp: React.FC = () => {
           <div className="w-full lg:w-3/5 p-6 md:p-10 relative z-10">
             <header className="mb-8 flex justify-between items-start">
               <div>
-                <h1 className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-[linear-gradient(to_right,#f87171,#fb923c,#facc15,#4ade80,#60a5fa,#818cf8,#c084fc)] mb-2">
-                  AI相性占い
-                </h1>
+                <div className="relative inline-block mb-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h1
+                      className="text-3xl md:text-4xl font-black"
+                      style={{
+                        background: 'linear-gradient(90deg, #92620a 0%, #c9982a 15%, #ffd700 35%, #fff8c0 50%, #ffd700 65%, #c9982a 85%, #92620a 100%)',
+                        backgroundSize: '200% auto',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        backgroundClip: 'text',
+                        animation: 'gold-shimmer 3s linear infinite',
+                        filter: 'drop-shadow(0 0 10px rgba(255,215,0,0.55))',
+                      }}
+                    >
+                      AI相性占い
+                    </h1>
+                    <span className="text-sm font-bold px-2 py-0.5 rounded-full border border-yellow-500/50 bg-yellow-950/30 text-yellow-400 whitespace-nowrap">
+                      無料版
+                    </span>
+                  </div>
+                  <span className="absolute -top-2 left-1 text-yellow-300 text-xs pointer-events-none select-none" style={{ animation: 'sparkle-star 2.2s ease-in-out infinite' }}>✦</span>
+                  <span className="absolute top-0 right-24 text-yellow-200 text-[10px] pointer-events-none select-none" style={{ animation: 'sparkle-star 3s ease-in-out infinite 0.9s' }}>✦</span>
+                  <span className="absolute -bottom-1 left-20 text-yellow-300 text-[10px] pointer-events-none select-none" style={{ animation: 'sparkle-star 2.7s ease-in-out infinite 1.5s' }}>✧</span>
+                </div>
                 <p className="text-fuchsia-200/60 text-sm tracking-wider">
                   二人の星が織りなす、運命の物語
                 </p>
