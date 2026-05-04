@@ -148,6 +148,20 @@ const FreePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#0a0612] text-white p-4 font-sans overflow-x-hidden relative">
+      <style>{`
+        @keyframes logoShimmer {
+          0% { background-position: 0% center; }
+          100% { background-position: 200% center; }
+        }
+        @keyframes logoGlow {
+          0%, 100% { filter: drop-shadow(0 0 6px rgba(255,215,0,0.5)) drop-shadow(0 0 14px rgba(255,165,0,0.3)); }
+          50% { filter: drop-shadow(0 0 14px rgba(255,215,0,1)) drop-shadow(0 0 28px rgba(255,165,0,0.7)) drop-shadow(0 0 50px rgba(255,215,0,0.25)); }
+        }
+        @keyframes sparkle {
+          0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+          50% { opacity: 1; transform: scale(1) rotate(180deg); }
+        }
+      `}</style>
       <AnimatePresence>
         {isLoading && (
           <motion.div
@@ -185,15 +199,36 @@ const FreePage: React.FC = () => {
 
       <div className="relative z-10 max-w-sm mx-auto pt-4 pb-8">
         <div className="flex justify-between items-start mb-4 py-1">
-          <div>
-            <h1 className="text-[38px] font-bold flex items-center tracking-tighter leading-none">
-              <span className="text-[#ff7e61]">A</span>
-              <span className="text-[#ff7e61]">I</span>
-              <span className="text-[#f9a620] ml-1">相</span>
-              <span className="text-[#f9a620]">性</span>
-              <span className="text-[#4cd97b] ml-1">占</span>
-              <span className="text-[#4cd97b]">い</span>
-            </h1>
+          <div className="flex items-end gap-2">
+            <div className="relative">
+              <h1
+                className="text-[38px] font-bold tracking-tighter leading-none"
+                style={{
+                  background: 'linear-gradient(90deg, #B8860B 0%, #FFD700 20%, #FFFACD 45%, #FFD700 65%, #B8860B 85%, #FFD700 100%)',
+                  backgroundSize: '200% auto',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                  animation: 'logoShimmer 3s linear infinite, logoGlow 2s ease-in-out infinite',
+                }}
+              >
+                AI相性占い
+              </h1>
+              <span className="absolute -top-1.5 -right-2 text-yellow-300 text-xs pointer-events-none" style={{ animation: 'sparkle 2.4s ease-in-out infinite', animationDelay: '0s' }}>✦</span>
+              <span className="absolute top-0.5 -right-3 text-amber-200 text-[8px] pointer-events-none" style={{ animation: 'sparkle 2.4s ease-in-out infinite', animationDelay: '0.8s' }}>✦</span>
+              <span className="absolute -bottom-1 -left-1 text-yellow-400 text-[8px] pointer-events-none" style={{ animation: 'sparkle 2.4s ease-in-out infinite', animationDelay: '1.6s' }}>✦</span>
+            </div>
+            <span
+              className="text-[11px] font-bold mb-1 px-2 py-0.5 rounded-full"
+              style={{
+                background: 'linear-gradient(135deg, rgba(255,215,0,0.12), rgba(255,165,0,0.08))',
+                border: '1px solid rgba(255,215,0,0.35)',
+                color: 'rgba(255,215,0,0.8)',
+                letterSpacing: '0.05em',
+              }}
+            >
+              無料版
+            </span>
           </div>
           <button
             onClick={() => setShowManual(true)}
