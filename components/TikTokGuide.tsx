@@ -7,11 +7,13 @@ export function isTikTokBrowser(): boolean {
   // URLパラメータ検知
   if (new URLSearchParams(window.location.search).get('from') === 'tiktok') return true;
   // iOS WebView検知（Safariは "Version/XX.X Mobile Safari" を持つ、TikTok内蔵ブラウザは持たない）
+  // Instagram / LINE / Facebook 等の主要SNSアプリは除外（WebViewだがアプリとして正常動作するため）
   const isIOS = /iPhone|iPod|iPad/.test(ua);
   const isChromeiOS = /CriOS/.test(ua);
   const isFirefoxiOS = /FxiOS/.test(ua);
   const hasVersionToken = /Version\/[\d.]+.*Safari/.test(ua);
-  if (isIOS && !isChromeiOS && !isFirefoxiOS && !hasVersionToken) return true;
+  const isKnownSNSApp = /Instagram|FBAN|FBAV|Line\/|Twitter|Snapchat/i.test(ua);
+  if (isIOS && !isChromeiOS && !isFirefoxiOS && !hasVersionToken && !isKnownSNSApp) return true;
   return false;
 }
 
