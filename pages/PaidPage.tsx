@@ -1,43 +1,8 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 
 const PaidPage: React.FC = () => {
-  const appleRef = useRef<HTMLDivElement>(null);
-  const cardRef = useRef<HTMLDivElement>(null);
-  const rendered = useRef(false);
-
-  useEffect(() => {
-    if (rendered.current) return;
-    rendered.current = true;
-
-    const script = document.createElement('script');
-    script.src = 'https://www.paypal.com/sdk/js?client-id=AfUn22zK4UsNWfThHlT_1sqvEi8gmtXHZ4jWMYafWPrX4bBorPFvMY8ZTuZAqTfVXygpK95YmdkZsj-N&currency=JPY&locale=ja_JP&enable-funding=applepay,card&components=buttons';
-    script.async = true;
-    script.onload = () => {
-      const pp = (window as any).paypal;
-      const orderConfig = {
-        createOrder: (_: any, actions: any) =>
-          actions.order.create({
-            purchase_units: [{ amount: { value: '780', currency_code: 'JPY' }, description: 'LoveLAB 運命鑑定' }],
-            application_context: { shipping_preference: 'NO_SHIPPING' }
-          }),
-        onApprove: (_: any, actions: any) =>
-          actions.order.capture().then(() => {
-            window.location.href = 'https://lovelab-thankyou.vercel.app';
-          }),
-        onError: (err: any) => { console.error('PayPal:', err); }
-      };
-
-      const appleBtn = pp.Buttons({ ...orderConfig, fundingSource: pp.FUNDING.APPLEPAY, style: { shape: 'pill', height: 52 } });
-      if (appleBtn.isEligible()) appleBtn.render(appleRef.current);
-
-      const cardBtn = pp.Buttons({ ...orderConfig, fundingSource: pp.FUNDING.CARD, style: { shape: 'pill', height: 52 } });
-      if (cardBtn.isEligible()) cardBtn.render(cardRef.current);
-    };
-    document.body.appendChild(script);
-  }, []);
-
   return (
     <div style={{
       background: '#0a0608', minHeight: '100vh',
@@ -100,23 +65,17 @@ const PaidPage: React.FC = () => {
           <p style={{ fontSize: '13px', color: 'rgba(255,255,255,.6)', letterSpacing: '.08em' }}>買い切り &nbsp;|&nbsp; 使い放題 &nbsp;|&nbsp; 即日アクセス</p>
         </div>
 
-        <p style={{ textAlign: 'center', fontSize: '12px', color: 'rgba(255,255,255,.4)', letterSpacing: '.1em', marginBottom: '14px' }}>── お支払い方法を選択 ──</p>
-        <div ref={appleRef} style={{ marginBottom: '10px' }} />
-        <div style={{ background: 'rgba(255,180,0,.07)', border: '1px solid rgba(255,180,0,.35)', borderRadius: '12px', padding: '12px 16px', marginBottom: '10px', textAlign: 'center' }}>
-          <p style={{ fontSize: '13px', color: '#ffe082', margin: 0, lineHeight: 1.9 }}>
-            ⚠️ 決済時に英語のポップアップが表示されます<br />
-            <strong style={{ color: '#ffd54f', fontSize: '14px' }}>「Accept（同意する）」</strong>をタップして進んでください
-          </p>
-        </div>
-        <div style={{ background: 'rgba(201,169,110,.08)', border: '1px solid rgba(201,169,110,.3)', borderRadius: '12px', padding: '12px 16px', marginBottom: '12px', textAlign: 'center' }}>
-          <p style={{ fontSize: '13px', color: '#f5e6a3', margin: 0, lineHeight: 1.8 }}>
-            カード入力後、<strong style={{ color: '#c9a96e' }}>「☑ 利用規約に同意する」</strong>に<br />チェックを入れると決済ボタンが有効になります
-          </p>
-        </div>
-        <div ref={cardRef} style={{ marginBottom: '20px' }} />
+        <p style={{ textAlign: 'center', fontSize: '12px', color: 'rgba(255,255,255,.2)', letterSpacing: '.05em', marginBottom: '14px' }}>── お支払い方法を選択 ──</p>
+        <a href="https://note.com/like_swan6953/membership" target="_blank" rel="noreferrer noopener" style={{ display: 'block', width: '100%', padding: '18px', borderRadius: '9999px', background: 'linear-gradient(90deg, #9333ea, #ec4899, #f59e0b, #ec4899, #9333ea)', backgroundSize: '200% auto', animation: 'shimmerBtn 2s linear infinite', fontWeight: 900, color: 'white', boxShadow: '0 0 40px rgba(236,72,153,.7), 0 0 80px rgba(168,85,247,.5)', border: 'none', cursor: 'pointer', fontSize: '16px', letterSpacing: '0.05em', textDecoration: 'none', textAlign: 'center', boxSizing: 'border-box' }}>
+          noteで申し込む（月額¥980・7日間無料）
+        </a>
 
-        <p style={{ textAlign: 'center', marginTop: '20px', fontSize: '12px', color: 'rgba(255,255,255,.2)', letterSpacing: '.05em' }}>© NEXA | AI Fortune</p>
+        <p style={{ fontSize: '11px', color: 'rgba(255,255,255,.35)', marginTop: '12px', textAlign: 'center' }}>安心のnote決済対応</p>
+        <p style={{ textAlign: 'center', fontSize: '12px', color: 'rgba(255,255,255,.2)', letterSpacing: '.05em' }}>© NEXA | AI Fortune</p>
       </div>
+      <style>{`
+        @keyframes shimmerBtn { 0% { background-position: 200% center; } 100% { background-position: -200% center; } }
+      `}</style>
     </div>
   );
 };
