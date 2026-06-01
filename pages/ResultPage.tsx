@@ -163,8 +163,29 @@ const ResultPage: React.FC = () => {
                 <motion.div animate={{ rotate: -360 }} transition={{ duration: 12, repeat: Infinity, ease: 'linear' }} className="absolute inset-3 rounded-full border border-pink-300/20" />
                 <motion.div animate={{ opacity: [0.4, 0.9, 0.4], scale: [0.96, 1.04, 0.96] }} transition={{ duration: 2.8, repeat: Infinity }} className="absolute inset-10 rounded-full bg-gradient-to-br from-purple-500/25 via-pink-400/20 to-yellow-300/20 blur-xl" />
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <motion.img src="https://raw.githubusercontent.com/chabin0323-dev/aisou-fortune-host/main/lovelab-logo.png" alt="LoveLAB" animate={{ scale: [1, 1.05, 1], filter: ['drop-shadow(0 0 10px rgba(255,100,255,0.6))', 'drop-shadow(0 0 25px rgba(255,100,255,1))', 'drop-shadow(0 0 10px rgba(255,100,255,0.6))'] }} transition={{ duration: 2.8, repeat: Infinity }} style={{ width: '130px', borderRadius: '12px' }} />
+                  <motion.div
+                    animate={{ scale: [1, 1.05, 1], filter: ['drop-shadow(0 0 10px rgba(255,100,255,0.6))', 'drop-shadow(0 0 25px rgba(255,100,255,1))', 'drop-shadow(0 0 10px rgba(255,100,255,0.6))'] }}
+                    transition={{ duration: 2.8, repeat: Infinity }}
+                    style={{ textAlign: 'center' }}
+                  >
+                    <div style={{
+                      fontSize: '36px', fontWeight: 700, letterSpacing: '0.04em',
+                      fontFamily: 'Georgia, serif',
+                      background: 'linear-gradient(135deg, #ffaaff 0%, #ffd700 40%, #ff69b4 70%, #ffaaff 100%)',
+                      backgroundSize: '200% auto',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text',
+                      animation: 'shimmerLogo 2s linear infinite',
+                    }}>
+                      Love<span style={{ WebkitTextFillColor: '#ff69b4' }}>LAB</span>
+                    </div>
+                    <div style={{ fontSize: '10px', color: 'rgba(255,220,200,0.7)', letterSpacing: '4px', marginTop: '2px', textTransform: 'uppercase' }}>
+                      AI Fortune
+                    </div>
+                  </motion.div>
                 </div>
+                <style>{`@keyframes shimmerLogo { 0%{background-position:200% center} 100%{background-position:-200% center} }`}</style>
               </motion.div>
               <motion.h2 initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.6 }} className="text-3xl font-black mb-3 leading-tight">あなたと<span className="text-[#f9a620]">{fortune.partnerName}</span>の<br />無料鑑定を開始します</motion.h2>
               <motion.p initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45, duration: 0.6 }} className="text-sm text-gray-300 leading-relaxed mb-8">まずは無料で、二人の相性・今の流れ・動くべき気配を読み解きます。核心部分はこの先で確認できます。</motion.p>

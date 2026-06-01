@@ -80,12 +80,23 @@ function SplashScreen({ onFinish }: { onFinish: () => void }) {
         transform: phase >= 1 ? 'scale(1)' : 'scale(0.7)',
         transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)',
         filter: phase >= 1 ? 'drop-shadow(0 0 20px rgba(255,100,255,0.8))' : 'none',
+        textAlign: 'center',
       }}>
-        <img
-          src="https://raw.githubusercontent.com/chabin0323-dev/aisou-fortune-host/main/lovelab-logo.png"
-          alt="LoveLAB"
-          style={{ width: '75vw', maxWidth: '320px', borderRadius: '16px' }}
-        />
+        <div style={{
+          fontSize: '64px', fontWeight: 700, letterSpacing: '0.04em',
+          fontFamily: 'Georgia, serif',
+          background: 'linear-gradient(135deg, #ffaaff 0%, #ffd700 40%, #ff69b4 70%, #ffaaff 100%)',
+          backgroundSize: '200% auto',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text',
+          animation: 'shimmer 2s linear infinite',
+        }}>
+          Love<span style={{ WebkitTextFillColor: '#ff69b4' }}>LAB</span>
+        </div>
+        <div style={{ fontSize: '13px', color: 'rgba(255,220,200,0.75)', letterSpacing: '6px', marginTop: '4px', textTransform: 'uppercase' }}>
+          AI Fortune
+        </div>
       </div>
       <div style={{
         position: 'relative', zIndex: 2, marginTop: '24px',
