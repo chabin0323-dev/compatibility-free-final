@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { buildFortuneBundle, type ActiveTabKey } from '../services/fortuneEngine';
 
-const PAID_URL = 'https://note.com/like_swan6953/membership';
+const PAID_URL = 'https://note.com/like_swan6953';
 
 type RevealStep =
   | 'intro'
@@ -87,7 +87,7 @@ const LockedPanel: React.FC<{
         onClick={onOpenPaid}
         style={{ width: '100%', padding: '16px', borderRadius: '9999px', background: 'linear-gradient(90deg, #9333ea, #ec4899, #f59e0b, #ec4899, #9333ea)', backgroundSize: '200% auto', animation: 'shimmerBtn 2s linear infinite', fontWeight: 900, color: 'white', boxShadow: '0 0 30px rgba(236,72,153,0.6), 0 0 60px rgba(168,85,247,0.4)', border: 'none', cursor: 'pointer', fontSize: '15px', letterSpacing: '0.05em' }}
       >
-        noteで申し込む（月額¥980・7日間無料）
+        完全鑑定を読む
       </button>
       <style>{`@keyframes shimmerBtn { 0% { background-position: 200% center; } 100% { background-position: -200% center; } }`}</style>
     </div>
@@ -255,7 +255,7 @@ const ResultPage: React.FC = () => {
               </div>
               <div className="mt-6 text-center">
                 <button onClick={openPaid} style={{ width: '100%', padding: '18px', borderRadius: '9999px', background: 'linear-gradient(90deg, #9333ea, #ec4899, #f59e0b, #ec4899, #9333ea)', backgroundSize: '200% auto', animation: 'shimmerBtn 2s linear infinite', fontWeight: 900, color: 'white', boxShadow: '0 0 40px rgba(236,72,153,0.7), 0 0 80px rgba(168,85,247,0.5)', border: 'none', cursor: 'pointer', fontSize: '16px', letterSpacing: '0.05em' }}>
-                  noteで申し込む（月額¥980・7日間無料）
+                  完全鑑定を読む
                 </button>
                 <div style={{ fontSize: '48px', marginTop: '12px', animation: 'unlockPulse 1.5s ease-in-out infinite' }}>🔓</div>
                 <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', marginTop: '4px' }}>安心のnote決済対応</p>
@@ -300,7 +300,7 @@ const ResultPage: React.FC = () => {
                 </div>
                 <div className="px-8 pb-8">
                   <button onClick={openPaid} style={{ width: '100%', padding: '18px', borderRadius: '9999px', background: 'linear-gradient(90deg, #9333ea, #ec4899, #f59e0b, #ec4899, #9333ea)', backgroundSize: '200% auto', animation: 'shimmerBtn 2s linear infinite', fontWeight: 900, color: 'white', boxShadow: '0 0 40px rgba(236,72,153,0.7), 0 0 80px rgba(168,85,247,0.5)', border: 'none', cursor: 'pointer', fontSize: '16px', letterSpacing: '0.05em' }}>
-                    noteで申し込む（月額¥980・7日間無料）
+                    完全鑑定を読む
                   </button>
                   <div style={{ textAlign: 'center', marginTop: '10px' }}><span style={{ fontSize: '36px', animation: 'unlockPulse 1.5s ease-in-out infinite', display: 'inline-block' }}>🔓</span></div>
                   <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', marginTop: '4px', textAlign: 'center' }}>安心のnote決済対応</p>
