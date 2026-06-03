@@ -25,7 +25,7 @@ const STORAGE_KEYS = {
   usageCount: 'free_usageCount',
 };
 
-const NOTE_URL = 'https://note.com/like_swan6953/n/nd3e29f905b78';
+const NOTE_URL = 'https://note.com/like_swan6953/membership/join';
 
 const bloodTypes = ['A', 'B', 'O', 'AB'];
 const constellations = [
