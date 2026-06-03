@@ -141,7 +141,7 @@ function App() {
   }
 
   const skipSplash = path === '/paid' || path === '/tiktok' || params.get('skip_splash') === '1';
-  const [showSplash, setShowSplash] = useState(!skipSplash);
+  const [showSplash, setShowSplash] = useState(false);
   const [isTikTok] = useState(() => isTikTokBrowser());
 
   if (isTikTok) return <TikTokGuide />;
