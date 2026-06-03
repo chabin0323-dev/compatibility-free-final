@@ -144,7 +144,7 @@ function App() {
   const [showSplash, setShowSplash] = useState(false);
   const [isTikTok] = useState(() => isTikTokBrowser());
 
-  if (isTikTok) return <TikTokGuide />;
+  // if (isTikTok) return <TikTokGuide />;
 
   return showSplash ? (
     <SplashScreen onFinish={() => setShowSplash(false)} />
