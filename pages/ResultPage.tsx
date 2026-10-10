@@ -41,6 +41,16 @@ function truncateText(text: string, max = 90) {
   return `${text.slice(0, max)}...`;
 }
 
+const RATE_LABELS: Record<string, string> = {
+  片思い: '告白成功率',
+  恋人: '結婚への近さ',
+  夫婦: '絆の安定度',
+  友人: '恋愛に発展する可能性',
+  仕事仲間: '信頼度',
+  商談相手: '商談成功率',
+  上司: '評価される可能性',
+};
+
 function getPreviewText(
   step: RevealStep,
   fortune: ReturnType<typeof buildFortuneBundle>
@@ -233,7 +243,7 @@ const ResultPage: React.FC = () => {
                     {STEP_LABELS[step]}
                     {isLocked ? (step === 'emotion' ? '🔒' : <span className="tab-lock" style={{ animationDelay: `${(i - 2) * 0.3}s` }}>🔒</span>) : ''}
                   </button>
-                  {isHighlight && <span className="tab-bubble">彼の本音はここ</span>}
+                  {isHighlight && <span className="tab-bubble">{fortune.partnerName}さんの本音はここ</span>}
                 </div>
               );
             })}
@@ -265,7 +275,7 @@ const ResultPage: React.FC = () => {
                   </div>
                   <div className="space-y-3">
                     <motion.div initial={{ opacity: 0, x: 24, scaleX: 0.4, scaleY: 0.92 }} animate={{ opacity: 1, x: 0, scaleX: 1, scaleY: 1 }} transition={{ delay: 0.28, type: 'spring', stiffness: 120, damping: 14 }} className="bg-[#1a0e2d]/70 border border-white/10 rounded-[22px] p-4 text-center shadow-xl backdrop-blur-sm origin-left">
-                      <p className="text-[10px] text-pink-300 font-bold mb-1 tracking-wider uppercase">告白成功率</p>
+                      <p className="text-[10px] text-pink-300 font-bold mb-1 tracking-wider uppercase">{RATE_LABELS[fortune.relationship] ?? '告白成功率'}</p>
                       <div className="text-2xl font-black text-white mb-2">{animatedConfessionRate}<span className="text-xs ml-0.5">%</span></div>
                       <div className="w-full h-1.5 bg-black/40 rounded-full overflow-hidden"><motion.div initial={{ width: 0, scaleX: 0.3 }} animate={{ width: `${animatedConfessionRate}%`, scaleX: 1 }} transition={{ type: 'spring', stiffness: 110, damping: 13, mass: 1.05 }} className="h-full bg-gradient-to-r from-pink-500 to-rose-400 origin-left" /></div>
                     </motion.div>
