@@ -67,12 +67,19 @@ const LockedPanel: React.FC<{
   preview: string;
   buttonLabel: string;
   onOpenPaid: () => void;
-}> = ({ title, subtitle, preview, onOpenPaid }) => {
+  clearLead?: string;
+}> = ({ title, subtitle, preview, onOpenPaid, clearLead }) => {
   return (
     <div className="bg-[#1a0e2d]/80 border border-white/10 rounded-[32px] p-8 shadow-2xl backdrop-blur-xl">
       <p className="text-[10px] tracking-[0.35em] text-pink-300 mb-3 uppercase">locked reading</p>
       <h3 className="text-2xl font-black mb-4 leading-tight">{title}</h3>
       <p className="text-sm text-gray-300 leading-relaxed mb-5">{subtitle}</p>
+      {clearLead && (
+        <div className="rounded-[24px] border border-pink-400/30 bg-pink-500/5 p-5 mb-3">
+          <p className="text-[11px] font-black text-pink-300 mb-2">💗 ここまで無料で公開</p>
+          <p className="text-[15px] text-white leading-relaxed font-bold">{clearLead}</p>
+        </div>
+      )}
       <div className="relative rounded-[28px] border border-white/10 bg-white/5 p-5 overflow-hidden mb-6">
         <div className="blur-[4px] select-none pointer-events-none">
           <p className="text-sm text-gray-200 leading-relaxed">{preview}</p>
@@ -89,6 +96,7 @@ const LockedPanel: React.FC<{
       >
         あなた専用の詳細鑑定をみる
       </button>
+      <p className="text-center text-[11px] text-gray-400 mt-2">完全版 2,980円・安心のnote決済</p>
       <style>{`@keyframes shimmerBtn { 0% { background-position: 200% center; } 100% { background-position: -200% center; } }`}</style>
     </div>
   );
@@ -138,7 +146,7 @@ const ResultPage: React.FC = () => {
     return () => { clearInterval(ct); clearInterval(it); };
   }, [fortune]);
 
-  useEffect(() => { const t = setTimeout(() => { setShowIntroOverlay(false); setCurrentStep('score'); }, 5000); return () => { clearTimeout(t); }; }, []);
+  useEffect(() => { const t = setTimeout(() => { setShowIntroOverlay(false); setCurrentStep((prev) => (prev === 'intro' ? 'score' : prev)); }, 5000); return () => { clearTimeout(t); }; }, []);
 
   if (!data || !fortune) { return <div className="min-h-screen bg-black flex items-center justify-center text-purple-200 font-bold">鑑定データ復元中...</div>; }
 
@@ -292,7 +300,7 @@ const ResultPage: React.FC = () => {
                   あなた専用の詳細鑑定をみる
                 </button>
                 <div style={{ fontSize: '48px', marginTop: '12px', animation: 'unlockPulse 1.5s ease-in-out infinite' }}>🔓</div>
-                <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', marginTop: '4px' }}>安心のnote決済対応</p>
+                <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', marginTop: '4px' }}>完全版 2,980円・安心のnote決済対応</p>
               </div>
               <style>{`
                 @keyframes unlockPulse { 0%,100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(255,200,100,0.6)); } 50% { transform: scale(1.2); filter: drop-shadow(0 0 20px rgba(255,200,100,1)); } }
@@ -303,7 +311,7 @@ const ResultPage: React.FC = () => {
 
           {currentStep === 'emotion' && (
             <motion.section key="emotion" initial={{ opacity: 0, y: 26 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -18 }} className="mb-8">
-              <LockedPanel title={`${fortune.partnerName}さんの本音は、この先で明らかになります`} subtitle="今、相手があなたをどう見ているか。好意・迷い・距離感の核心は有料版で公開されます。" preview={getPreviewText('emotion', fortune)} buttonLabel="相手の本音を開く" onOpenPaid={openPaid} />
+              <LockedPanel title={`${fortune.partnerName}さんの本音は、この先で明らかになります`} subtitle="今、相手があなたをどう見ているか。好意・迷い・距離感の核心は有料版で公開されます。" preview={truncateText(fortune.tabs.blood.content, 80)} clearLead={`今、${fortune.partnerName}さんの心には、あなたを無視できない感情の揺れが出ています。`} buttonLabel="相手の本音を開く" onOpenPaid={openPaid} />
               <div className="mt-6 flex justify-center"><button onClick={handleNextStep} className="px-8 py-4 rounded-full bg-white/8 border border-white/15 font-black text-gray-200 active:scale-95 transition-all backdrop-blur-md">運命分析の予告を見る</button></div>
             </motion.section>
           )}
@@ -337,7 +345,7 @@ const ResultPage: React.FC = () => {
                     あなた専用の詳細鑑定をみる
                   </button>
                   <div style={{ textAlign: 'center', marginTop: '10px' }}><span style={{ fontSize: '36px', animation: 'unlockPulse 1.5s ease-in-out infinite', display: 'inline-block' }}>🔓</span></div>
-                  <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', marginTop: '4px', textAlign: 'center' }}>安心のnote決済対応</p>
+                  <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', marginTop: '4px', textAlign: 'center' }}>完全版 2,980円・安心のnote決済対応</p>
                 </div>
               </div>
               <div className="mt-6 flex justify-center"><button onClick={handleNextStep} className="px-8 py-4 rounded-full bg-white/8 border border-white/15 font-black text-gray-200 active:scale-95 transition-all backdrop-blur-md">今後の流れを見る</button></div>
