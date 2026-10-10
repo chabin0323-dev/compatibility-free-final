@@ -202,11 +202,32 @@ const ResultPage: React.FC = () => {
             <button onClick={handleBackToTop} className="w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-purple-300 shadow-lg active:scale-90 transition-transform backdrop-blur-md text-lg">←</button>
           </div>
           <div className="mb-3"><div className="w-full h-1.5 rounded-full bg-white/5 overflow-hidden"><motion.div animate={{ width: `${progressPercent}%` }} transition={{ duration: 0.45 }} className="h-full bg-gradient-to-r from-pink-500 via-purple-400 to-cyan-400" /></div></div>
+          <style>{`
+            .tab-glow{position:relative;overflow:hidden;isolation:isolate;border-color:transparent!important}
+            .tab-glow::before{content:"";position:absolute;inset:-150%;background:conic-gradient(from 0deg,transparent 0 70%,#ff5fa2 80%,#ffd36b 90%,transparent 100%);animation:tabGlowSpin 2.4s linear infinite;z-index:-2}
+            .tab-glow::after{content:"";position:absolute;inset:2px;border-radius:14px;background:#2a1a38;z-index:-1}
+            @keyframes tabGlowSpin{to{transform:rotate(360deg)}}
+            .tab-bubble{position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#ff5fa2;color:#fff;font-size:10px;font-weight:900;padding:3px 8px;border-radius:8px;white-space:nowrap;pointer-events:none;animation:tabBubbleBob 1.6s ease-in-out infinite;z-index:50}
+            .tab-bubble::after{content:"";position:absolute;top:-5px;left:50%;margin-left:-5px;border:5px solid transparent;border-bottom-color:#ff5fa2;border-top:0}
+            @keyframes tabBubbleBob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,3px)}}
+            .tab-lock{display:inline-block;transform-origin:50% 0;animation:tabLockShake 2.2s ease-in-out infinite}
+            @keyframes tabLockShake{0%,70%,100%{transform:rotate(0)}74%{transform:rotate(-18deg)}80%{transform:rotate(16deg)}86%{transform:rotate(-10deg)}92%{transform:rotate(6deg)}}
+            @media (prefers-reduced-motion: reduce){.tab-glow::before,.tab-bubble,.tab-lock{animation:none}}
+          `}</style>
           <div className="grid grid-cols-6 gap-2">
-            {(['score', 'emotion', 'destiny', 'detail', 'biorhythm', 'final'] as const).map((step) => {
+            {(['score', 'emotion', 'destiny', 'detail', 'biorhythm', 'final'] as const).map((step, i) => {
               const isActive = currentStep === step;
               const isLocked = LOCKED_STEPS.includes(step);
-              return (<button key={step} onClick={() => jumpToStep(step)} className={`rounded-2xl py-2 text-[10px] font-black transition-all border ${isActive ? 'bg-purple-700/80 border-purple-300/40 text-white' : 'bg-white/10 border-white/10 text-gray-200 active:scale-95'}`}>{STEP_LABELS[step]}{isLocked ? '🔒' : ''}</button>);
+              const isHighlight = step === 'emotion' && !isActive;
+              return (
+                <div key={step} className="relative">
+                  <button onClick={() => jumpToStep(step)} className={`w-full rounded-2xl py-2 text-[10px] font-black transition-all border ${isActive ? 'bg-purple-700/80 border-purple-300/40 text-white' : 'bg-white/10 border-white/10 text-gray-200 active:scale-95'} ${isHighlight ? 'tab-glow' : ''}`}>
+                    {STEP_LABELS[step]}
+                    {isLocked ? (step === 'emotion' ? '🔒' : <span className="tab-lock" style={{ animationDelay: `${(i - 2) * 0.3}s` }}>🔒</span>) : ''}
+                  </button>
+                  {isHighlight && <span className="tab-bubble">彼の本音はここ</span>}
+                </div>
+              );
             })}
           </div>
         </div>
