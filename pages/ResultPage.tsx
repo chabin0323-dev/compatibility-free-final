@@ -232,7 +232,7 @@ const ResultPage: React.FC = () => {
           </div>
         </div>
 
-        <header className="text-left mb-6 mt-2">
+        <header className="text-left mb-6 mt-5">
           <p className="text-[10px] tracking-[0.35em] text-purple-300 mb-2 uppercase">only for you</p>
           <h1 className="text-3xl font-black mb-2 leading-tight">あなた <span className="text-gray-600 font-light mx-1">&</span>{' '}<span className="text-[#f9a620]">{fortune.partnerName}</span></h1>
           <div className="flex items-center gap-2 flex-wrap"><p className="text-gray-500 text-[10px] tracking-widest font-bold">鑑定番号: MS-2026-V3</p><span className="text-[10px] px-2 py-1 rounded-full border border-white/10 bg-white/5 text-purple-200">関係性：{fortune.relationship}</span></div>
@@ -274,7 +274,20 @@ const ResultPage: React.FC = () => {
                   <p className="text-sm text-gray-300 leading-relaxed">あなたの入力情報から導かれたこの数値は、{fortune.partnerName}さんとの今の関係性・感情の温度・未来の流れを総合したものです。</p>
                 </div>
               </div>
-              <div className="mt-6 text-center">
+              {(() => {
+                const full = getPreviewText('emotion', fortune).replace(/\.\.\.$/, '');
+                const c1 = full.indexOf('、'); const c2 = c1 >= 0 ? full.indexOf('、', c1 + 1) : -1; const cut = c2 > 0 && c2 < 30 ? c2 + 1 : 18;
+                return (
+                  <div className="mt-5 bg-[#1a0e2d]/70 border border-pink-400/30 rounded-[24px] px-5 py-4 text-left shadow-xl backdrop-blur-sm">
+                    <p className="text-[11px] font-black text-pink-300 mb-2">💗 {fortune.partnerName}さんの本音（一部公開）</p>
+                    <p className="text-sm text-gray-100 leading-relaxed">{full.slice(0, cut)}<span className="select-none" style={{ filter: 'blur(4px)', color: '#d8c8ea' }}>{full.slice(cut, cut + 45)}</span></p>
+                  </div>
+                );
+              })()}
+              <div className="mt-5">
+                <button onClick={handleNextStep} className="w-full py-4 rounded-full border-2 border-pink-300/70 bg-pink-500/10 text-pink-100 font-black text-[15px] active:scale-95 transition-all">▼ 次へ：{fortune.partnerName}さんの本音を見る</button>
+              </div>
+              <div className="mt-4 text-center">
                 <button onClick={openPaid} style={{ width: '100%', padding: '18px', borderRadius: '9999px', background: 'linear-gradient(90deg, #9333ea, #ec4899, #f59e0b, #ec4899, #9333ea)', backgroundSize: '200% auto', animation: 'shimmerBtn 2s linear infinite', fontWeight: 900, color: 'white', boxShadow: '0 0 40px rgba(236,72,153,0.7), 0 0 80px rgba(168,85,247,0.5)', border: 'none', cursor: 'pointer', fontSize: '16px', letterSpacing: '0.05em' }}>
                   あなた専用の詳細鑑定をみる
                 </button>
